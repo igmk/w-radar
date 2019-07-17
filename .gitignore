@@ -1,0 +1,8 @@
+# ignore file backups
+*~
+
+# ignore individual radars config, pre-and postprocessing files
+*joyrad.m
+*joyrad94.m
+*mirac.m
+*miraca.m
