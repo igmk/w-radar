@@ -86,7 +86,7 @@ Note that you need to have read access to the directory.
 The option of reading RPG lv1 binary files and converting them to netcdf is
 not working at the moment (10.7.2019).
 
-## 3.2 output files: Naming convention and types ##
+## 3.2 Output files: Naming convention and types ##
 
 Two types of putput files are available. 
     i) general file: includes all metadata information, all flags, 
