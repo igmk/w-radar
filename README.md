@@ -9,15 +9,20 @@ restructured and partly updated in 2019 by Juan Antonio Bravo Aranda and
 Rosa Gierens.
 
 
---- Content of this documentation: ----------------------------------------
+## Content of this documentation: ##
 0. General stucture
 1. How to call the program
 2. Setting data processing options (config file)
 3. Input and output files
-    3.1 Supported input files
-    3.2 output files: naming convention and types
+
+    3.1. Supported input files
+    
+    3.2. output files: naming convention and types
+    
 4. Short description of the data processing
+
     4.1 Steps of the data processing
+
     4.2 Dealiasing
 
 
@@ -45,7 +50,7 @@ Call the scripts with:
 
 
 
-# 2. Setting data processing options (config file)
+# 2. Setting data processing options (config file) #
 
 The settings required for running the program have to be set in the 
 configuration file (config_radarname, see above for calling the program). 
@@ -65,7 +70,7 @@ See config_example.m for details.
 
 # 3. Input and output files #
 
-# 3.1 Supported input files#
+## 3.1 Supported input files ##
 
 The program can handle 4 different file formats for lv0 files:
     i) binary files of type 1 created with RPG radar software version 1.
@@ -81,7 +86,7 @@ Note that you need to have read access to the directory.
 The option of reading RPG lv1 binary files and converting them to netcdf is
 not working at the moment (10.7.2019).
 
-# 3.2 output files: Naming convention and types #
+## 3.2 output files: Naming convention and types ##
 
 Two types of putput files are available. 
     i) general file: includes all metadata information, all flags, 
@@ -114,7 +119,7 @@ Raw2l1_radar includes:
     - In momentslv0.m first search for input files for the day considered.
     - Per selected day, ech file is processed individually. Details below.
 
-# 4.1. Steps of the data processing #
+## 4.1. Steps of the data processing ##
 
 This is the processing applied for each file in momentslv0.m.
 
