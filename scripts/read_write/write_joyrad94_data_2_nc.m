@@ -395,17 +395,19 @@ if data.DualPol > 0
     netcdf.putAtt(ncid,id_ldr,'long_name','Linear depolarization ratio');
     netcdf.putAtt(ncid,id_ldr,'units','');    
     
-    id_xcorr = netcdf.defVar(ncid,'xcorr','nc_float',[did_range,did_time]);
-    netcdf.putAtt(ncid,id_xcorr,'long_name','co-cross-channel correlation coefficient');
-    netcdf.putAtt(ncid,id_xcorr,'units','');    
+    if data.DualPol == 2
+        id_xcorr = netcdf.defVar(ncid,'xcorr','nc_float',[did_range,did_time]);
+        netcdf.putAtt(ncid,id_xcorr,'long_name','co-cross-channel correlation coefficient');
+        netcdf.putAtt(ncid,id_xcorr,'units','');    
 
-    id_difphase = netcdf.defVar(ncid,'difphase','nc_float',[did_range,did_time]);
-    netcdf.putAtt(ncid,id_difphase,'long_name','co-cross-channel differential phase');
-    netcdf.putAtt(ncid,id_difphase,'units','');        
+        id_difphase = netcdf.defVar(ncid,'difphase','nc_float',[did_range,did_time]);
+        netcdf.putAtt(ncid,id_difphase,'long_name','co-cross-channel differential phase');
+        netcdf.putAtt(ncid,id_difphase,'units','');        
+    end
 end % if data.DualPol > 0
 
 
-if data.CompEna == 2 && data.DualPol > 0
+if data.CompEna == 2 && data.DualPol == 2
     
     id_d_spec = netcdf.defVar(ncid,'d_spec','nc_float',[did_vel,did_range,did_time]);
     netcdf.putAtt(ncid,id_d_spec,'long_name','Differntial spectral reflectivity');
@@ -513,11 +515,13 @@ if data.DualPol > 0
     netcdf.defVarDeflate(ncid,id_spec_covRe,true,true,9);
     netcdf.defVarDeflate(ncid,id_spec_covIm,true,true,9);
     netcdf.defVarDeflate(ncid,id_ldr,true,true,9); %JABA    
-    netcdf.defVarDeflate(ncid,id_difphase,true,true,9); %JABA    
-    netcdf.defVarDeflate(ncid,id_xcorr,true,true,9); %JABA    
+    if data.DualPol == 2
+        netcdf.defVarDeflate(ncid,id_difphase,true,true,9); %JABA    
+        netcdf.defVarDeflate(ncid,id_xcorr,true,true,9); %JABA    
+    end
 end
 
-if data.CompEna == 2 && data.DualPol > 0
+if data.CompEna == 2 && data.DualPol == 2
     netcdf.defVarDeflate(ncid,id_d_spec,true,true,9);
     netcdf.defVarDeflate(ncid,id_CorrCoeff,true,true,9);
     netcdf.defVarDeflate(ncid,id_DiffPh,true,true,9);
@@ -643,11 +647,13 @@ if data.DualPol > 0
     netcdf.putVar(ncid,id_spec_covRe,[0,0,0],[max(data.DoppLen),data.n_levels,data.totsamp],permute(data.spec_covRe,[3,2,1]));
     netcdf.putVar(ncid,id_spec_covIm,[0,0,0],[max(data.DoppLen),data.n_levels,data.totsamp],permute(data.spec_covIm,[3,2,1]));
     netcdf.putVar(ncid,id_ldr,[0,0],[data.n_levels,data.totsamp],data.LDR'); %JABA
-    netcdf.putVar(ncid,id_xcorr,[0,0],[data.n_levels,data.totsamp],data.xcorr'); %JABA
-    netcdf.putVar(ncid,id_difphase,[0,0],[data.n_levels,data.totsamp],data.difphase'); %JABA
+    if data.DualPol == 2
+        netcdf.putVar(ncid,id_xcorr,[0,0],[data.n_levels,data.totsamp],data.xcorr'); %JABA
+        netcdf.putVar(ncid,id_difphase,[0,0],[data.n_levels,data.totsamp],data.difphase'); %JABA
+    end
 end
 
-if data.CompEna == 2 && data.DualPol > 0
+if data.CompEna == 2 && data.DualPol == 2
     netcdf.putVar(ncid,id_d_spec,[0,0,0],[max(data.DoppLen),data.n_levels,data.totsamp],permute(data.d_spec,[3,2,1]));
     netcdf.putVar(ncid,id_CorrCoeff,[0,0,0],[max(data.DoppLen),data.n_levels,data.totsamp],permute(data.CorrCoeff,[3,2,1]));
     netcdf.putVar(ncid,id_DiffPh,[0,0,0],[max(data.DoppLen),data.n_levels,data.totsamp],permute(data.DiffPh,[3,2,1]));

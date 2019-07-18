@@ -1,4 +1,4 @@
-function [data, avdealias] = setting_data(data, config)
+function [data] = setting_data(data, config)
 
 specsize = size(data.spec);
 
@@ -58,11 +58,11 @@ end
 % create dummy status flag
 data.AliasStatus = NaN(specsize(1),specsize(2)); % dummy variable that provides information on quality of dealiasing, not given by RPG software
 
-%Checking if dealias was already applied.
-if data.AntiAlias || (isfield(data, 'CompEna') && ne(data.CompEna,0)) % spectra are compressed, dealiasing not possible, take from LV1 files if available
-    avdealias = false;
-else % set MinVel matrix
-    avdealias = true;
+%Checking if dealias was already applied by RPG software.
+if ~data.AntiAlias  
+    
+    % set MinVel matrix
+    
     % if dealiasing was performed then the true velocity array can be
     % calculated as the following:
     % vel_true =  data.velocity + data.Minvel(i,j) - data.velocity(1)
@@ -87,6 +87,13 @@ data.MinVel_Correction = zeros(specsize(1),specsize(2));
 
 % variable to collect information on quality issues in data
 data.QualFlag = false(specsize(1),specsize(2),3);
+
+% flag for compressed spectra
+if (isfield(data, 'CompEna') && ne(data.CompEna,0))
+    data.compress_spec = true;
+else
+    data.compress_spec = false;
+end
 
 % copy from the value given in config file
 data.MSL = config.MSL;

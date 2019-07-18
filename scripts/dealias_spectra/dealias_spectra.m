@@ -1,5 +1,6 @@
 
-function [spec_out,vel_out,moments,alias_flag,status_flag] = dealias_spectra(spec,vel,nAvg,dr,vm_prev_col,varargin)
+function [spec_out,vel_out,moments,alias_flag,status_flag] = ...
+                    dealias_spectra(spec,vel,nAvg,dr,vm_prev_col,varargin)
 
 % this function dealiases doppler spectra by
 % - identifying a region where the mean doppler velocity is close to zero
@@ -9,29 +10,52 @@ function [spec_out,vel_out,moments,alias_flag,status_flag] = dealias_spectra(spe
 
 % input:
 %   spec = doppler spectra, rows contain different heights, columns
-%    different velo-bins, units must be linear, fill value must be NaN
+%          different velo-bins, units must be linear, fill value must be NaN
 %   vel = doppler velocity array (matrix), rows contain velo-bins, columns
-%    different chrip sequences
+%         different chrip sequences
 %   nAvg = number of spectral averages for each chirp sequence
-%   varargin = can contain further specifications as highest moment that
-%    should be calculated and/or the mean or peak noise factor (mnf/pnf) that is used
-%    to distinguish between signal and noise. if joy94 data is
-%    provided varargin must contain the range_offsets.
-%       varargin{1} = 'moment_str'; varargin{2} = 'sigma'; varargin{3} = 'mnf';
-%       varargin{4} = 1.2; varargin{5} = 'nbins'; varargin{6} = 6; varargin{8} =
-%       'range_offsets'; varargin{9} = range_offsets;
-%       moment must can be: 'Ze','vm','sigma','skew', 'kurt'
-%       with this setting the function calculates the mean doppler velocity
-%       and the spectral where the a signficant peak is identified when 6
-%       consectutive peaks (nbins) exceed the mean noise level (mnf) by a
-%       factor if 1.2. the intital guess is taken from vm being the mean
-%       doppler velocity calculated from non-dealiased spectra.
-%    if varargin is empty the default values are: vm, pnf = 1.2, nbins = 5
-%    and vm is calculated
 %   dr = range resolution which is need to concatenate layer of signal if
-%   there are gaps of a few bins
-%   vm_prev_col: column of mean doppler velocity of previous column
-
+%        there are gaps of a few bins
+%   vm_prev_col= column of mean doppler velocity of previous column
+%   varargin = contains further specifications
+% 
+%       varargin{1} = 'moment_str'; - specify highest moment to calculate,
+%                                     that is given by varargin{2}
+%       varargin{2} = 'vm';  - default is vm, options are 'Ze', 'vm', 
+%                              'sigma', 'skew', 'kurt'
+% 
+%       varargin{3} = 'pnf'; - specify if mean ('mnf') or peak noise ('pnf')  
+%                              used for noise clipping, factor given by
+%                              next argument
+%       varargin{4} = 1.2;   - default is 'pnf' and 1.2 
+% 
+%       varargin{5} = 'nbins'; - number of consectutive bins that are above
+%                                varargin{4}*mean noise floor, so that
+%                                program continues calculations (dealising,
+%                                moment calculation)
+%       varargin{6} = 3;       - default is 3
+% 
+%       varargin{7} = 'range_offsets'; - if more than one chirp included,
+%                                       range_offsets need to be given
+%       varargin{8} = range_offsets;   - array with range gate indexes for
+%                                        each chirp 
+% 
+%       varargin{9} = 'linear'; - if spectra is given in dB-units,
+%                                 conversion to linear space has to be done
+% 
+%       varargin{10} = 'comp_flag' - flag for determining if spectra is 
+%                       compressed 
+%       varargin{11} = flag_compress_spec - default is false
+% 
+%       varargin{12} = 'DualPol' - flag for Dual Pol given, default is zero
+%       varargin{13} = 0 - single pol radar, 
+%                      1 - dual pol radar LDR conf., 
+%                      2 - dual pol radar STSR mode (dealiasing not
+%                      programmed yet - July 20190
+%       varargin{14} = spectra for horisontally received polarisation, when
+%                      DualPol == 1
+% 
+% 
 % output:
 %   spec_out: dealiased spectra
 %   vel_out: velocity arrays corresponding to new spectra
@@ -57,25 +81,55 @@ function [spec_out,vel_out,moments,alias_flag,status_flag] = dealias_spectra(spe
 
 
 % ##################### check input
-% check if there is data
-if all( isnan(spec(:,1)) )
-    return;
-end
 
-ss = size(spec);
-sv = size(vel);
+ss = size(spec); % ss(1) = range dimension, e.g. spec(X,:)
+                 % ss(2) = doppler velocity dimension, e.g. spec(:,Y)
+sv = size(vel); % sv(1) - doppler velocity dimension, sv(2) - number of chirps 
 
 if sv(2) > sv(1)
     vel = vel';
     sv = size(vel);
 end
 
-delv = vel(2,:)-vel(1,:);
-vn = -vel(1,:); % nyquist velocity
+delv = vel(2,:)-vel(1,:); % vel = data.velocity, delv = velocity resolution for each chirp
+vn = -vel(1,:); % nyquist velocity for each chirp
 
-[moment_string, nf, nf_string, nbins, range_offsets] = dealias_spectra_varargin_check(ss, varargin{:});
+% check input options given by varargin, if not existing default options
+% set
+[moment_string, nf, nf_string, nbins, range_offsets, flag_compress_spec] = dealias_spectra_varargin_check(ss, varargin{:});
 
-% check unit of spectra
+
+
+ix = find(strcmp(varargin,'DualPol'), 1);
+
+if isempty(ix)
+    flag_DualPol = 0;
+    
+else % flag given as input
+    
+    flag_DualPol = varargin{ix+1};
+    
+    if flag_DualPol == 1
+        spec_hv = varargin{ix+2};
+    end 
+end 
+
+
+
+% check if there is data
+if flag_compress_spec
+    if ~any(~isnan(spec(:))) % if any non-nan values found, don't continue
+        return
+    end
+
+else
+    if all(isnan(spec(:,1)))
+        return
+    end
+end
+    
+
+% check unit of spectra - this should be unnecessary
 if isempty(find(strcmp(varargin,'linear'), 1)) % convert into linear regime
     spec = 10.^(spec./10);
 end
@@ -95,18 +149,25 @@ moments.kurt = NaN(ss(1),1);
 moments.peaknoise = NaN(ss(1),1);
 moments.meannoise = NaN(ss(1),1);
 
+if flag_DualPol > 0
+    moments.Ze_hv = NaN(ss(1),1);
+    moments.vm_hv = NaN(ss(1),1);
+    moments.LDR =  NaN(ss(1),1);
+end
+
 spec_out = spec;
 vel_out = NaN(ss);
 
 if sv(2) > 1 
     for ii = 1:ss(1)
-        % get range indexes
+        % get chirp indexes for each range gate
          r_idx = dealias_spectra_get_range_index(range_offsets, ii);
          vel_out(ii,:) = vel(:,r_idx)';
     end
 end
 
 
+% initialize flag
 status_flag = zeros(ss(1),1); % if aliasing could be perform properliy
 status_flag = dec2bin(status_flag,4); % convert to three binary string
 
@@ -115,14 +176,43 @@ Nfft = sum(~isnan(vel(:,:)));
 
 
 % ###################### check aliasing
-[alias_flag, noise] = dealias_spectra_check_aliasing(ss, spec, vel, nAvg, range_offsets);
+[alias_flag, noise] = dealias_spectra_check_aliasing(ss, spec, vel, nAvg, range_offsets, flag_compress_spec);
+
 moments.peaknoise = noise.peaknoise;
 moments.meannoise = noise.meannoise;
 
 
 % #################### check if aliasing occured in the column
 if sum(alias_flag) == 0 % no aliasing occured, calculate moments from input spectra
-    moments = radar_moments(spec,vel,nAvg,'noise',noise,'linear','range_offsets',range_offsets(1:end-1),'moment_str',moment_string,nf_string,nf,'nbins',nbins);
+    
+    if flag_compress_spec 
+        
+        switch flag_DualPol
+            case 0
+                moments = radar_moments(spec,vel,nAvg,'noise',noise,'linear','range_offsets',range_offsets(1:end-1),'moment_str',moment_string,nf_string,nf,'nbins',nbins, 'compressed');
+            
+            case 1
+                moments = radar_moments(spec,vel,nAvg,'noise',noise,'linear','range_offsets',range_offsets(1:end-1),'moment_str',moment_string,nf_string,nf,'nbins',nbins, 'compressed', 'DualPol', flag_DualPol, spec_hv);
+            
+            case 2 
+                disp('Not done yet')
+        end 
+        
+    else % not compressed 
+        switch flag_DualPol
+            
+            case 0
+                moments = radar_moments(spec,vel,nAvg,'noise',noise,'linear','range_offsets',range_offsets(1:end-1),'moment_str',moment_string,nf_string,nf,'nbins',nbins);
+            
+            case 1
+                moments = radar_moments(spec,vel,nAvg,'noise',noise,'linear','range_offsets',range_offsets(1:end-1),'moment_str',moment_string,nf_string,nf,'nbins',nbins, 'DualPol', spec_hv);
+            
+            case 2
+                disp('Not done yet')
+        end 
+           
+    end
+    
     return
 end
 

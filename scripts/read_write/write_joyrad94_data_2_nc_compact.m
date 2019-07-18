@@ -154,11 +154,14 @@ netcdf.putAtt(ncid,id_QualFlag,'definition', ...
 id_ldr = netcdf.defVar(ncid,'ldr','nc_float',[did_range,did_time]);
 netcdf.putAtt(ncid,id_ldr,'long_name','Linear depolarization ratio');
 
-id_xcorr = netcdf.defVar(ncid,'xcorr','nc_float',[did_range,did_time]);
-netcdf.putAtt(ncid,id_xcorr,'long_name','co-cross-channel correlation coefficient');
+if data.DualPol == 2
+    id_xcorr = netcdf.defVar(ncid,'xcorr','nc_float',[did_range,did_time]);
+    netcdf.putAtt(ncid,id_xcorr,'long_name','co-cross-channel correlation coefficient');
 
-id_difphase = netcdf.defVar(ncid,'difphase','nc_float',[did_range,did_time]);
-netcdf.putAtt(ncid,id_difphase,'long_name','co-cross-channel differential phase');
+    id_difphase = netcdf.defVar(ncid,'difphase','nc_float',[did_range,did_time]);
+    netcdf.putAtt(ncid,id_difphase,'long_name','co-cross-channel differential phase');
+    
+end
 
 %% ######################## add global attributes
 glob = netcdf.getConstant('NC_GLOBAL');
@@ -183,9 +186,14 @@ netcdf.defVarDeflate(ncid,id_vm,true,true,9);
 netcdf.defVarDeflate(ncid,id_sigma,true,true,9);
 netcdf.defVarDeflate(ncid,id_skew,true,true,9);
 netcdf.defVarDeflate(ncid,id_QualFlag,true,true,9);
-netcdf.defVarDeflate(ncid,id_ldr,true,true,9); %JABA    
-netcdf.defVarDeflate(ncid,id_difphase,true,true,9); %JABA    
-netcdf.defVarDeflate(ncid,id_xcorr,true,true,9); %JABA  
+if data.DualPol > 0
+    netcdf.defVarDeflate(ncid,id_ldr,true,true,9); %JABA    
+end 
+    
+if data.DualPol == 2
+    netcdf.defVarDeflate(ncid,id_difphase,true,true,9); %JABA    
+    netcdf.defVarDeflate(ncid,id_xcorr,true,true,9); %JABA  
+end
 
 netcdf.endDef(ncid);
 
@@ -231,6 +239,8 @@ netcdf.putVar(ncid,id_QualFlag,[0,0],[data.n_levels,data.totsamp],data.QualFlag'
 if data.DualPol > 0
     
     netcdf.putVar(ncid,id_ldr,[0,0],[data.n_levels,data.totsamp],data.LDR'); %JABA
+end
+if data.DualPol == 2
     netcdf.putVar(ncid,id_xcorr,[0,0],[data.n_levels,data.totsamp],data.xcorr'); %JABA
     netcdf.putVar(ncid,id_difphase,[0,0],[data.n_levels,data.totsamp],data.difphase'); %JABA
     

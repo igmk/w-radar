@@ -10,13 +10,29 @@ data.vm =  NaN(specsize(1:2));
 data.sigma =  NaN(specsize(1:2));
 data.skew =  NaN(specsize(1:2));
 data.kurt =  NaN(specsize(1:2));
+if data.DualPol
+    data.LDR = NaN(specsize(1:2));
+end
 
 % oldspec = data.spec;  
 for i = 1:numel(data.time)
     temp = squeeze(data.spec(i,:,:));
 
-    if all(isnan(temp(:,1)))
-        continue
+    if data.DualPol > 0
+        temp_hv = squeeze(data.spec_h(i,:,:));
+    end
+        
+    % check if any data found for this time step - if not, continue with
+    % next column
+    if data.compress_spec
+        if ~any(~isnan(temp(:))) % if any non-nan values found, don't continue
+            continue
+        end
+        
+    else
+        if all(isnan(temp(:,1)))
+            continue
+        end
     end
 %   temp = squeeze(oldspec(i,:,:));           
 %   fig = pcolor_spectra_with_different_velocities(data.velocity,temp,'height',data.range,'range_offsets',data.range_offsets);
@@ -29,7 +45,25 @@ for i = 1:numel(data.time)
         vm_prev_col = NaN(specsize(2),1);
     end
 
-    [tempspec,tempvel,tempmoments,alias_flag,status_flag] = dealias_spectra(temp,data.velocity',data.nAvg,data.dr,vm_prev_col,'moment_str','kurt','pnf',1.,'nbins',3,'range_offsets',data.range_offsets,'linear');
+    % 0 = single pol radar, 1 = dual pol radar LDR conf., 2 = dual pol radar STSR mode
+    if data.DualPol == 0
+        
+         [tempspec,tempvel,tempmoments,alias_flag,status_flag] = ...
+            dealias_spectra(temp,data.velocity',data.nAvg,data.dr,vm_prev_col,...
+            'moment_str','kurt','pnf',1.,'nbins',3,'range_offsets',data.range_offsets,...
+            'linear', 'comp_flag', data.compress_spec, 'DualPol', data.DualPol);
+    
+    elseif data.DualPol == 1
+        
+        [tempspec,tempvel,tempmoments,alias_flag,status_flag] = ...
+            dealias_spectra(temp,data.velocity',data.nAvg,data.dr,vm_prev_col,...
+            'moment_str','kurt','pnf',1.,'nbins',3,'range_offsets',data.range_offsets,...
+            'linear', 'comp_flag', data.compress_spec, 'DualPol', data.DualPol, temp_hv);
+        
+    else
+        disp('Dealiasing for full polarimetric radar not prgrammed yet - July 2019')
+       
+    end
 
 %     fig = pcolor_spectra_with_different_velocities(tempvel,tempspec,'height',data.range,'range_offsets',data.range_offsets);
 %     hold on;
@@ -71,6 +105,10 @@ for i = 1:numel(data.time)
     data.VNoisePow_mean(i,:) = tempmoments.meannoise';
     data.VNoisePow_peak(i,:) = tempmoments.peaknoise';
            
+    if data.DualPol > 0
+        data.LDR(i,:) = tempmoments.LDR';
+    end 
+    
 end % i = 1:numel
         
 % compare adjacent columns regarding vm and correct MinVel and vm

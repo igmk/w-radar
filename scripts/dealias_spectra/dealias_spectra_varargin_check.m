@@ -1,4 +1,5 @@
-function [moment_string, nf, nf_string, nbins, range_offsets] = dealias_spectra_varargin_check(ss, varargin)
+function [moment_string, nf, nf_string, nbins, range_offsets, ...
+            flag_compress_spec] = dealias_spectra_varargin_check(ss, varargin)
 
 
 moment_string = find(strcmp(varargin,'moment_str'), 1)+1;
@@ -40,3 +41,13 @@ if ~isempty(range_offsets)
 else
     range_offsets = [1,ss(1)+1,10*ss(1),10*ss(1)];
 end
+
+
+
+ix = find(strcmp(varargin,'comp_flag'), 1);
+if ~isempty(ix)
+    flag_compress_spec = varargin{ix+1};
+else
+    flag_compress_spec = false;
+end
+

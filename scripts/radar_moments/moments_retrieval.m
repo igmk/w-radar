@@ -20,10 +20,6 @@ if isfield(data,'DualPol')
         case 1            
             disp('LDR-mode available')            
             data.hZe = NaN(specsize(1:2));
-            data.hvm =  NaN(specsize(1:2));
-            data.hsigma =  NaN(specsize(1:2));
-            data.hskew =  NaN(specsize(1:2));
-            data.hkurt =  NaN(specsize(1:2));   
             if data.CompEna == 0
                 data.HNoisePow_mean = NaN(specsize(1:2));
                 data.HNoisePow_peak = NaN(specsize(1:2));

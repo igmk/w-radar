@@ -87,11 +87,11 @@ else
             disp('Completing data structure...');
             
             if config.debuging % for debugging, want to have the code crash
-                [data, avdealias] = setting_data(data, config);
+                [data] = setting_data(data, config);
                 disp('Completing data structure...done!');
             else
                 try
-                    [data, avdealias] = setting_data(data, config);
+                    [data] = setting_data(data, config);
                     disp('Completing data structure...done!');
                 catch 
                     disp('Completing data structure...Error!!');
@@ -124,20 +124,23 @@ else
             % v) Dealising and calculating moments
             if config.dealias  % If the user wants to do it
                 
-                if avdealias %If it is possible to do it
+                if data.AntiAlias
+                    disp('Dealising already applied in RPG software.')
+                    disp('    -> Currently this is not a working option - 18.7.2019');  
+                    applied_method = 2;
+                    
+                     %Retrieval of moments
+                    disp('Radar moments are now calculated from spectra dealiased by RPG software.')
+                    disp('   -> data output for higher moments definitely not correct - 18.7.2019')
+                    data = moments_retrieval(data);
+                    
+                else 
+                
                     disp('Dealising Doppler spectral velocity...');
                     % dealias the spectra and calculates moments from corrected spectra
                     data = dealising(data); 
                     applied_method = 1;
                     disp('Dealising Doppler spectral velocity...done!');
-                    
-                else
-                    disp('Dealising already applied or compressed spectra.');                           
-                    applied_method = 2;
-                    
-                    %Retrieval of moments
-                    disp('Radar moments are now calculated from spectra that has not been dealiased.')
-                    data = moments_retrieval(data);
                     
                 end    
             else

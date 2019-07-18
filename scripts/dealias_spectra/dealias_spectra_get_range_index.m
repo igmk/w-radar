@@ -1,7 +1,7 @@
 function r_idx = dealias_spectra_get_range_index(range_offsets, ii)
 
-% this function returns the number of the chirp sequence in which the range
-% bin 'ii' is contained
+% this function returns the number of the chirp in which the range
+% 'ii' is contained
 
 % input:
 %   range_offsets: contains the indexes in where a new chrip sequence

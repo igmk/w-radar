@@ -50,27 +50,86 @@ if ~any(strcmp(varargin,'linear'))
     linflag = false;
 end
 
+% by default not assuming polarimetry
+ix = find(strcmp(varargin,'DualPol'));
+if isempty(ix)
+    flag_DualPol = 0;
+    
+else
+    
+    flag_DualPol = varargin{ix+1};
+    
+    if flag_DualPol == 1
+        spec_hv = varargin{ix+2};
+    end
+    
+end
+
+
 % ######### calculate radar moments
 if idx_compress == true && isempty(idx_range_offsets)
     
     output = radar_moments_from_compressed_spectra(spec, velocity, moment_str, linflag);
-    
+
+    if flag_DualPol == 1
+        tempoutput = radar_moments_from_compressed_spectra(spec_hv, velocity, 'vm', linflag);
+        
+        output.Ze_hv = tempoutput.Ze;
+        output.vm_hv = tempoutput.vm;
+        
+    end
+
 elseif idx_compress == true && ~isempty(idx_range_offsets)
     
-    output = radar_moments_from_compressed_spectra_and_different_chirp_seq(spec, velocity, moment_str, varargin{idx_range_offsets}, linflag);
+    switch flag_DualPol
+        
+        case 0
+            output = radar_moments_from_compressed_spectra_and_different_chirp_seq(spec, velocity, moment_str, varargin{idx_range_offsets}, linflag);
+        case 1
+            output = radar_moments_from_compressed_spectra_and_different_chirp_seq(spec, velocity, moment_str, varargin{idx_range_offsets}, linflag, 'DualPol',flag_DualPol, spec_hv);
+        case 2 
+            disp('not done yet')
+    end
+
     
 elseif idx_compress == false && isempty(idx_range_offsets)
     
     output = radar_moments_from_spectra(spec, velocity, nAvg, varargin{:});
     
+    
+    if flag_DualPol == 1
+        tempoutput =  radar_moments_from_spectra(spec_hv, velocity, nAvg, varargin{:});
+        
+        output.Ze_hv = tempoutput.Ze;
+        output.vm_hv = tempoutput.vm;
+        
+    end
+    
 elseif idx_compress == false && ~isempty(idx_range_offsets)
     
     output = radar_moments_from_spectra_and_different_chrip_seq(spec, velocity, nAvg, varargin{:});    
+    
+    if flag_DualPol == 1
+        
+        tempvarargin = varargin;
+        ix = find(strcmp(varargin, 'moment_str'));
+        tempvarargin{ix + 1} = 'vm';
+        tempoutput =  radar_moments_from_spectra_and_different_chrip_seq(spec_hv, velocity, nAvg, tempvarargin{:});    
+        
+        output.Ze_hv = tempoutput.Ze;
+        output.vm_hv = tempoutput.vm;
+        
+    end
     
 end
 
 % set Ze == 0 to NaN
 output.Ze(output.Ze == 0) = NaN;
 
-
+if flag_DualPol > 0 
+    output.Ze_hv(output.Ze_hv == 0) = NaN;
+    
+    % compute linear depolarisation ratio
+    output.LDR = output.Ze_hv ./ output.Ze;
+end
 
