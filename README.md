@@ -24,6 +24,8 @@ Rosa Gierens.
     4.1 Steps of the data processing
 
     4.2 Dealiasing
+    
+ X. References
 
 
 ####################### DESCRIPTION OF THE PROCESSING #####################
@@ -123,23 +125,36 @@ Raw2l1_radar includes:
 
 This is the processing applied for each file in momentslv0.m.
 
-i) Check if output file already exist. 
+### i) Check if output file already exist. 
     If config.overwrite is set to 0, and the desired output files already 
     exist, no processing of that file will be done. Program continues with 
     next file.
 
-ii) Reading input data. 
+### ii) Reading input data. 
     First the lv0 file type is determined, and the corresponding reading 
     function is assigned, for example read_lv0_v3.m (function whichReader.m).
     If a new file type is introduced by RPG, a new reading function needs 
     to be created. The input file is read into variable "data" (variable 
     type structure).
+    
+### iii) Dataflags read from input data
+    - DualPol:   0 = radar has no polarimetric configuration, 
+                 1 = radar only measures LDR 
+                 2 = radar has full polarimetric mesurement capabilities
+    - CompEna:   0 = not compressed
+                 1 = spectra compressed
+                 2 = spectra compressed and spectral polarimetric variable are stored in the file
+                 -> In the program these flag is called compress_spec. It has option 'true', combines option 1 and 2, or 
+                    'fales'.
+    - AntiAlias: 0 = no dialiaising applied by RPG
+                 1 = dialiaising applied by RPG (July 2019 - this configuration still leads to significant bias in the data, 
+                     Do not use this option!)
 
-iii) Additional variables added into "data" and missing values set to NaN.
+### iv) Additional variables added into "data" and missing values set to NaN.
     Function setting_data.m. If you want to add any variables into "data", 
     do it here.
 
-iv) Radar specific settings to be applied before dealising. 
+### v) Radar specific settings to be applied before dealising. 
     The function preprocessing_radarname.m is called if such a function
     exist. Such a function is only necessary if you want to make any radar 
     specific corrections or add missing meta data (relevant for early RPG 
@@ -150,13 +165,13 @@ iv) Radar specific settings to be applied before dealising.
     match the config.nickradar given in the config file. For a simple 
     example of the preprocessing function see preprocessing_exampleradar.m.
 
-v) Dealising and calculating moments 
+### vi) Dealising and calculating moments 
     If set in config file, and supported by the program, the dealising 
     routine is called (function dealising.m). If dealising is not applied, 
     moments are calculated from the non-dealiased spectra (function 
     moments_retrieval.m). Details of the dealiasing in Section 4.2.
 
-vi) Radar specific settings to be applied after dealising. 
+### vii) Radar specific settings to be applied after dealising. 
     The function postprocessing_radarname.m is called if such a function
     exist. Such a function is only necessary if you want to make any radar 
     specific corrections, for example add known reflectivity offsets due
@@ -166,12 +181,40 @@ vi) Radar specific settings to be applied after dealising.
     config.nickradar given in the config file. For a simple example of the 
     postprocessing function see postprocessing_exampleradar.m.
 
-vii) Write output data
+### viii) Write output data
     Output file(s) are created and data is written to file(s). Function
     savedata.m calls function write_joyrad94_data_2_nc.m for general file 
     and function write_joyrad94_data_2_nc_compact.m for compact file. To 
     add variables in output, edit the write***.m function(s).
 
+## 4.2. Dealaising routine description ##
+
+The principle used for dealaising the Doppler spectrum in the program is based on the method descripbed in Maahn and Kollias, 2012, (Section 3.3.2) and Küchler et al., 2017, (Section 6b). The Doppler spectrum is aliaised, if the Niquist verlocity range (Min and Max velocity bin of the Doppler spectum) is set too narrow and the ambiount conditions in the sampling volume (turbulence, particle fall velocities or up and down drafts) result in velocities outside of this range. If this effect is not corrected it leads to incorrect higher radar moments (mean Doppler velocity, Doppler spectrum width, Skewness). Here the steps of the dealiasing-program are preafly described.
+
+### i) Loop over time
+    Processing is done per spectrogram (one single time step inclouding all Doppler spectra for all range gates). Further 
+    processing is only applied if any data found that are not 'NaN' in each spectrum per range. 
+        
+### ii) Check if aliaising occures (deailias_spectra_check_aliaising.m)
+    flaggs range bins in which alaising occures. This is done cheching if the first and last 5% of the Doppler spectral bins 
+    contain data points above the noise floor (For 512 Doppler bis 5% of all Doppler bis would be 26 bins). For compressed 
+    spectra any value given is by default above noise. For non-compressed spectra the noise floor is calculated by 
+    Hidebrand-Sekhon, 1974.
+    - checking aliaising for polarimetric radar configuration. Check is not done for the cross polar spectrum.
+    - if no dealising is found the moments are calculated from the spectra and the program contineous with the next 
+      spectrogram.
+          
+### iii) Dealiaising procedure (deaias_spectra.m; line=222)
+
+Continue here next meeting!
+
+# X. References #
+
+[Hildebrand and Sekhon, 1974 - Objective Determination of the Noise Level in Doppler Spectra; JAM](https://journals.ametsoc.org/doi/abs/10.1175/1520-0450(1974)013%3C0808:ODOTNL%3E2.0.CO%3B2)
+
+[Küchler et al, 2017 - A W-Band Radar–Radiometer System for Accurate and Continuous Monitoring of Clouds and Precipitation; JTECH](https://journals.ametsoc.org/doi/full/10.1175/JTECH-D-17-0019.1)
+
+[Maahn and Kollias, 2012 - Improved Micro Rain Radar snow measurements using Doppler spectra post-processing; AMT](https://www.atmos-meas-tech.net/5/2661/2012/)
 
 ######################## END OF THE DESCRIPTION ###########################
    
