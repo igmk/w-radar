@@ -140,21 +140,21 @@ This is the processing applied for each file in momentslv0.m.
 ### iii) Dataflags read from input data
     - DualPol:   0 = radar has no polarimetric configuration, 
                  1 = radar only measures LDR 
-                 2 = radar has full polarimetric mesurement capabilities
+                 2 = radar has full polarimetric measurement capabilities
     - CompEna:   0 = not compressed
                  1 = spectra compressed
                  2 = spectra compressed and spectral polarimetric variable are stored in the file
                  -> In the program these flag is called compress_spec. It has option 'true', combines option 1 and 2, or 
-                    'fales'.
-    - AntiAlias: 0 = no dialiaising applied by RPG
-                 1 = dialiaising applied by RPG (July 2019 - this configuration still leads to significant bias in the data, 
+                    'false'.
+    - AntiAlias: 0 = no dialiasing applied by RPG
+                 1 = dialiasing applied by RPG (July 2019 - this configuration still leads to significant bias in the data, 
                      Do not use this option!)
 
 ### iv) Additional variables added into "data" and missing values set to NaN.
     Function setting_data.m. If you want to add any variables into "data", 
     do it here.
 
-### v) Radar specific settings to be applied before dealising. 
+### v) Radar specific settings to be applied before dealiasing. 
     The function preprocessing_radarname.m is called if such a function
     exist. Such a function is only necessary if you want to make any radar 
     specific corrections or add missing meta data (relevant for early RPG 
@@ -165,13 +165,13 @@ This is the processing applied for each file in momentslv0.m.
     match the config.nickradar given in the config file. For a simple 
     example of the preprocessing function see preprocessing_exampleradar.m.
 
-### vi) Dealising and calculating moments 
+### vi) Dealiasing and calculating moments 
     If set in config file, and supported by the program, the dealising 
     routine is called (function dealising.m). If dealising is not applied, 
     moments are calculated from the non-dealiased spectra (function 
     moments_retrieval.m). Details of the dealiasing in Section 4.2.
 
-### vii) Radar specific settings to be applied after dealising. 
+### vii) Radar specific settings to be applied after dealiasing. 
     The function postprocessing_radarname.m is called if such a function
     exist. Such a function is only necessary if you want to make any radar 
     specific corrections, for example add known reflectivity offsets due
@@ -187,22 +187,33 @@ This is the processing applied for each file in momentslv0.m.
     and function write_joyrad94_data_2_nc_compact.m for compact file. To 
     add variables in output, edit the write***.m function(s).
 
-## 4.2. Dealaising routine description ##
+## 4.2. Dealiasing routine description ##
 
-The principle used for dealaising the Doppler spectrum in the program is based on the method descripbed in Maahn and Kollias, 2012, (Section 3.3.2) and Küchler et al., 2017, (Section 6b). The Doppler spectrum is aliaised, if the Niquist verlocity range (Min and Max velocity bin of the Doppler spectum) is set too narrow and the ambiount conditions in the sampling volume (turbulence, particle fall velocities or up and down drafts) result in velocities outside of this range. If this effect is not corrected it leads to incorrect higher radar moments (mean Doppler velocity, Doppler spectrum width, Skewness). Here the steps of the dealiasing-program are preafly described.
+The principle used for dealiasing the Doppler spectrum in the program is based 
+on the method described in Maahn and Kollias, 2012, (Section 3.3.2) and Küchler 
+et al., 2017, (Section 6b). The Doppler spectrum is aliaised, if the Nyquist 
+velocity range (Min and Max velocity bin of the Doppler spectum) is set too narrow 
+and the ambient conditions in the sampling volume (turbulence, particle fall 
+velocities or up and down drafts) result in velocities outside of this range. If 
+this effect is not corrected it leads to incorrect higher radar moments (mean 
+Doppler velocity, Doppler spectrum width, Skewness). Here the steps of the 
+dealiasing-program are briefly described.
 
 ### i) Loop over time
-    Processing is done per spectrogram (one single time step inclouding all Doppler spectra for all range gates). Further 
-    processing is only applied if any data found that are not 'NaN' in each spectrum per range. 
+    Processing is done per spectrogram (one single time step inclouding all Doppler 
+    spectra for all range gates). Further processing is only applied if any data 
+    found that are not 'NaN' in each spectrum per range. 
         
 ### ii) Check if aliaising occures (deailias_spectra_check_aliaising.m)
-    flaggs range bins in which alaising occures. This is done cheching if the first and last 5% of the Doppler spectral bins 
-    contain data points above the noise floor (For 512 Doppler bis 5% of all Doppler bis would be 26 bins). For compressed 
-    spectra any value given is by default above noise. For non-compressed spectra the noise floor is calculated by 
-    Hidebrand-Sekhon, 1974.
-    - checking aliaising for polarimetric radar configuration. Check is not done for the cross polar spectrum.
-    - if no dealising is found the moments are calculated from the spectra and the program contineous with the next 
-      spectrogram.
+    Flaggs range bins in which alaising occures. This is done by checking if the 
+    first and last 5% of the Doppler spectral bins contain data points above the 
+    noise floor (For 512 Doppler bins 5% of all Doppler bibs would be 26 bins). For 
+    compressed spectra any value given is by default above noise. For non-compressed 
+    spectra the noise floor is calculated by Hidebrand-Sekhon, 1974.
+    - Checking aliaising for polarimetric radar configuration. Check is not done for 
+      the cross polar spectrum.
+    - If no dealising is found the moments are calculated from the spectra and the 
+      program contineous with the next spectrogram.
           
 ### iii) Dealiaising procedure (deaias_spectra.m; line=222)
 
