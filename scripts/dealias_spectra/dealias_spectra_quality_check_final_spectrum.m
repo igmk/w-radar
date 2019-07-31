@@ -1,4 +1,4 @@
-function alias_flag = dealias_spectra_quality_check_final_spectrum(spec, peaknoise)
+function alias_flag = dealias_spectra_quality_check_final_spectrum(spec, peaknoise, flag_compress_spec)
 
 % check if aliasing occured
 % a certain fraction of all values that exceed the peak noise level must be
@@ -16,19 +16,33 @@ alias_flag = 0;
 ss = size(spec);
 
 
-% sort spectrum
-[spec_sorted, idx] = sort(spec);
+if flag_compress_spec
+    
+    idx_signal = ~isnan(spec);
+    
+    % number of all data points above noise
+    n_signal = sum(idx_signal);
+    
+    % number of data points above median within v(1)/v(end) -+v_n/4
+    idx = find( spec > median(spec) );
+    idx_inside = idx < ss(2)/4 | idx > 3/4*ss(2);
 
-% get all values above peaknoise
-idx_signal = spec_sorted > peaknoise;
+else
 
-% select only the highest 50%
-n_signal = sum(idx_signal);
-idx_signal(1:end-ceil(n_signal/2)) = false;
+    % sort spectrum
+    [spec_sorted, idx] = sort(spec);
 
-% check how many of these points are within v(1)/v(end) -+v_n/4
-idx_inside = idx(idx_signal) < ss(2)/4 | idx(idx_signal) > 3/4*ss(2);
+    % get all values above peaknoise
+    idx_signal = spec_sorted > peaknoise;
 
+    % select only the highest 50%
+    n_signal = sum(idx_signal);
+    idx_signal(1:end-ceil(n_signal/2)) = false;
+    
+    % check how many of these points are within v(1)/v(end) -+v_n/4
+    idx_inside = idx(idx_signal) < ss(2)/4 | idx(idx_signal) > 3/4*ss(2);
+
+end
 
 % calculate fraction of how mmany percents fall into v(1)/v(end) -+v_n/4
 frac = sum(idx_inside)/sum(idx_signal);

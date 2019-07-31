@@ -122,6 +122,21 @@ else
                 
 
             % v) Dealising and calculating moments
+            
+            % for compressed spectra, remove all spectral bin-blocks with
+            % less than Nbin
+            if data.compress_spec
+                Nbin = 5;
+                data.spec = compress_spectra_filtering(data.spec, Nbin);
+                
+                if data.DualPol == 1
+                    data.spec_hv = compress_spectra_filtering(data.spec_hv, Nbin);
+                
+                elseif data.DualPol == 2
+                    disp('Not programmed yet')
+                end
+            end
+            
             if config.dealias  % If the user wants to do it
                 
                 if data.AntiAlias

@@ -171,6 +171,10 @@ This is the processing applied for each file in momentslv0.m.
     moments are calculated from the non-dealiased spectra (function 
     moments_retrieval.m). Details of the dealiasing in Section 4.2.
 
+    For calculating moments, only spectral bins are included where N_bins 
+    or more consecutive bins above noise are indentified. N_bins is 5 for 
+    compressed and 3 for non-compressed spectra.
+
 ### vii) Radar specific settings to be applied after dealiasing. 
     The function postprocessing_radarname.m is called if such a function
     exist. Such a function is only necessary if you want to make any radar 
@@ -200,7 +204,7 @@ Doppler velocity, Doppler spectrum width, Skewness). Here the steps of the
 dealiasing-program are briefly described.
 
 ### i) Loop over time
-    Processing is done per spectrogram (one single time step inclouding all Doppler 
+    Processing is done per spectrogram (one single time step including all Doppler 
     spectra for all range gates). Further processing is only applied if any data 
     found that are not 'NaN' in each spectrum per range. 
         
@@ -215,9 +219,47 @@ dealiasing-program are briefly described.
     - If no dealising is found the moments are calculated from the spectra and the 
       program contineous with the next spectrogram.
           
-### iii) Dealiaising procedure (deaias_spectra.m; line=222)
+### iii) Identify cloud layers
+    Dealiasing is applied for each cloud layer separately, so cloud layers 
+    have to be identified. If in a cloud layer aliasing occurs, the program
+    looks for the first non-dealiased Doppler spectra starting from cloud 
+    layer top and sets this as a reference bin.
 
-Continue here next meeting!
+### iv) Guess velocity
+    From the reference (see above), the first guess velocity is calculated. 
+    In case of issues, several alternative options for calculating the 
+    guess velocity are included.
+
+
+### v) Concatenate spectra
+    The aliased spectra is concatenated with the spectra from 2 range gates 
+    below and above.
+
+### vi) Find maximum 
+    The maximum in the concatenated spectra within +-Vnyq/2 from guess 
+    velocity is identied. The corresponding Doppler velocity bin is V_max.
+
+### vii) Shift spectra
+    The spectrum is centered so that the contributions of the neighboring 
+    range gates are minimized. Different approach for compressed and 
+    non-compressed spectra is applied due to removed noise for compressed 
+    spectra.
+
+    **Non-compressed spectra**: shift center of spectrum within  +-Vnyq/2 from 
+    V_max to the minimum of the first and last data point. See figure 10 in
+    Küchler et al, 2017.
+
+    **Compressed spectra**: we are not quite sure yet
+
+### viii) Quality check and calculating moments
+    For quality it is checked if majority of top 50% of the data points 
+    (above noise) are located in the center of the spectra. If so, moments 
+    are calculated. If not, it is once tried to adjusted the guess velocity.
+    It is shifted towards the mean velocity from neigbhouring bins in the 
+    previous time step, and dealiasing is attempted again.
+
+### ix) Final quality check for entire file
+- after entire file gas been dealiased, last quality check for consistency in time-height domain is done
 
 # X. References #
 

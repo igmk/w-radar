@@ -25,7 +25,7 @@ function [block_start, block_end] = radar_moments_get_blocks_of_signal(idx_signa
     end
 
     if block_end(1) < block_start(1) % then first block start at first bin
-        block_start = [1, block_start];
+        block_start = [1; block_start];
     end
 
     if block_start(end) > block_end(end) % then last block goes until last bin

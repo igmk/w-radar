@@ -41,8 +41,14 @@ idx_range_offsets = find(strcmp(varargin,'range_offsets'), 1) + 1;
 
 
 % ########## check if spectra are compressed
-idx_compress = any(strcmp(varargin,'compressed'));
-
+ix = find(strcmp(varargin,'compressed'));
+if isempty(ix)
+    idx_compress = 0;
+    
+else
+    idx_compress = varargin{ix+1};
+end
+    
 
 % ######### check units of spectra
 linflag = true;

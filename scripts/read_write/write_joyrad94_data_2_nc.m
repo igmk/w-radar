@@ -644,7 +644,7 @@ netcdf.putVar(ncid,id_QualFlag,[0,0],[data.n_levels,data.totsamp],data.QualFlag'
 if data.DualPol > 0
     netcdf.putVar(ncid,id_PNh,[0,0],[data.n_levels,data.totsamp],data.PNh');
     netcdf.putVar(ncid,id_SLh,[0,0],[data.n_levels,data.totsamp],data.SLh');
-    netcdf.putVar(ncid,id_spec_h,[0,0,0],[max(data.DoppLen),data.n_levels,data.totsamp],permute(data.spec_h,[3,2,1]));
+    netcdf.putVar(ncid,id_spec_h,[0,0,0],[max(data.DoppLen),data.n_levels,data.totsamp],permute(data.spec_hv,[3,2,1]));
     netcdf.putVar(ncid,id_spec_covRe,[0,0,0],[max(data.DoppLen),data.n_levels,data.totsamp],permute(data.spec_covRe,[3,2,1]));
     netcdf.putVar(ncid,id_spec_covIm,[0,0,0],[max(data.DoppLen),data.n_levels,data.totsamp],permute(data.spec_covIm,[3,2,1]));
     netcdf.putVar(ncid,id_ldr,[0,0],[data.n_levels,data.totsamp],data.LDR'); %JABA

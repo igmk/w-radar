@@ -1,4 +1,4 @@
-function [cbh_fin, cth_fin] = dealias_spectra_find_cloud_layers(spec, range_offsets, dr, max_dis)
+function [cbh_fin, cth_fin] = dealias_spectra_find_cloud_layers(spec, range_offsets, dr, max_dis, flag_compress_spec)
 
 % this function determins the number of cloud layers. the maximum distance
 % between two bins is allowed to be max_dis. if the distance is larger,
@@ -9,6 +9,7 @@ function [cbh_fin, cth_fin] = dealias_spectra_find_cloud_layers(spec, range_offs
 %   range_offsets: indexes where chirp sequences start
 %   dr: range_resolutions of chirp sequences
 %   max_dis: maximum allowed distance between two bins
+%   flag_compress_spec: flag for compressed spectra (true/false)
 %
 % output:
 %   cbh_fin: array containing indexes of cloud base heights
@@ -19,7 +20,16 @@ ss = size(spec);
 
 % find cloud layers
 signal = zeros(ss(1),1);
-signal(~isnan(spec(:,1))) = 1;
+
+if flag_compress_spec
+    signal( any( ~isnan(spec), 2) ) = 1;
+
+else
+    signal(~isnan(spec(:,1))) = 1;
+end
+
+
+
 dsignal = diff(signal);
 
 if sum(dsignal) == 0 % then there is either no signal or signal in whole column

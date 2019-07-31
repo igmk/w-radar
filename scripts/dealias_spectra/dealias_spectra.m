@@ -104,16 +104,19 @@ ix = find(strcmp(varargin,'DualPol'), 1);
 
 if isempty(ix)
     flag_DualPol = 0;
-    
+    spec_hv = NaN(size(spec)); % dummy variable needed for function inputs
 else % flag given as input
     
     flag_DualPol = varargin{ix+1};
     
     if flag_DualPol == 1
         spec_hv = varargin{ix+2};
+    elseif flag_DualPol == 0
+        spec_hv = NaN(size(spec));
+    else
+        disp('not done yet')
     end 
 end 
-
 
 
 % check if there is data
@@ -146,9 +149,9 @@ moments.vm = NaN(ss(1),1);
 moments.sigma = NaN(ss(1),1);
 moments.skew = NaN(ss(1),1);
 moments.kurt = NaN(ss(1),1);
-moments.peaknoise = NaN(ss(1),1);
-moments.meannoise = NaN(ss(1),1);
-
+% moments.peaknoise = NaN(ss(1),1);
+% moments.meannoise = NaN(ss(1),1);
+% 
 if flag_DualPol > 0
     moments.Ze_hv = NaN(ss(1),1);
     moments.vm_hv = NaN(ss(1),1);
@@ -178,61 +181,42 @@ Nfft = sum(~isnan(vel(:,:)));
 % ###################### check aliasing
 [alias_flag, noise] = dealias_spectra_check_aliasing(ss, spec, vel, nAvg, range_offsets, flag_compress_spec);
 
-moments.peaknoise = noise.peaknoise;
-moments.meannoise = noise.meannoise;
+if ~flag_compress_spec 
+    moments.peaknoise = noise.peaknoise;
+    moments.meannoise = noise.meannoise;
+end
 
 
 % #################### check if aliasing occured in the column
 if sum(alias_flag) == 0 % no aliasing occured, calculate moments from input spectra
     
-    if flag_compress_spec 
-        
-        switch flag_DualPol
-            case 0
-                moments = radar_moments(spec,vel,nAvg,'noise',noise,'linear','range_offsets',range_offsets(1:end-1),'moment_str',moment_string,nf_string,nf,'nbins',nbins, 'compressed');
-            
-            case 1
-                moments = radar_moments(spec,vel,nAvg,'noise',noise,'linear','range_offsets',range_offsets(1:end-1),'moment_str',moment_string,nf_string,nf,'nbins',nbins, 'compressed', 'DualPol', flag_DualPol, spec_hv);
-            
-            case 2 
-                disp('Not done yet')
-        end 
-        
-    else % not compressed 
-        switch flag_DualPol
-            
-            case 0
-                moments = radar_moments(spec,vel,nAvg,'noise',noise,'linear','range_offsets',range_offsets(1:end-1),'moment_str',moment_string,nf_string,nf,'nbins',nbins);
-            
-            case 1
-                moments = radar_moments(spec,vel,nAvg,'noise',noise,'linear','range_offsets',range_offsets(1:end-1),'moment_str',moment_string,nf_string,nf,'nbins',nbins, 'DualPol', spec_hv);
-            
-            case 2
-                disp('Not done yet')
-        end 
-           
-    end
-    
+    moments = radar_moments(spec,vel,nAvg,'noise',noise,'linear','range_offsets',range_offsets(1:end-1),'moment_str',moment_string,nf_string,nf,'nbins',nbins, 'compressed', flag_compress_spec, 'DualPol', flag_DualPol, spec_hv);
     return
+    
 end
 
 
 
 % ##################### find cloud layers
-[cbh_fin, cth_fin] = dealias_spectra_find_cloud_layers(spec, range_offsets, dr, max_dis);
+% looks for cloud base and cloud top of all cloud layers
+[cbh_fin, cth_fin] = dealias_spectra_find_cloud_layers(spec, range_offsets, dr, max_dis, flag_compress_spec);
 
 
 % #################### start dealiasing every layer
 for i = 1:numel(cbh_fin)
 
-    [tempstruct, no_clean_signal, idx_0] = dealias_spectra_find_nonaliased_bin(cth_fin(i), cbh_fin(i), spec, range_offsets, vel, nAvg, moment_string, nf_string, nf, nbins, alias_flag, noise);
+    % Looks for a range bin where no aliasing occurs starting from cloud
+    % top down. This bin is used as reference in the next step (line 250->)!
+    % if a non-dealiased bin is found, the function will calculate the 
+    % higher moments in this bin
+    [tempstruct, no_clean_signal, idx_0] = dealias_spectra_find_nonaliased_bin(cth_fin(i), cbh_fin(i), spec, range_offsets, vel, nAvg, moment_string, nf_string, nf, nbins, alias_flag, noise, Nfft(r_idx), flag_compress_spec, flag_DualPol, spec_hv);
     
     % write to output struct
     if no_clean_signal == false
         
         moments = dealias_spectra_write_tempmoments_to_finalmoments(moments, tempstruct, idx_0, moment_string);
 
-    else % no clean singal was found; calculate moments for all bins
+    else % no non-dealiased singal was found; calculate moments for all bins
         
         for ii = cbh_fin(i):cth_fin(i)
                         
@@ -246,7 +230,7 @@ for i = 1:numel(cbh_fin)
             tempnoise.meannoise = noise.meannoise(ii);
             tempnoise.peaknoise = noise.peaknoise(ii);
             
-            tempstruct = radar_moments(spec(ii,1:Nfft(r_idx)),vel(1:Nfft(r_idx),r_idx),nAvg(r_idx),'noise',tempnoise,'moment_str',moment_string,'linear',nf_string,nf,'nbins',nbins);
+            tempstruct = radar_moments(spec(ii,1:Nfft(r_idx)),vel(1:Nfft(r_idx),r_idx),nAvg(r_idx),'noise',tempnoise,'moment_str',moment_string,'linear',nf_string,nf,'nbins',nbins, 'compressed', flag_compress_spec, 'DualPol', flag_DualPol, spec_hv(ii,1:Nfft(r_idx)));
             moments = dealias_spectra_write_tempmoments_to_finalmoments(moments, tempstruct, idx_0, moment_string);
 
         end
@@ -260,29 +244,32 @@ for i = 1:numel(cbh_fin)
     
     % ################ dealiase
     % start dealiasing topdown
-    if ne(idx_0,cbh_fin(i)) && ne(idx_0,cth_fin(i)) % then dealias in both directions
+    
+    % 3 possibilities: the first non-dealised bin is between cloud base and 
+    % top (a), at cloud top (b), or at cloud base (c)
+    if (idx_0 ~= cbh_fin(i)) && (idx_0 ~= cth_fin(i)) % (a) then dealias in both directions
         
-        % top down
+        % from idx_0 down to base
         [spec_out(cbh_fin(i):idx_0-1, :), vel_out(cbh_fin(i):idx_0-1, :), status_flag, moments] =...
             dealias_spectra_from_idxA_to_idxB(idx_0-1, cbh_fin(i), range_offsets, vel, delv, spec, vn,...
-            moments, moment_string, nAvg, nf_string, nf, nbins, status_flag, dr, vm_prev_col, noise.peaknoise);
+            moments, moment_string, nAvg, nf_string, nf, nbins, status_flag, dr, vm_prev_col, noise.peaknoise, flag_compress_spec, flag_DualPol, spec_hv);
         
-        % down top
+        % from idx_0 up to top
         [spec_out(idx_0+1:cth_fin(i), :), vel_out(idx_0+1:cth_fin(i), :), status_flag, moments] =...
             dealias_spectra_from_idxA_to_idxB(idx_0+1, cth_fin(i), range_offsets, vel, delv, spec, vn,...
-            moments, moment_string, nAvg, nf_string, nf, nbins, status_flag, dr, vm_prev_col, noise.peaknoise);
+            moments, moment_string, nAvg, nf_string, nf, nbins, status_flag, dr, vm_prev_col, noise.peaknoise, flag_compress_spec, flag_DualPol, spec_hv);
         
-    elseif ne(idx_0,cbh_fin(i)) % only topdown
-        
+    elseif (idx_0 ~= cbh_fin(i)) % (b) only topdown
+                
         [spec_out(cbh_fin(i):idx_0-1, :), vel_out(cbh_fin(i):idx_0-1, :), status_flag, moments] =...
             dealias_spectra_from_idxA_to_idxB(idx_0-1, cbh_fin(i), range_offsets, vel, delv, spec, vn,...
-            moments, moment_string, nAvg, nf_string, nf, nbins, status_flag, dr, vm_prev_col, noise.peaknoise);        
+            moments, moment_string, nAvg, nf_string, nf, nbins, status_flag, dr, vm_prev_col, noise.peaknoise, flag_compress_spec, flag_DualPol, spec_hv);        
         
-    else % only downtop
+    else % (c) only downtop
         
         [spec_out(idx_0+1:cth_fin(i), :), vel_out(idx_0+1:cth_fin(i), :), status_flag, moments] =...
             dealias_spectra_from_idxA_to_idxB(idx_0+1, cth_fin(i), range_offsets, vel, delv, spec, vn,...
-            moments, moment_string, nAvg, nf_string, nf, nbins, status_flag, dr, vm_prev_col, noise.peaknoise);
+            moments, moment_string, nAvg, nf_string, nf, nbins, status_flag, dr, vm_prev_col, noise.peaknoise, flag_compress_spec, flag_DualPol, spec_hv);
             
         
     end

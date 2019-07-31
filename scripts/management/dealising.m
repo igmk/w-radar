@@ -19,7 +19,7 @@ for i = 1:numel(data.time)
     temp = squeeze(data.spec(i,:,:));
 
     if data.DualPol > 0
-        temp_hv = squeeze(data.spec_h(i,:,:));
+        temp_hv = squeeze(data.spec_hv(i,:,:));
     end
         
     % check if any data found for this time step - if not, continue with
@@ -102,8 +102,11 @@ for i = 1:numel(data.time)
     data.sigma(i,:) = tempmoments.sigma';
     data.skew(i,:) = tempmoments.skew';
     data.kurt(i,:) = tempmoments.kurt'; 
-    data.VNoisePow_mean(i,:) = tempmoments.meannoise';
-    data.VNoisePow_peak(i,:) = tempmoments.peaknoise';
+    
+    if ~data.compress_spec
+        data.VNoisePow_mean(i,:) = tempmoments.meannoise';
+        data.VNoisePow_peak(i,:) = tempmoments.peaknoise';
+    end
            
     if data.DualPol > 0
         data.LDR(i,:) = tempmoments.LDR';

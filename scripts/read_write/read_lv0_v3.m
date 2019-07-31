@@ -139,7 +139,7 @@ function data = read_lv0_v3(infile)
     if data.DualPol > 0
         data.PNh(1:data.totsamp,1:data.n_levels) = single(-999); % total IF power in h-pol measured at ADT unput
         data.SLh(1:data.totsamp,1:data.n_levels) = single(-999); % linear sensitivity limit in Ze units for horizontal polarisation
-        data.spec_h(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % hor pol doppler spectrum linear units
+        data.spec_hv(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % hor pol doppler spectrum linear units
         data.spec_covRe(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % real part of covariance spectrum
         data.spec_covIm(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % imaginary part of covariance spectrum
     end      
@@ -236,7 +236,7 @@ function data = read_lv0_v3(infile)
 
                     data.spec(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra
                     if data.DualPol > 0
-                        data.spec_h(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra 
+                        data.spec_hv(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra 
                         data.spec_covRe(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra 
                         data.spec_covIm(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra 
                     end
@@ -260,7 +260,7 @@ function data = read_lv0_v3(infile)
                         
                         if data.DualPol > 0
                             try
-                                data.spec_h(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
+                                data.spec_hv(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
                                 data.spec_covRe(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
                                 data.spec_covIm(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
                             catch
