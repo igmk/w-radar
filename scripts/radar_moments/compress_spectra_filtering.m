@@ -17,7 +17,7 @@ for ii = 1:ss(1)
         idx = ~isnan(spec(ii,jj,:));
         
         % determine blocks of consecutive bins
-        [block_start, block_end] = radar_moments_get_blocks_of_signal(idx,ss(3));
+        [block_start, block_end] = radar_moments_get_blocks_of_signal(idx,[1, ss(3)]);
     
         if isnan(block_start)
             spec(ii,jj,:) = NaN;
