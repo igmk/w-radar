@@ -110,6 +110,8 @@ for i = 1:numel(data.time)
            
     if data.DualPol > 0
         data.LDR(i,:) = tempmoments.LDR';
+        data.Ze_hv(i,:) = tempmoments.Ze_hv';
+        data.vm_hv(i,:) = tempmoments.vm_hv';
     end 
     
 end % i = 1:numel

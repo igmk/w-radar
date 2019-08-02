@@ -19,7 +19,7 @@ if isfield(data,'DualPol')
     switch data.DualPol
         case 1            
             disp('LDR-mode available')            
-            data.hZe = NaN(specsize(1:2));
+            data.Ze_hv = NaN(specsize(1:2));
             if data.CompEna == 0
                 data.HNoisePow_mean = NaN(specsize(1:2));
                 data.HNoisePow_peak = NaN(specsize(1:2));
@@ -79,7 +79,7 @@ for i = 1:numel(data.time)
     
     if depol_case==1
         %Co-pol
-        temp = squeeze(data.spec_h(i,:,:));            
+        temp = squeeze(data.spec_hv(i,:,:));            
         
         if data.CompEna == 0                
             temp = noise_substraction(temp, velocity, nAvg, noise, 1, range_offsets, moment_str, mnf, pnf, bins);
@@ -87,11 +87,11 @@ for i = 1:numel(data.time)
 
         tempmoments = radar_chirps(temp, velocity, range_offsets);       
             % get moments
-        data.hZe(i,:) = tempmoments.Ze';
-        data.hvm(i,:) = tempmoments.vm';
-        data.hsigma(i,:) = tempmoments.sigma';
-        data.hskew(i,:) = tempmoments.skew';
-        data.hkurt(i,:) = tempmoments.kurt';
+        data.Ze_hv(i,:) = tempmoments.Ze';
+        data.vm_hv(i,:) = tempmoments.vm';
+%         data.hsigma(i,:) = tempmoments.sigma';
+%         data.hskew(i,:) = tempmoments.skew';
+%         data.hkurt(i,:) = tempmoments.kurt';
         if data.CompEna == 0
             data.HNoisePow_mean(i,:) = tempmoments.meannoise';
             data.HNoisePow_peak(i,:) = tempmoments.peaknoise';
@@ -102,13 +102,13 @@ end % i = 1:numel
 %LDR module
 if depol_case==1
     %LDR Retrieval
-    data.LDR = data.hZe./data.Ze;
+    data.LDR = data.Ze_hv./data.Ze;
     
     %Retrieval of spectral co-cross-channel correlation coefficient
     % calculate moments
     covRe = squeeze(nansum(data.spec_covRe,3));
     covIm = squeeze(nansum(data.spec_covIm,3));    
-    data.xcorr = sqrt(covRe.^2 + covIm.^2)./(data.hZe - data.Ze);     
+    data.xcorr = sqrt(covRe.^2 + covIm.^2)./(data.Ze_hv - data.Ze);     
     data.difphase = covRe./covIm;
 end
     

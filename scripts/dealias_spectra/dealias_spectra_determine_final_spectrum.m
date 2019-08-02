@@ -80,21 +80,6 @@ end
 
 if flag_compress_spec
     
-    % some unphysical spectrum found 
-    leftside = nansum(~isnan(spec_chain(idx_max-Nfft/2:idx_max)));
-    rghtside = nansum(~isnan(spec_chain(idx_max:idx_max+Nfft/2)));
-    
-    if abs(leftside-rghtside)/max([leftside,rghtside]) > 0.5 
-        spec_chain(idx_max-Nfft/2:idx_max+Nfft/2-1) = NaN;
-        
-        spec_out = spec_chain(idx_max-Nfft/2:idx_max+Nfft/2-1);
-        vel_out = vel_chain(idx_max-Nfft/2:idx_max+Nfft/2-1);
-    
-        return
-        
-    end
-    
-    
     tempstruct = radar_moments(spec_chain(idx_max-Nfft/2:idx_max+Nfft/2-1), vel_chain(idx_max-Nfft/2:idx_max+Nfft/2-1),Nfft, 'moment_str','skew','linear','pnf',1.5,'nbins',5, 'compressed', flag_compress_spec, 'DualPol', 0, []);
            
     

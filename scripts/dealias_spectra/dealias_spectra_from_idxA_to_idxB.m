@@ -127,8 +127,12 @@ for ii = idxA:inc:idxB %
     
     % if dual pol, dealias spec_hv
     if flag_DualPol > 0
-        disp('dealias spec_hv here')
-%         spec_out_hv = dealias_spechv();
+        
+        [spec_chain_hv, ~] = dealias_spectra_concetenate_spectra(vm_guess, spec_hv(:,1:Nfft(r_idx)), vn(r_idx), ii, next_chirp, Nfft(r_idx));
+
+        ind1 = find(vel_chain == vel_out(cc,1));
+        ind2 = find(vel_chain == vel_out(cc,Nfft(r_idx)));
+        spec_hv_out(cc,1:Nfft(r_idx)) =  spec_chain_hv(ind1:ind2);
         
         if flag_DualPol == 2
             disp('De-aliasing of fully polarimetric spectral capability not done')
