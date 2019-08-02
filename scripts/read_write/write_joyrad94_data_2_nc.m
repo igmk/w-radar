@@ -93,7 +93,7 @@ netcdf.putAtt(ncid,id_AntiAlias,'comment',...
 id_cal_mom = netcdf.defVar(ncid,'cal_mom','nc_byte',did_scalar);
 netcdf.putAtt(ncid,id_cal_mom,'long_name','Integer indicating how moments were calculated.');
 netcdf.putAtt(ncid,id_cal_mom,'comment',...
-    '1 = moments were calculated from dealiased spectra. 2 = moments were calculated from raw spectra. 3 = moments were calculated by RPG software.');
+    'Set in config file. 2 = moments were calculated from spectra. 3 = moments are taken from RPG processing sofware (lv1).');
 
 id_lat = netcdf.defVar(ncid,'Lat','nc_float',did_scalar);
 netcdf.putAtt(ncid,id_lat,'long_name','Latitude in degrees north [-90,90]');

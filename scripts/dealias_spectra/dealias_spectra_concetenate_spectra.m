@@ -19,26 +19,60 @@ status_flag = '0000';
 
 delta = ii - next_chirp;
 
-if delta == -2 % then second upper bin is in new chirp sequence
+if delta == -3 % then second upper bin is in new chirp sequence
     
     % check if double aliasing might have occure
     if vm_guess < -11/4*vn % if yes dealiasing correctly for motion towards the radar is not possible anymore since no spectrum at expected velocities is avaiable
         status_flag(2) = '1';
     end
     
-    spec_chain = [spec(ii+1,1:Nfft), spec(ii+1,1:Nfft), spec(ii,1:Nfft), spec(ii-1,1:Nfft), spec(ii-2,1:Nfft)];
+    spec_chain = [spec(ii+2,1:Nfft), spec(ii+2,1:Nfft), spec(ii+1,1:Nfft), spec(ii,1:Nfft), spec(ii-1,1:Nfft), spec(ii-2,1:Nfft), spec(ii-3,1:Nfft)];
     
     % check if neighbouring spectra contain signal, else dublicate
     % neighbouring spectrum
     if isnan(spec(ii+1,1))
-        spec_chain(1:Nfft) = spec(ii,1:Nfft);
-        spec_chain(Nfft+1:2*Nfft) = spec(ii,1:Nfft);
+        spec_chain(2*Nfft+1:3*Nfft) = spec(ii,1:Nfft);
     end
+    if isnan(spec(ii+2,1))
+        spec_chain(Nfft+1:2*Nfft) = spec_chain(2*Nfft+1:3*Nfft);
+        spec_chain(1:Nfft) = spec_chain(2*Nfft+1:3*Nfft);
+    end
+
     if isnan(spec(ii-1,1))
-        spec_chain(3*Nfft+1:4*Nfft) = spec(ii,1:Nfft);
+        spec_chain(4*Nfft+1:5*Nfft) = spec(ii,1:Nfft);
     end
     if isnan(spec(ii-2,1))
-        spec_chain(4*Nfft+1:5*Nfft) = spec_chain(3*Nfft+1:4*Nfft);
+        spec_chain(5*Nfft+1:6*Nfft) = spec_chain(4*Nfft+1:5*Nfft);
+    end
+    if isnan(spec(ii-3,1))
+        spec_chain(6*Nfft+1:end) = spec_chain(5*Nfft+1:6*Nfft);
+    end
+    
+
+elseif delta == -2 % then second upper bin is in new chirp sequence
+    
+    % check if double aliasing might have occure
+    if vm_guess < -11/4*vn % if yes dealiasing correctly for motion towards the radar is not possible anymore since no spectrum at expected velocities is avaiable
+        status_flag(2) = '1';
+    end
+    
+    spec_chain = [spec(ii+1,1:Nfft), spec(ii+1,1:Nfft), spec(ii+1,1:Nfft), spec(ii,1:Nfft), spec(ii-1,1:Nfft), spec(ii-2,1:Nfft), spec(ii-3,1:Nfft)];
+    
+    % check if neighbouring spectra contain signal, else dublicate
+    % neighbouring spectrum
+    if isnan(spec(ii+1,1))
+        spec_chain(1:Nfft)         = spec(ii,1:Nfft);
+        spec_chain(Nfft+1:2*Nfft)  = spec(ii,1:Nfft);
+        spec_chain(2*Nfft+1:3*Nfft) = spec(ii,1:Nfft);
+    end
+    if isnan(spec(ii-1,1))
+        spec_chain(4*Nfft+1:5*Nfft) = spec(ii,1:Nfft);
+    end
+    if isnan(spec(ii-2,1))
+        spec_chain(5*Nfft+1:6*Nfft) = spec_chain(4*Nfft+1:5*Nfft);
+    end
+    if isnan(spec(ii-3,1))
+        spec_chain(6*Nfft+1:end) = spec_chain(5*Nfft+1:6*Nfft);
     end
     
     
@@ -52,17 +86,19 @@ elseif delta == -1 % then next bin is in new chirp sequence
     % else aliasing into lower bins can be corrected
     
     % create spec_chain, triplicate spectrum of current bin
-    spec_chain = [spec(ii,1:Nfft), spec(ii,1:Nfft), spec(ii,1:Nfft) spec(ii-1,1:Nfft), spec(ii-2,1:Nfft)];
+    spec_chain = [spec(ii,1:Nfft), spec(ii,1:Nfft), spec(ii,1:Nfft), spec(ii,1:Nfft) spec(ii-1,1:Nfft), spec(ii-2,1:Nfft), spec(ii-3,1:Nfft)];
     
     % check if neighbouring spectra contain signal, else dublicate
     % neighbouring spectrum
     if isnan(spec(ii-1,1))
-        spec_chain(3*Nfft+1:4*Nfft) = spec(ii,1:Nfft);
+        spec_chain(4*Nfft+1:5*Nfft) = spec(ii,1:Nfft);
     end
     if isnan(spec(ii-2,1))
-        spec_chain(4*Nfft+1:end) = spec_chain(3*Nfft+1:4*Nfft);
+        spec_chain(5*Nfft+1:6*Nfft) = spec_chain(4*Nfft+1:5*Nfft);
     end
-    
+    if isnan(spec(ii-3,1))
+        spec_chain(6*Nfft+1:end) = spec_chain(5*Nfft+1:6*Nfft);
+    end
     
 elseif delta == 0 % two lower bins are in the previous chirp_sequence
     
@@ -74,17 +110,19 @@ elseif delta == 0 % two lower bins are in the previous chirp_sequence
     % else dealias spectrum:
     
     % create spec_chain, triplicate spectrum of current bin
-    spec_chain = [spec(ii+2,1:Nfft), spec(ii+1,1:Nfft), spec(ii,1:Nfft), spec(ii,1:Nfft), spec(ii,1:Nfft)];
+    spec_chain = [spec(ii+3,1:Nfft), spec(ii+2,1:Nfft), spec(ii+1,1:Nfft), spec(ii,1:Nfft), spec(ii,1:Nfft), spec(ii,1:Nfft), spec(ii,1:Nfft)];
     
     % check if neighbouring spectra contain signal, else dublicate
     % neighbouring spectrum
     if isnan(spec(ii+1,1))
-        spec_chain(Nfft+1:2*Nfft) = spec(ii,1:Nfft);
+        spec_chain(2*Nfft+1:3*Nfft) = spec(ii,1:Nfft);
     end
     if isnan(spec(ii+2,1))
+        spec_chain(Nfft+1:2*Nfft) = spec_chain(2*Nfft+1:3*Nfft);
+    end
+    if isnan(spec(ii+3,1))
         spec_chain(1:Nfft) = spec_chain(Nfft+1:2*Nfft);
     end
-    
     
 elseif delta == 1 % second lower bin is pervious chirp sequence
     
@@ -94,38 +132,76 @@ elseif delta == 1 % second lower bin is pervious chirp sequence
     end
     
     % create spec_chain, dublicate spectrum of lower bin
-    spec_chain = [spec(ii+2,1:Nfft), spec(ii+1,1:Nfft), spec(ii,1:Nfft), spec(ii-1,1:Nfft), spec(ii-1,1:Nfft)];
+    spec_chain = [spec(ii+3,1:Nfft), spec(ii+2,1:Nfft), spec(ii+1,1:Nfft), spec(ii,1:Nfft), spec(ii-1,1:Nfft), spec(ii-1,1:Nfft), spec(ii-1,1:Nfft)];
     
     % check if neighbouring spectra contain signal, else dublicate
     % neighbouring spectrum
     if isnan(spec(ii-1,1))
-        spec_chain(3*Nfft+1:4*Nfft) = spec(ii,1:Nfft);
-        spec_chain(4*Nfft+1:end) = spec(ii,1:Nfft);
+        spec_chain(4*Nfft+1:5*Nfft) = spec(ii,1:Nfft);
+        spec_chain(5*Nfft+1:6*Nfft) = spec(ii,1:Nfft);
+        spec_chain(6*Nfft+1:end)    = spec(ii,1:Nfft);
     end
     if isnan(spec(ii+1,1))
-        spec_chain(Nfft+1:2*Nfft) = spec(ii,1:Nfft);
+        spec_chain(2*Nfft+1:3*Nfft) = spec(ii,1:Nfft);
     end
     if isnan(spec(ii+2,1))
+        spec_chain(Nfft+1:2*Nfft) = spec_chain(2*Nfft+1:3*Nfft);
+    end
+    if isnan(spec(ii+3,1))
         spec_chain(1:Nfft) = spec_chain(Nfft+1:2*Nfft);
     end
     
+elseif delta == 2 % third lower bin is pervious chirp sequence
     
-else % create spectral array concatenating five spectra
+    % check if double aliasing into lower bins occured
+    if vm_guess > 11/4*vn % then dealiasing is not possible but use spectra from upper (dealiased) bin
+        status_flag(2) = '1';
+    end
     
-    spec_chain = [spec(ii+2,1:Nfft), spec(ii+1,1:Nfft), spec(ii,1:Nfft), spec(ii-1,1:Nfft), spec(ii-2,1:Nfft)];
+    % create spec_chain, dublicate spectrum of lower bin
+    spec_chain = [spec(ii+3,1:Nfft), spec(ii+2,1:Nfft), spec(ii+1,1:Nfft), spec(ii,1:Nfft), spec(ii-1,1:Nfft), spec(ii-2,1:Nfft), spec(ii-2,1:Nfft)];
     
     % check if neighbouring spectra contain signal, else dublicate
     % neighbouring spectrum
     if isnan(spec(ii-1,1))
-        spec_chain(3*Nfft+1:4*Nfft) = spec(ii,1:Nfft);
+        spec_chain(4*Nfft+1:5*Nfft) = spec(ii,1:Nfft);
     end
     if isnan(spec(ii-2,1))
-        spec_chain(4*Nfft+1:end) = spec_chain(3*Nfft+1:4*Nfft);
+        spec_chain(5*Nfft+1:6*Nfft) = spec_chain(4*Nfft+1:5*Nfft);
+        spec_chain(6*Nfft+1:end)    = spec_chain(4*Nfft+1:5*Nfft);
     end
     if isnan(spec(ii+1,1))
-        spec_chain(Nfft+1:2*Nfft) = spec(ii,1:Nfft);
+        spec_chain(2*Nfft+1:3*Nfft) = spec(ii,1:Nfft);
     end
     if isnan(spec(ii+2,1))
+        spec_chain(Nfft+1:2*Nfft) = spec_chain(2*Nfft+1:3*Nfft);
+    end    
+    if isnan(spec(ii+3,1))
+        spec_chain(1:Nfft) = spec_chain(Nfft+1:2*Nfft);
+    end
+    
+else % create spectral array concatenating five spectra
+    
+    spec_chain = [spec(ii+3,1:Nfft), spec(ii+2,1:Nfft), spec(ii+1,1:Nfft), spec(ii,1:Nfft), spec(ii-1,1:Nfft), spec(ii-2,1:Nfft), spec(ii-3,1:Nfft)];
+    
+    % check if neighbouring spectra contain signal, else dublicate
+    % neighbouring spectrum
+    if isnan(spec(ii-1,1))
+        spec_chain(4*Nfft+1:5*Nfft) = spec(ii,1:Nfft);
+    end
+    if isnan(spec(ii-2,1))
+        spec_chain(5*Nfft+1:6*Nfft) = spec_chain(4*Nfft+1:5*Nfft);
+    end
+    if isnan(spec(ii-3,1))
+        spec_chain(6*Nfft+1:end) = spec_chain(5*Nfft+1:6*Nfft);
+    end
+    if isnan(spec(ii+1,1))
+        spec_chain(2*Nfft+1:3*Nfft) = spec(ii,1:Nfft);
+    end
+    if isnan(spec(ii+2,1))
+        spec_chain(Nfft+1:2*Nfft) = spec_chain(2*Nfft+1:3*Nfft);
+    end
+    if isnan(spec(ii+3,1))
         spec_chain(1:Nfft) = spec_chain(Nfft+1:2*Nfft);
     end
     

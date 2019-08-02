@@ -26,11 +26,6 @@ netcdf.putAtt(ncid,id_AntiAlias,'long_name','Flag for dealiasing.');
 netcdf.putAtt(ncid,id_AntiAlias,'comment',...
     '0 = no dealiasing applied, 1 = dealiasing by RPG, 2 = dealiasing in process_joyrad94_data.m');
 
-id_cal_mom = netcdf.defVar(ncid,'cal_mom','nc_byte',did_scalar);
-netcdf.putAtt(ncid,id_cal_mom,'long_name','Integer indicating how moments were calculated.');
-netcdf.putAtt(ncid,id_cal_mom,'comment',...
-    '1 = moments were calculated from dealiased spectra. 2 = moments were calculated from raw spectra. 3 = moments were calculated by RPG software.');
-
 id_lat = netcdf.defVar(ncid,'Lat','nc_float',did_scalar);
 netcdf.putAtt(ncid,id_lat,'long_name','Latitude in degrees north [-90,90]');
 netcdf.putAtt(ncid,id_lat,'units','degrees');
@@ -46,6 +41,7 @@ netcdf.putAtt(ncid,id_MSL,'units','m');
 id_freq = netcdf.defVar(ncid,'freq','nc_float',did_scalar);
 netcdf.putAtt(ncid,id_freq,'long_name','Transmission frequency');
 netcdf.putAtt(ncid,id_freq,'units','GHz');
+
 
 
 
@@ -102,6 +98,27 @@ id_RR = netcdf.defVar(ncid,'RR','nc_float',did_time);
 netcdf.putAtt(ncid,id_RR,'long_name','Rain rate of meteo-station');
 netcdf.putAtt(ncid,id_RR,'units','mm/h');
 
+
+id_rh = netcdf.defVar(ncid,'rh','nc_float',did_time);
+netcdf.putAtt(ncid,id_rh,'long_name','Relative humidity of meteo-station');
+netcdf.putAtt(ncid,id_rh,'units','%');
+
+id_T_env = netcdf.defVar(ncid,'T_env','nc_float',did_time);
+netcdf.putAtt(ncid,id_T_env,'long_name','Environmental temperature of meteo-station');
+netcdf.putAtt(ncid,id_T_env,'units','K');
+
+id_pres = netcdf.defVar(ncid,'pres','nc_float',did_time);
+netcdf.putAtt(ncid,id_pres,'long_name','Environmental pressure of meteo-station');
+netcdf.putAtt(ncid,id_pres,'units','hPa');
+
+id_ff = netcdf.defVar(ncid,'ff','nc_float',did_time);
+netcdf.putAtt(ncid,id_ff,'long_name','Wind speed of meteo-station');
+netcdf.putAtt(ncid,id_ff,'units','km/h');
+
+id_fff = netcdf.defVar(ncid,'fff','nc_float',did_time);
+netcdf.putAtt(ncid,id_fff,'long_name','Wind direction of meteo-station');
+netcdf.putAtt(ncid,id_fff,'units','degrees');
+
 id_Tb = netcdf.defVar(ncid,'Tb','nc_float',did_time);
 netcdf.putAtt(ncid,id_Tb,'long_name','brightness temperature direct detection channel');
 netcdf.putAtt(ncid,id_Tb,'units','K');
@@ -109,6 +126,34 @@ netcdf.putAtt(ncid,id_Tb,'units','K');
 id_lwp = netcdf.defVar(ncid,'lwp','nc_float',did_time);
 netcdf.putAtt(ncid,id_lwp,'long_name','Liquid water path calculated by RPG software');
 netcdf.putAtt(ncid,id_lwp,'units','g/m^2');
+
+
+id_status = netcdf.defVar(ncid,'status','nc_float',did_time);
+netcdf.putAtt(ncid,id_status,'long_name','status flag: 0/1 = heater on/off; 0/10 = blower on/off');
+
+id_TransPow = netcdf.defVar(ncid,'TransPow','nc_float',did_time);
+netcdf.putAtt(ncid,id_TransPow,'long_name','Transmitted power');
+netcdf.putAtt(ncid,id_TransPow,'units','W');
+
+id_T_trans = netcdf.defVar(ncid,'T_trans','nc_float',did_time);
+netcdf.putAtt(ncid,id_T_trans,'long_name','Transmitter temperature');
+netcdf.putAtt(ncid,id_T_trans,'units','K');
+
+id_T_rec = netcdf.defVar(ncid,'T_rec','nc_float',did_time);
+netcdf.putAtt(ncid,id_T_rec,'long_name','Receiver temperature');
+netcdf.putAtt(ncid,id_T_rec,'units','K');
+
+id_T_pc = netcdf.defVar(ncid,'T_pc','nc_float',did_time);
+netcdf.putAtt(ncid,id_T_pc,'long_name','PC temperature');
+netcdf.putAtt(ncid,id_T_pc,'units','K');
+
+id_QF = netcdf.defVar(ncid,'QF','nc_byte',did_time);
+netcdf.putAtt(ncid,id_QF,'long_name','Quality flag given by radar');
+netcdf.putAtt(ncid,id_QF,'comment', ...
+    ['To get the bit entries, one has to convert the integer into a 4 bit binary. '...
+    'bit4 = ADC saturation, bit3 = spectral width too high, bit2 = no transmitter power leveling.' ...
+    'Note that in the above convention holds: bit1 = 2^3, bit2 = 2^2, bit3 = 2^1, bit4 = 2^0'])
+
 
 
 
@@ -177,10 +222,21 @@ netcdf.putAtt(ncid,glob,'contact',contactperson);
 netcdf.putAtt(ncid,glob,'processing script',processing_script);
 
 
-%% ###################### initialize copression of all floats:
+%% ###################### initialize compression of all floats:
 netcdf.defVarDeflate(ncid,id_RR,true,true,9);
+netcdf.defVarDeflate(ncid,id_rh,true,true,9);
+netcdf.defVarDeflate(ncid,id_T_env,true,true,9);
+netcdf.defVarDeflate(ncid,id_pres,true,true,9);
+netcdf.defVarDeflate(ncid,id_ff,true,true,9);
+netcdf.defVarDeflate(ncid,id_fff,true,true,9);
 netcdf.defVarDeflate(ncid,id_Tb,true,true,9);
 netcdf.defVarDeflate(ncid,id_lwp,true,true,9);
+netcdf.defVarDeflate(ncid,id_status,true,true,9);
+netcdf.defVarDeflate(ncid,id_TransPow,true,true,9);
+netcdf.defVarDeflate(ncid,id_T_trans,true,true,9);
+netcdf.defVarDeflate(ncid,id_T_rec,true,true,9);
+netcdf.defVarDeflate(ncid,id_T_pc,true,true,9);
+netcdf.defVarDeflate(ncid,id_QF,true,true,9);
 netcdf.defVarDeflate(ncid,id_Ze,true,true,9);
 netcdf.defVarDeflate(ncid,id_vm,true,true,9);
 netcdf.defVarDeflate(ncid,id_sigma,true,true,9);
@@ -203,7 +259,6 @@ netcdf.endDef(ncid);
 
 % scalars
 netcdf.putVar(ncid,id_AntiAlias,0,data.AntiAlias);
-netcdf.putVar(ncid,id_cal_mom,0,data.cal_mom);
 netcdf.putVar(ncid,id_freq,0,data.freq);
 netcdf.putVar(ncid,id_lon,0,data.Lon);
 netcdf.putVar(ncid,id_lat,0,data.Lat);
@@ -226,8 +281,20 @@ netcdf.putVar(ncid,id_nAvg,0,data.no_chirp_seq,data.nAvg);
 netcdf.putVar(ncid,id_time,0,data.totsamp,data.time);
 netcdf.putVar(ncid,id_sampleTms,0,data.totsamp,data.sampleTms);
 netcdf.putVar(ncid,id_RR,0,data.totsamp,data.RR);
+netcdf.putVar(ncid,id_rh,0,data.totsamp,data.rh);
+netcdf.putVar(ncid,id_T_env,0,data.totsamp,data.T_env);
+netcdf.putVar(ncid,id_pres,0,data.totsamp,data.pres);
+netcdf.putVar(ncid,id_ff,0,data.totsamp,data.ff);
+netcdf.putVar(ncid,id_fff,0,data.totsamp,data.fff);
 netcdf.putVar(ncid,id_Tb,0,data.totsamp,data.Tb);
 netcdf.putVar(ncid,id_lwp,0,data.totsamp,data.lwp);
+netcdf.putVar(ncid,id_status,0,data.totsamp,data.status);
+netcdf.putVar(ncid,id_TransPow,0,data.totsamp,data.TransPow);
+netcdf.putVar(ncid,id_T_trans,0,data.totsamp,data.T_trans);
+netcdf.putVar(ncid,id_T_rec,0,data.totsamp,data.T_rec);
+netcdf.putVar(ncid,id_T_pc,0,data.totsamp,data.T_pc);
+netcdf.putVar(ncid,id_QF,0,data.totsamp,data.QF);
+
 
 % multidimensional variables
 netcdf.putVar(ncid,id_Ze,[0,0],[data.n_levels,data.totsamp],data.Ze');

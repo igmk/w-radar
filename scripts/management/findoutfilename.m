@@ -9,6 +9,7 @@ config.filename = filename;
 filename = strrep(config.filename,config.nickradar, '');
 filename = strrep(filename,config.nickstation, '');
 
+
 switch config.compact_flag
     case 0
         outfile = fullfile(config.outputpath_tree, sprintf('%s_%s_%s.nc', config.nickradar, config.nickstation, filename));
@@ -19,16 +20,24 @@ switch config.compact_flag
         outfile2 = fullfile(config.outputpath_tree, sprintf('%s_%s_%s_compact.nc', config.nickradar, config.nickstation, filename));
 end
 
-while strfind(outfile, '__')
-    outfile = strrep(outfile,'__', '_');
-end
-while strfind(outfile2, '__')
-    outfile2 = strrep(outfile2,'__', '_');
-end
+
 
 if exist('outfile', 'var')
+
+    while strfind(outfile, '__')
+        outfile = strrep(outfile,'__', '_');
+    end
+
     config.outfile = outfile;
 end
+
+
+
 if exist('outfile2', 'var')
+    
+    while strfind(outfile2, '__')
+        outfile2 = strrep(outfile2,'__', '_');
+    end
+
     config.outfile2 = outfile2;
 end

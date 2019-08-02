@@ -209,6 +209,7 @@ for i = 1:numel(cbh_fin)
     % top down. This bin is used as reference in the next step (line 250->)!
     % if a non-dealiased bin is found, the function will calculate the 
     % higher moments in this bin
+   
     [tempstruct, no_clean_signal, idx_0] = dealias_spectra_find_nonaliased_bin(cth_fin(i), cbh_fin(i), spec, range_offsets, vel, nAvg, moment_string, nf_string, nf, nbins, alias_flag, noise, Nfft(r_idx), flag_compress_spec, flag_DualPol, spec_hv);
     
     % write to output struct

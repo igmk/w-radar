@@ -9,8 +9,13 @@ ss = size(spec);
 
 for ii = 1:ss(1)
     for jj = 1:ss(2)
+        
+        if all((isnan(spec(ii,jj,:)))) % no data, no check needed
+            continue
+        end
+        
         idx = ~isnan(spec(ii,jj,:));
-
+        
         % determine blocks of consecutive bins
         [block_start, block_end] = radar_moments_get_blocks_of_signal(idx,ss(3));
     

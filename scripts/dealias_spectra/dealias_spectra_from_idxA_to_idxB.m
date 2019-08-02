@@ -65,7 +65,7 @@ for ii = idxA:inc:idxB %
     % ############## get spec and vel chains
     % make a celovity array that is 5 times wider than the original, with
     % the same doppler resolution
-    vel_chain = (vel(1,r_idx) - 2*Nfft(r_idx)*delv(r_idx)) : delv(r_idx) : (vel(Nfft(r_idx),r_idx)+2*Nfft(r_idx)*delv(r_idx) + delv(r_idx));    
+    vel_chain = (vel(1,r_idx) - 3*Nfft(r_idx)*delv(r_idx)) : delv(r_idx) : (vel(Nfft(r_idx),r_idx)+3*Nfft(r_idx)*delv(r_idx) + delv(r_idx));    
     
     % check if chrip boundary is approached
     [~,idx] = min(abs(ii-range_offsets));
@@ -92,15 +92,21 @@ for ii = idxA:inc:idxB %
         vm_guess = dealias_spectra_vm_guess_qual_check(moments.vm, vm_prev_col, ii, inc, dr(r_idx));
     end
     
+    if vm_guess < -4*vn(r_idx)
+        vm_guess = -4*vn(r_idx);
+                
+    elseif vm_guess > -4*vn(r_idx)
+        vm_guess = 4*vn(r_idx);
+       
+    end
+    
     % check if upper or lower boundary is reached
     % spectra from 5 bins is concatenated to spec_chain
     [spec_chain, status_flag(ii,1:4)] = dealias_spectra_concetenate_spectra(vm_guess, spec(:,1:Nfft(r_idx)), vn(r_idx), ii, next_chirp, Nfft(r_idx));
     
-    
     %################ get final spectrum    
     [spec_out(cc,1:Nfft(r_idx)), vel_out(cc,1:Nfft(r_idx)), status_flag(ii,1:4)] = dealias_spectra_determine_final_spectrum(vm_guess, spec_chain, vel_chain, Nfft(r_idx), flag_compress_spec);
-    
-    
+
     %############## quality check final spectrum
     alias_flag = dealias_spectra_quality_check_final_spectrum(spec_out(cc,1:Nfft(r_idx)), peaknoise(ii), flag_compress_spec);
     

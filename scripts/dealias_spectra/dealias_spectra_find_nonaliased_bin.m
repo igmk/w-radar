@@ -17,7 +17,7 @@ cc = 0;
 no_clean_signal = false;
 idx_0 = NaN;
 
-
+signal = zeros( 1, length(spec(:,1)) );
 if flag_compress_spec
     signal( any( ~isnan(spec), 2) ) = 1;
 
