@@ -16,6 +16,7 @@ end
 
 % oldspec = data.spec;  
 for i = 1:numel(data.time)
+
     temp = squeeze(data.spec(i,:,:));
 
     if data.DualPol > 0

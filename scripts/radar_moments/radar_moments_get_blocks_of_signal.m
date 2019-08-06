@@ -32,7 +32,14 @@ function [block_start, block_end] = radar_moments_get_blocks_of_signal(idx_signa
         block_end = [block_end(:); sv(2)];
     end
     
-    if any(size(block_start) ~= size(block_end))
+    test = size(block_start);
+    if test(1) ~= 1
         block_start = block_start';
     end
+        
+    test = size(block_end);
+    if test(1) ~= 1
+        block_end = block_end';
+    end
+    
 end % function

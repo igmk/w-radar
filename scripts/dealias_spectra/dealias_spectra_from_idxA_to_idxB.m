@@ -52,8 +52,8 @@ Nfft = sum(~isnan(vel));
 
 cc = 0;
 for ii = idxA:inc:idxB % 
-    cc = cc + 1;
     
+    cc = cc + 1;
 
     % ############### get range indexes
     r_idx = dealias_spectra_get_range_index(range_offsets, ii);
@@ -76,6 +76,7 @@ for ii = idxA:inc:idxB %
         vm_guess = NaN;
     else
         vm_guess = moments.vm(ii-inc);
+        
     end
     
     % check here if vm_guess has signal
@@ -83,23 +84,30 @@ for ii = idxA:inc:idxB %
         % if doppler velocity at ii-inc is NaN, the function tries to find
         % another guess vm:
         % 1. looks for another reference velocity in the same column. Last
-        %    50 m are considered, and the nearest value is taken.
+        %    vel_win m are considered, and the nearest value is taken.
         % 2. If no value found in the same column, the value of the same
         %    range of the previous time step is taken.
-        % 3. If still no value found, average of +-25 m of the previous
+        % 3. If still no value found, average of +-vel_win/2 m of the previous
         %    time step is taken.
         % If none of the options leads to a guess velocity, NaN is returned.
-        vm_guess = dealias_spectra_vm_guess_qual_check(moments.vm, vm_prev_col, ii, inc, dr(r_idx));
+        vel_win = 50;
+        while isnan(vm_guess) && vel_win <= 200
+            
+            vm_guess = dealias_spectra_vm_guess_qual_check(moments.vm, vm_prev_col, ii, inc, dr(r_idx), vel_win);
+            vel_win = vel_win*2;
+        end
     end
+    
+%     vm_quality_check(vm_prev_col, )
     
     if vm_guess < -4*vn(r_idx)
         vm_guess = -4*vn(r_idx);
                 
-    elseif vm_guess > -4*vn(r_idx)
+    elseif vm_guess > 4*vn(r_idx)
         vm_guess = 4*vn(r_idx);
        
     end
-    
+        
     % check if upper or lower boundary is reached
     % spectra from 5 bins is concatenated to spec_chain
     [spec_chain, status_flag(ii,1:4)] = dealias_spectra_concetenate_spectra(vm_guess, spec(:,1:Nfft(r_idx)), vn(r_idx), ii, next_chirp, Nfft(r_idx));

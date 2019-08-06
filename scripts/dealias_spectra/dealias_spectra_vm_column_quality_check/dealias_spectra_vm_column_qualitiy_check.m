@@ -22,14 +22,16 @@ function [status, vm, correction] = dealias_spectra_vm_column_qualitiy_check(vm,
 noise_fac = 1;
 
 % ########### initial check
-idx = find(range > 2000,1,'first') - 1;
-dv = nanmean(diff(vm(:,1:idx)),2);
-noise = hildebrand_sekon(abs(dv)',1);
-
-if max(abs(dv)) < 2 && noise.peaknoise < 1 % then column is clean
-    return
-end
-
+idx = length(range);
+% idx = find(range > 2000,1,'first') - 1;
+% 
+% dv = nanmean(diff(vm(:,idx(1):idx(2))),2);
+% noise = hildebrand_sekon(abs(dv)',1);
+% 
+% if max(abs(dv)) < 2 && noise.peaknoise < 1 % then column is clean
+%     return
+% end
+% 
 
 
 % ##################### compare columns with respect to the mean difference

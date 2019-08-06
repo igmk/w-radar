@@ -27,8 +27,8 @@ status_flag = '0000';
 
 % ############### find maximum of spectrum
 
-if isnan(vm_guess) % start at center of 3rd spectrum
-    idx_in = single(floor(5/2*Nfft));
+if isnan(vm_guess) % start at center of 4rd spectrum
+    idx_in = single(floor(3.5*Nfft));
     status_flag(4) = '1';
 else
     % find index nearest value in vel_chain to vm_guess
@@ -54,8 +54,23 @@ elseif idx_in+window > numel(spec_chain)
     idx_max = idx_max + numel(spec_chain) - Nfft - 1;
     status_flag(3) = '1';
 else
-    [~,idx_max] = max(spec_chain(idx_in-window:idx_in+window));
-    idx_max = idx_max + idx_in-window - 1;
+    
+    if all(isnan(spec_chain(idx_in-window:idx_in+window))) % clearly a very bad guess velocity! (for compressed spectra)
+        
+        [~, max1] = max(spec_chain(idx_in-window-Nfft:idx_in-window));
+        maxtest(1) = max1 + idx_in-window-Nfft -1;
+        [~, max2] = max(spec_chain(idx_in+window:idx_in+window+Nfft));
+        maxtest(2) = max2 + idx_in+window -1;
+        
+        [~, ind] = min([idx_in-maxtest(1), maxtest(2)-idx_in]);
+        idx_in = maxtest(ind);
+        idx_max = maxtest(ind);
+    else
+    
+        [~,idx_max] = max(spec_chain(idx_in-window:idx_in+window));
+        idx_max = idx_max + idx_in-window - 1;
+        
+    end
 end
     
     
@@ -66,9 +81,14 @@ if isnan(vm_guess) &&  vel_chain(idx_max) > 2.5
     [~,idx_max] = max(spec_chain(idx_in-Nfft/4:idx_in+Nfft/4));
     idx_max = idx_max + idx_in-Nfft/4 - 1;
     
-    if vel_chain(idx_max) > 2.5 
-        disp('fix')
-    end
+end
+
+if isnan(vm_guess) &&  vel_chain(idx_max) < -10
+    % likely hit the wrong max!
+    
+    idx_in = idx_max+Nfft;
+    [~,idx_max] = max(spec_chain(idx_in-Nfft/4:idx_in+Nfft/4));
+    idx_max = idx_max + idx_in-Nfft/4 - 1;
     
 end
 

@@ -1,4 +1,4 @@
-function vm_guess = dealias_spectra_vm_guess_qual_check(vm, vm_prev_col, ii, inc, dr)
+function vm_guess = dealias_spectra_vm_guess_qual_check(vm, vm_prev_col, ii, inc, dr,win)
 
 % this function looks for vm_guess if the bordering bins in the column do
 % not provide an estimate
@@ -18,7 +18,7 @@ function vm_guess = dealias_spectra_vm_guess_qual_check(vm, vm_prev_col, ii, inc
 n = numel(vm);
 
 % get number of indexes that are not closer than 50 meters
-n_bins_curr = floor(50/dr);
+n_bins_curr = floor(win/dr);
 
 % ######## create indexes for neighbour checks
 idx_prev = ii-inc*max([floor(n_bins_curr/2), 1]):inc:ii+inc*max([floor(n_bins_curr/2), 1]);
