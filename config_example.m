@@ -1,8 +1,8 @@
-% configuration file for joyrad94 to run data processing
+% exmple configuration file to run data processing
 % 
-% Configuration of the processing script. It inclouds input and output
+% Configuration of the processing script. It includes input and output
 % directories of the data, sets radar options (radar location, radar name, 
-% contact person), processing options (dealaising, overwriting of output 
+% contact person), processing options (dealiaising, overwriting of output 
 % data) and others.
 %
 % Processing is done by Raw2l_radar.m (main routine) 
@@ -43,7 +43,7 @@ config.MSL = 11;
 config.contactperson = 'radarscientist@university.web';
 config.processing_script = [mfilename('fullpath') '.m'];
 
-% Debuging option (config.xyz)
+% Debuging option
 % 0 - no debugging information given, code does not crash
 % 1 - makes check plot in dealising, enables debugging of some functions
 config.debuging = 0; 
@@ -67,6 +67,7 @@ config.compact_flag = 2;
 config.dealias = true;
 
 % moments_cal:
+% Note! at the moment (July 2019), only use 2!
 % 2 - means spectral moments will be calculated (runs momentslv0-function)
 % 3 - means moments are taken from files lv1 if available, (runs momentslv1-function, in 201907 not working)
 config.moments2calculate = 2;
