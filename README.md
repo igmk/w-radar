@@ -4,9 +4,12 @@ stores the data in binary format. The program converts it into netcdf4
 format. Additionally some reprocessing of the data can be applied including 
 dealasing the radar spectra and the calculation of higher moments. 
 
-The program was first created by Nils Küchler in 2018. The code was 
-restructured and partly updated in 2019 by Juan Antonio Bravo Aranda and 
-Rosa Gierens.
+The program was first created by Nils Küchler in 2018, and the first version of the 
+program is available for the [JOYRAD-94 radar](https://github.com/nilskuechler/process_joyrad94_data) 
+and the [MiRAC-A radar](https://github.com/nilskuechler/process_mirac-a_data). 
+The code was restructured and updated in 2019 by Juan Antonio Bravo Aranda, 
+Rosa Gierens and Lukas Pfitzenmaier to also include processing and dealiasing 
+of compressed and polarized spectra.
 
 
 ## Content of this documentation: ##
