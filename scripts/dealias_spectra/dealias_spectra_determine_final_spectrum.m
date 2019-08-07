@@ -63,8 +63,16 @@ else
         maxtest(2) = max2 + idx_in+window -1;
         
         [~, ind] = min([idx_in-maxtest(1), maxtest(2)-idx_in]);
-        idx_in = maxtest(ind);
-        idx_max = maxtest(ind);
+        
+        % guess should not be at the edge of the spec chain
+        tempvar = [1 2];
+        if maxtest(ind) < Nfft  || maxtest(ind) > 6*Nfft
+            idx_in =  maxtest(tempvar(~(tempvar == ind)));
+            idx_max = idx_in;
+        else
+            idx_in = maxtest(ind);
+            idx_max = maxtest(ind);
+        end
     else
     
         [~,idx_max] = max(spec_chain(idx_in-window:idx_in+window));
@@ -98,7 +106,7 @@ end
 
 
 
-if flag_compress_spec
+if flag_compress_spec 
     
     tempstruct = radar_moments(spec_chain(idx_max-Nfft/2:idx_max+Nfft/2-1), vel_chain(idx_max-Nfft/2:idx_max+Nfft/2-1),Nfft, 'moment_str','skew','linear','pnf',1.5,'nbins',5, 'compressed', flag_compress_spec, 'DualPol', 0, []);
            

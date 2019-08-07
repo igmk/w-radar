@@ -261,7 +261,7 @@ for i = 1:numel(cbh_fin)
             moments, moment_string, nAvg, nf_string, nf, nbins, status_flag, dr, vm_prev_col, noise.peaknoise, flag_compress_spec, flag_DualPol, spec_hv);
         
     elseif (idx_0 ~= cbh_fin(i)) % (b) only topdown
-                
+        
         [spec_out(cbh_fin(i):idx_0-1, :), vel_out(cbh_fin(i):idx_0-1, :), status_flag, moments] =...
             dealias_spectra_from_idxA_to_idxB(idx_0-1, cbh_fin(i), range_offsets, vel, delv, spec, vn,...
             moments, moment_string, nAvg, nf_string, nf, nbins, status_flag, dr, vm_prev_col, noise.peaknoise, flag_compress_spec, flag_DualPol, spec_hv);        

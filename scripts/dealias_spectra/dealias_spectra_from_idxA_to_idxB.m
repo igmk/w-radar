@@ -52,7 +52,7 @@ Nfft = sum(~isnan(vel));
 
 cc = 0;
 for ii = idxA:inc:idxB % 
-    
+
     cc = cc + 1;
 
     % ############### get range indexes
@@ -113,6 +113,7 @@ for ii = idxA:inc:idxB %
     [spec_chain, status_flag(ii,1:4)] = dealias_spectra_concetenate_spectra(vm_guess, spec(:,1:Nfft(r_idx)), vn(r_idx), ii, next_chirp, Nfft(r_idx));
     
     %################ get final spectrum    
+    
     [spec_out(cc,1:Nfft(r_idx)), vel_out(cc,1:Nfft(r_idx)), status_flag(ii,1:4)] = dealias_spectra_determine_final_spectrum(vm_guess, spec_chain, vel_chain, Nfft(r_idx), flag_compress_spec);
 
     %############## quality check final spectrum
