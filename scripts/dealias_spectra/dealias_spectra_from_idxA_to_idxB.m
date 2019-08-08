@@ -59,8 +59,8 @@ for ii = idxA:inc:idxB %
 
     % ############### get range indexes
     r_idx = dealias_spectra_get_range_index(range_offsets, ii);
-    
-    if all( isnan(spec(ii,1:Nfft(r_idx))) ) || nansum(spec(ii,1:Nfft(r_idx))) < 10^-20 % then no signal is available
+  
+    if all( isnan(spec(ii,1:Nfft(r_idx))) ) || nansum(spec(ii,1:Nfft(r_idx)),2) < 1e-20 % then no signal is available
         continue
     end
     
