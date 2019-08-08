@@ -44,6 +44,8 @@ vel_out = NaN(n_levels,ss(2));
 
 if flag_DualPol > 0
     spec_hv_out = spec_hv(idx,:);
+else
+    spec_hv_out = NaN(size(spec_out));
 end
 
 tempflag = false(size(ss(1))); % indicates if spectra were determined correctly
@@ -131,10 +133,10 @@ for ii = idxA:inc:idxB %
         vm_guess_new = dealias_spectra_vm_guess_modify(vm_prev_col(a:b), vn(r_idx), vm_guess);
 
         if (vm_guess_new ~= vm_guess) && ~isnan(vm_guess_new) % then determine spectrum again
-            [spec_out(cc,1:Nfft(r_idx)), vel_out(cc,1:Nfft(r_idx)), status_flag(ii,1:4)] = dealias_spectra_determine_final_spectrum(vm_guess_new, spec_chain, vel_chain, Nfft(r_idx));
+            [spec_out(cc,1:Nfft(r_idx)), vel_out(cc,1:Nfft(r_idx)), status_flag(ii,1:4)] = dealias_spectra_determine_final_spectrum(vm_guess_new, spec_chain, vel_chain, Nfft(r_idx), flag_compress_spec);
             
             %############## quality check final spectrum again
-            alias_flag = dealias_spectra_quality_check_final_spectrum(spec_out(cc,1:Nfft(r_idx)), peaknoise(ii));
+            alias_flag = dealias_spectra_quality_check_final_spectrum(spec_out(cc,1:Nfft(r_idx)), peaknoise(ii), flag_compress_spec);
         end
                
     end
