@@ -35,7 +35,7 @@ if isempty(idx_curr)
 end
 
 %  ############# check neigbours including previous column
-vm_guess = dealias_spectra_vm_guess_qual_check_neighbour_check(vm, vm_prev_col, idx_curr, idx_prev, ii);
+vm_guess = dealias_spectra_vm_guess_qual_check_neighbour_check(vm, vm_prev_col, idx_curr, idx_prev, ii, inc);
     
 % if ~isnan(vm_guess)
 %     return
@@ -47,12 +47,12 @@ vm_guess = dealias_spectra_vm_guess_qual_check_neighbour_check(vm, vm_prev_col, 
 
 end
 
-function vm_guess = dealias_spectra_vm_guess_qual_check_neighbour_check(vm, vm_prev_col, idx_curr, idx_prev, ii)
+function vm_guess = dealias_spectra_vm_guess_qual_check_neighbour_check(vm, vm_prev_col, idx_curr, idx_prev, ii, inc)
 
     vm_guess = NaN;
     
     if ~isnan(idx_curr) % check if the next to bins of the current column contain dealiased signal
-        vm_guess = vm( find(~isnan(vm(idx_curr)),1) + idx_curr(1) - 1 );
+        vm_guess = vm( idx_curr(1)  -inc*find(~isnan(vm(idx_curr)),1) + inc );
     end
     
     if ~isnan(vm_guess)
