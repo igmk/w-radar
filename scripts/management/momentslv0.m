@@ -105,6 +105,10 @@ else
             funcname = strrep(funcname,'-', ''); % dash not allowed in function name
             funcpath = fullfile(pwd,'scripts','preprocessing',funcname);
             
+            % check data - some times there are data logging issues 
+            % - RG 14.8.2019
+            data = checkdatain(data);
+            
             if exist(funcpath, 'file')
                 fprintf('Preprocessing %s data...\n', config.nickradar);                   
                 setting = str2func(funcname);

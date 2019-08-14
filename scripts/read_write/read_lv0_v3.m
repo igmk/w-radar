@@ -109,7 +109,7 @@ function data = read_lv0_v3(infile)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% allocate arrays
     
     data.samplen(1:data.totsamp) = int32(0); % sample length in bytes without samplen
-    data.time(1:data.totsamp) = uint32(0); % time of sample [sec] since 1.1.2001 0:0:0
+    data.time(1:data.totsamp) = double(0); % time of sample [sec] since 1.1.2001 0:0:0
     data.sampleTms(1:data.totsamp) = int32(0); % milliseconds of sample
     data.QF(1:data.totsamp) = int8(0); % quality flag: bit 4 = ADC saturation, bit 3 = spectral width too high, bit 2 = no transm. power leveling, get bits using dec2bin()
     data.RR(1:data.totsamp) = single(-999); % rain rate [mm/h]
