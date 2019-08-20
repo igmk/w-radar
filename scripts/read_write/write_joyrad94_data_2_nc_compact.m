@@ -194,6 +194,8 @@ netcdf.putAtt(ncid,id_QualFlag,'definition', ...
      'If 2^2 bit is 1: wet-radome (was a problem for mirac-a for a time period when coating missing)' ...
      ]);
 
+id_Aliasmask = netcdf.defVar(ncid,'AliasMask','nc_byte',[did_range,did_time]);
+netcdf.putAtt(ncid,id_Aliasmask,'long_name','Mask array indicating in which bin dealiasing was applied. If AnitAlias = 1, then dealiasing was applied by RPG software: 0 = not applied; 1 = applied; If AntiAlias = 2, then dealiasing was applied in post-processing: 0 = no aliasing detected, 1 = aliasing detected; if any bin equals 1 (while AntiAlias = 2) then the full column was dealiased.');
 
 %Included by Bravo-Aranda, J.A. JABA
 id_ldr = netcdf.defVar(ncid,'ldr','nc_float',[did_range,did_time]);
@@ -242,6 +244,7 @@ netcdf.defVarDeflate(ncid,id_vm,true,true,9);
 netcdf.defVarDeflate(ncid,id_sigma,true,true,9);
 netcdf.defVarDeflate(ncid,id_skew,true,true,9);
 netcdf.defVarDeflate(ncid,id_QualFlag,true,true,9);
+netcdf.defVarDeflate(ncid,id_Aliasmask,true,true,9);
 if data.DualPol > 0
     netcdf.defVarDeflate(ncid,id_ldr,true,true,9); %JABA    
 end 
@@ -302,6 +305,7 @@ netcdf.putVar(ncid,id_vm,[0,0],[data.n_levels,data.totsamp],data.vm');
 netcdf.putVar(ncid,id_sigma,[0,0],[data.n_levels,data.totsamp],data.sigma');
 netcdf.putVar(ncid,id_skew,[0,0],[data.n_levels,data.totsamp],data.skew');
 netcdf.putVar(ncid,id_QualFlag,[0,0],[data.n_levels,data.totsamp],data.QualFlag');
+netcdf.putVar(ncid,id_Aliasmask,[0,0],[data.n_levels,data.totsamp],data.Aliasmask');
 
 if data.DualPol > 0
     
