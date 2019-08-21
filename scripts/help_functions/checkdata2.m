@@ -15,6 +15,14 @@ indnan = isnan(data.time);
 
 xarray = 1:length(data.time);
 
-data.time(indnan) = interp1(xarray(~indnan), data.time(~indnan), xarray(indnan) );
+data.time(indnan) = round(interp1(xarray(~indnan), data.time(~indnan), xarray(indnan) ));
 
     
+% data.time should be integers, but it is possible that interpolation
+% creates real values that are rounded to integers that already exist ->
+% non-unique time stamps
+
+while length(unique( data.time)) ~=  length(data.time)
+    ind = find(diff(data.time) == 0);
+    data.time(ind) = data.time(ind) -1;
+end
