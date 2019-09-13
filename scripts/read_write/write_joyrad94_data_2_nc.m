@@ -1,4 +1,4 @@
-function write_joyrad94_data_2_nc(data, outfile, contactperson, processing_script)
+function write_joyrad94_data_2_nc(data, outfile, config)
 % this function writes joyrad94 data into netcdf4
 
 %################## Create a netCDF file.
@@ -470,8 +470,8 @@ else
     model = '94 GHz dual pol.';
 end
 netcdf.putAtt(ncid,glob,'model_type',model);
-netcdf.putAtt(ncid,glob,'contact',contactperson);
-netcdf.putAtt(ncid,glob,'processing script',processing_script);
+netcdf.putAtt(ncid,glob,'contact',config.contactperson);
+netcdf.putAtt(ncid,glob,'processing script',config.processing_script);
 
 
 %% ###################### initialize copression

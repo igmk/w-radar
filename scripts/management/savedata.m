@@ -40,5 +40,5 @@ if config.compact_flag~=0
     end
     
     disp(['Writing file ' config.outfile2])
-    write_joyrad94_data_2_nc_compact(data,config.outfile2, config.contactperson, config.processing_script);
+    write_joyrad94_data_2_nc_compact(data,config.outfile2, config);
 end
