@@ -21,8 +21,61 @@ data.time(indnan) = round(interp1(xarray(~indnan), data.time(~indnan), xarray(in
 % data.time should be integers, but it is possible that interpolation
 % creates real values that are rounded to integers that already exist ->
 % non-unique time stamps
+Ncnt = 0;
 
 while length(unique( data.time)) ~=  length(data.time)
-    ind = find(diff(data.time) == 0);
-    data.time(ind) = data.time(ind) -1;
+    Ncnt = Ncnt + 1;
+
+    ind = find(diff(data.time) <= 0);
+
+    lentime = length(data.time);
+
+    % if duplicate or decreasing time is found, removing the data points that occur first in the file
+    % added by RG 19.11.2019
+    if ~isempty(ind)
+
+        fn = fieldnames(data);
+        for k=1:numel(fn)
+
+            if any(size(data.(fn{k})) == lentime)
+
+                timdim = find(size(data.(fn{k})) == lentime);
+
+                switch length(size(data.(fn{k})))
+
+                    case 1
+                        data.(fn{k})(ind) = [];
+
+                    case 2
+                         switch timdim
+                             case 1
+                                 data.(fn{k})(ind,:) = [];
+
+                             case 2
+                                 data.(fn{k})(:,ind) = [];
+                         end
+
+                    case 3
+
+                        switch timdim
+                            case 1
+                                data.(fn{k})(ind,:,:) = [];
+                            case 2
+                                data.(fn{k})(:,ind,:) = [];
+                            case 3
+                                data.(fn{k})(:,:,ind) = [];
+                        end
+                end
+           
+
+            end
+
+        end
+    end 
+
+
+    if Ncnt > 10
+       disp('exciting while loop after 10 interations in function checkdata2 - check why issue not resolved')
+       break
+    end
 end
