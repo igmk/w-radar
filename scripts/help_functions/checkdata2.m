@@ -79,3 +79,11 @@ while length(unique( data.time)) ~=  length(data.time)
        break
     end
 end
+
+
+
+if length(data.time) ~= data.totsamp % change in time dimension 
+    data.totsamp = length(data.time);
+    data.totsampchangelabel = 1;
+
+end

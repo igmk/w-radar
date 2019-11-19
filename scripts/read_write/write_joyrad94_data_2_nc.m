@@ -174,6 +174,10 @@ id_time = netcdf.defVar(ncid,'time','nc_uint',did_time);
 netcdf.putAtt(ncid,id_time,'long_name','Time in sec since 2001.01.01. 00:00:00');
 netcdf.putAtt(ncid,id_time,'units','seconds UTC');
 netcdf.putAtt(ncid,id_time,'comment','To get the correct time the variable sampleTms must be added: time = time + sampleTms.');
+if isfield( data, totsampchangelabel )
+    netcdf.putAtt(ncid,id_time, 'Flag', 'Dublicate time stamps found in lv0-file, the first occurrence of the dublicate time is removed')
+end
+
 
 id_sampleTms = netcdf.defVar(ncid,'sampleTms','nc_int',did_time);
 netcdf.putAtt(ncid,id_sampleTms,'long_name','Milliseconds of sample');
