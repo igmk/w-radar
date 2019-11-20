@@ -14,6 +14,15 @@ function [] = Raw2l1_radar(infopath, varargin)
 % Add functions in subfolders
 addpath(genpath('./scripts/'))
 
+Ninputs = nargin - 1;
+
+% add flag for operational use, only process past two files
+opF = false;
+if  any(strcmp(varargin, 'op'))
+    Ninputs = Ninputs - 1;
+    opF = true;
+end
+
 switch (nargin - 1) % configures the time period to be processed
     
     case -1
@@ -47,7 +56,7 @@ for tmpdate = dateini:dateend
     fprintf('Launching raw2l1_radar for %s...\n', datestr(tmpdate, 'yyyymmdd'));
     if config.moments2calculate == 2        
         disp('Retrieving radar moments from level-0 files.');
-        error = momentslv0(config, tmpdate);                    
+        error = momentslv0(config, tmpdate, opF);                    
         if ~error
             disp('Retrieving radar moments from level-0 files... done!');
         end           

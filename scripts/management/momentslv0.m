@@ -1,4 +1,4 @@
-function [error] = momentslv0(config, numdate)
+function [error] = momentslv0(config, numdate, opF)
 
 
 %Error management
@@ -21,9 +21,16 @@ if isempty(files.lv0)
     return
 
 else
+
+    % if run operational, only last two files processed
+    if opF
+        stf = max(numel(files.lv0) -1, 1);
+    else
+        stf = 1;
+    end 
        
     disp('Running code...')
-    for h = 1:numel(files.lv0)
+    for h = stf:numel(files.lv0)
         % start with level 0 (lv0) files
         infile = fullfile(path.lv0, files.lv0(h).name);        
         fprintf('Start processing with %s\n', infile);

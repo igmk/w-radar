@@ -53,6 +53,11 @@ Call the scripts with:
 - Raw2l1_radar('config_radarname', 'yyyymmd1', 'yyyymmd2') 
     to process all data from the first date to the second date
 
+It is possible to add the flag 'op' while calling the script, intended to 
+facilitite frequent automatic processing. Only last two files of the given 
+date are processed. For example:
+  Raw2l1_radar('config_radarname', 'yyyymmdd', 'op')
+
 
 
 # 2. Setting data processing options (config file) #
