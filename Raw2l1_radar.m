@@ -22,9 +22,6 @@ if  any(strcmp(varargin, 'op'))
     Ninputs = Ninputs - 1;
     opF = true;
 end
-disp('test')
-Ninputs
-opF
 
 switch Ninputs % configures the time period to be processed
     
