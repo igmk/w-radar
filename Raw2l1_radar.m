@@ -22,8 +22,11 @@ if  any(strcmp(varargin, 'op'))
     Ninputs = Ninputs - 1;
     opF = true;
 end
+disp('test')
+Ninputs
+opF
 
-switch (nargin - 1) % configures the time period to be processed
+switch Ninputs % configures the time period to be processed
     
     case -1
         disp('Configuration file name needs to be given as input.');
