@@ -8,6 +8,8 @@ if ~any(diff(data.time) <= 0)
     return
 end
 
+data.time = double(data.time); % in case time is still an int -> the rest of this function would not work
+
 ind = find(diff(data.time) <= 0);
 data.time(ind+1) = NaN;
 
