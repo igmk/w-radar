@@ -15,7 +15,7 @@ indnan = isnan(data.time);
 
 xarray = 1:length(data.time);
 
-data.time(indnan) = round(interp1(xarray(~indnan), data.time(~indnan), xarray(indnan) ));
+data.time(indnan) = round(interp1(xarray(~indnan), double(data.time(~indnan)), xarray(indnan) ));
 
     
 % data.time should be integers, but it is possible that interpolation
