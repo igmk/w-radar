@@ -22,15 +22,21 @@ if isempty(files.lv0)
 
 else
 
-    % if run operational, only last two files processed
+    % if run operational, go from newest file to oldest file
     if opF
-        stf = max(numel(files.lv0) -1, 1);
+        stf = numel(files.lv0);
+        endf = 1;
+        df = -1;
     else
         stf = 1;
+        endf = numel(files.lv0);
+        df = 1;
     end 
        
     disp('Running code...')
-    for h = stf:numel(files.lv0)
+    Nh = 0;
+    
+    for h = stf:df:endf
         % start with level 0 (lv0) files
         infile = fullfile(path.lv0, files.lv0(h).name);        
         fprintf('Start processing with %s\n', infile);
@@ -64,6 +70,9 @@ else
                     
             end
         end
+        
+        % counter for how many files are actually processed
+        Nh = Nh + 1;
                        
         %Input confirmation
         config.path = path;        
@@ -235,6 +244,10 @@ else
         savedata(data, config);    
         disp('Saving data...done!')   
         
+        % if run operational, only process two files
+        if opF && Nh >= 2
+            return
+        end
         %return
     end % h = 1:numel(files)    
         
