@@ -653,8 +653,9 @@ if data.DualPol > 0
     netcdf.putVar(ncid,id_spec_covIm,[0,0,0],[max(data.DoppLen),data.n_levels,data.totsamp],permute(data.spec_covIm,[3,2,1]));
     netcdf.putVar(ncid,id_ldr,[0,0],[data.n_levels,data.totsamp],data.LDR'); %JABA
     if data.DualPol == 2
-        netcdf.putVar(ncid,id_xcorr,[0,0],[data.n_levels,data.totsamp],data.xcorr'); %JABA
-        netcdf.putVar(ncid,id_difphase,[0,0],[data.n_levels,data.totsamp],data.difphase'); %JABA
+        disp('WARNING! skipping writing id_xcorr and difphase into files, variables not available (yet??)')
+%         netcdf.putVar(ncid,id_xcorr,[0,0],[data.n_levels,data.totsamp],data.xcorr'); %JABA
+%         netcdf.putVar(ncid,id_difphase,[0,0],[data.n_levels,data.totsamp],data.difphase'); %JABA
     end
 end
 

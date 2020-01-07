@@ -54,10 +54,17 @@ function [spec_out,vel_out,moments,alias_flag,status_flag] = ...
 %                      programmed yet - July 20190
 %       varargin{14} = spectra for horisontally received polarisation, when
 %                      DualPol == 1
+%       varargin{15} = real part of the covariance spectrum, when DualPol == 2
+%       varargin{16} = imaginary part of the covariance spectrum, when
+%                      DualPol == 2
+
+
 % 
 % 
 % output:
 %   spec_out: dealiased spectra
+%             spec_out for single pol, spec_out.spec, spec_out.spec_hv etc
+%             for polarimetric radars
 %   vel_out: velocity arrays corresponding to new spectra
 %   moments: radar moments of spectra
 %   alias_flag == 1 where aliasing occurs
@@ -102,19 +109,25 @@ vn = -vel(1,:); % nyquist velocity for each chirp
 
 ix = find(strcmp(varargin,'DualPol'), 1);
 
+
+spec_hv = NaN(size(spec)); % dummy variables needed for function inputs
+spec_re = NaN(size(spec)); % dummy
+spec_im = NaN(size(spec)); % dummy
+
 if isempty(ix)
     flag_DualPol = 0;
-    spec_hv = NaN(size(spec)); % dummy variable needed for function inputs
+    
 else % flag given as input
     
     flag_DualPol = varargin{ix+1};
     
     if flag_DualPol == 1
         spec_hv = varargin{ix+2};
-    elseif flag_DualPol == 0
-        spec_hv = NaN(size(spec));
-    else
-        disp('not done yet')
+    
+    elseif flag_DualPol == 2
+        spec_hv = varargin{ix+2};
+        spec_re = varargin{ix+3};
+        spec_im = varargin{ix+4};
     end 
 end 
 
@@ -158,7 +171,14 @@ if flag_DualPol > 0
     moments.LDR =  NaN(ss(1),1);
 end
 
-spec_out = spec;
+if flag_DualPol == 2
+    disp('Hey! add here initialization of additional polarimetric variables - in function dealias_spectra.m')
+end
+
+spec_out.spec = spec;
+spec_out.spec_hv = spec_hv;
+spec_out.spec_re = spec_re;
+spec_out.spec_im = spec_im;
 vel_out = NaN(ss);
 
 if sv(2) > 1 
@@ -190,7 +210,7 @@ end
 % #################### check if aliasing occured in the column
 if sum(alias_flag) == 0 % no aliasing occured, calculate moments from input spectra
     
-    moments = radar_moments(spec,vel,nAvg,'noise',noise,'linear','range_offsets',range_offsets(1:end-1),'moment_str',moment_string,nf_string,nf,'nbins',nbins, 'compressed', flag_compress_spec, 'DualPol', flag_DualPol, spec_hv);
+    moments = radar_moments(spec,vel,nAvg,'noise',noise,'linear','range_offsets',range_offsets(1:end-1),'moment_str',moment_string,nf_string,nf,'nbins',nbins, 'compressed', flag_compress_spec, 'DualPol', flag_DualPol, spec_hv, spec_re, spec_im);
     return
     
 end
@@ -210,7 +230,7 @@ for i = 1:numel(cbh_fin)
     % if a non-dealiased bin is found, the function will calculate the 
     % higher moments in this bin
    
-    [tempstruct, no_clean_signal, idx_0] = dealias_spectra_find_nonaliased_bin(cth_fin(i), cbh_fin(i), spec, range_offsets, vel, nAvg, moment_string, nf_string, nf, nbins, alias_flag, noise, Nfft(r_idx), flag_compress_spec, flag_DualPol, spec_hv);
+    [tempstruct, no_clean_signal, idx_0] = dealias_spectra_find_nonaliased_bin(cth_fin(i), cbh_fin(i), spec, range_offsets, vel, nAvg, moment_string, nf_string, nf, nbins, alias_flag, noise, Nfft(r_idx), flag_compress_spec, flag_DualPol, spec_hv, spec_re, spec_im);
     
     % write to output struct
     if no_clean_signal == false
@@ -231,7 +251,7 @@ for i = 1:numel(cbh_fin)
             tempnoise.meannoise = noise.meannoise(ii);
             tempnoise.peaknoise = noise.peaknoise(ii);
             
-            tempstruct = radar_moments(spec(ii,1:Nfft(r_idx)),vel(1:Nfft(r_idx),r_idx),nAvg(r_idx),'noise',tempnoise,'moment_str',moment_string,'linear',nf_string,nf,'nbins',nbins, 'compressed', flag_compress_spec, 'DualPol', flag_DualPol, spec_hv(ii,1:Nfft(r_idx)));
+            tempstruct = radar_moments(spec(ii,1:Nfft(r_idx)),vel(1:Nfft(r_idx),r_idx),nAvg(r_idx),'noise',tempnoise,'moment_str',moment_string,'linear',nf_string,nf,'nbins',nbins, 'compressed', flag_compress_spec, 'DualPol', flag_DualPol, spec_hv(ii,1:Nfft(r_idx)), spec_re(ii,1:Nfft(r_idx)), spec_im(ii,1:Nfft(r_idx)));
             moments = dealias_spectra_write_tempmoments_to_finalmoments(moments, tempstruct, idx_0, moment_string);
 
         end
@@ -251,26 +271,30 @@ for i = 1:numel(cbh_fin)
     if (idx_0 ~= cbh_fin(i)) && (idx_0 ~= cth_fin(i)) % (a) then dealias in both directions
         
         % from idx_0 down to base
-        [spec_out(cbh_fin(i):idx_0-1, :), vel_out(cbh_fin(i):idx_0-1, :), status_flag, moments] =...
+        [spec_out.spec(cbh_fin(i):idx_0-1, :), spec_out.spec_hv(cbh_fin(i):idx_0-1, :), spec_out.spec_re(cbh_fin(i):idx_0-1, :),spec_out.spec_im(cbh_fin(i):idx_0-1, :),...
+            vel_out(cbh_fin(i):idx_0-1, :), status_flag, moments] =...
             dealias_spectra_from_idxA_to_idxB(idx_0-1, cbh_fin(i), range_offsets, vel, delv, spec, vn,...
-            moments, moment_string, nAvg, nf_string, nf, nbins, status_flag, dr, vm_prev_col, noise.peaknoise, flag_compress_spec, flag_DualPol, spec_hv);
+            moments, moment_string, nAvg, nf_string, nf, nbins, status_flag, dr, vm_prev_col, noise.peaknoise, flag_compress_spec, flag_DualPol, spec_hv, spec_re, spec_im);
         
         % from idx_0 up to top
-        [spec_out(idx_0+1:cth_fin(i), :), vel_out(idx_0+1:cth_fin(i), :), status_flag, moments] =...
+        [spec_out.spec(idx_0+1:cth_fin(i), :), spec_out.spec_hv(idx_0+1:cth_fin(i), :), spec_out.spec_re(idx_0+1:cth_fin(i), :), spec_out.spec_im(idx_0+1:cth_fin(i), :),...
+            vel_out(idx_0+1:cth_fin(i), :), status_flag, moments] =...
             dealias_spectra_from_idxA_to_idxB(idx_0+1, cth_fin(i), range_offsets, vel, delv, spec, vn,...
-            moments, moment_string, nAvg, nf_string, nf, nbins, status_flag, dr, vm_prev_col, noise.peaknoise, flag_compress_spec, flag_DualPol, spec_hv);
+            moments, moment_string, nAvg, nf_string, nf, nbins, status_flag, dr, vm_prev_col, noise.peaknoise, flag_compress_spec, flag_DualPol, spec_hv, spec_re, spec_im);
         
     elseif (idx_0 ~= cbh_fin(i)) % (b) only topdown
         
-        [spec_out(cbh_fin(i):idx_0-1, :), vel_out(cbh_fin(i):idx_0-1, :), status_flag, moments] =...
+        [spec_out.spec(cbh_fin(i):idx_0-1, :), spec_out.spec_hv(cbh_fin(i):idx_0-1, :), spec_out.spec_re(cbh_fin(i):idx_0-1, :), spec_out.spec_im(cbh_fin(i):idx_0-1, :),...
+            vel_out(cbh_fin(i):idx_0-1, :), status_flag, moments] =...
             dealias_spectra_from_idxA_to_idxB(idx_0-1, cbh_fin(i), range_offsets, vel, delv, spec, vn,...
-            moments, moment_string, nAvg, nf_string, nf, nbins, status_flag, dr, vm_prev_col, noise.peaknoise, flag_compress_spec, flag_DualPol, spec_hv);        
+            moments, moment_string, nAvg, nf_string, nf, nbins, status_flag, dr, vm_prev_col, noise.peaknoise, flag_compress_spec, flag_DualPol, spec_hv, spec_re, spec_im);      
         
     else % (c) only downtop
         
-        [spec_out(idx_0+1:cth_fin(i), :), vel_out(idx_0+1:cth_fin(i), :), status_flag, moments] =...
+        [spec_out.spec(idx_0+1:cth_fin(i), :), spec_out.spec_hv(idx_0+1:cth_fin(i), :), spec_out.spec_re(idx_0+1:cth_fin(i), :), spec_out.spec_im(idx_0+1:cth_fin(i), :),...
+            vel_out(idx_0+1:cth_fin(i), :), status_flag, moments] =...
             dealias_spectra_from_idxA_to_idxB(idx_0+1, cth_fin(i), range_offsets, vel, delv, spec, vn,...
-            moments, moment_string, nAvg, nf_string, nf, nbins, status_flag, dr, vm_prev_col, noise.peaknoise, flag_compress_spec, flag_DualPol, spec_hv);
+            moments, moment_string, nAvg, nf_string, nf, nbins, status_flag, dr, vm_prev_col, noise.peaknoise, flag_compress_spec, flag_DualPol, spec_hv, spec_re, spec_im);
             
         
     end
@@ -280,7 +304,14 @@ for i = 1:numel(cbh_fin)
 
 end % for i = 
 
-    
+% remove dummie variables from output
+if flag_DualPol == 0
+    spec_out = spec_out.spec;
+
+elseif flag_DualPol == 1
+    spec_out = rmfield(spec_out, 'spec_re');
+    spec_out = rmfield(spec_out, 'spec_im');
+end    
 
 end  % function
 

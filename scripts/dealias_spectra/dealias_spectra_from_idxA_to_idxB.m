@@ -1,4 +1,4 @@
-function [spec_out, vel_out, status_flag, moments] =...
+function [spec_out, spec_hv_out, spec_re_out, spec_im_out, vel_out, status_flag, moments] =...
     dealias_spectra_from_idxA_to_idxB(idxA,...  %  start index
     idxB,...            % end index
     range_offsets,...   % index where chirp sequences start
@@ -18,7 +18,9 @@ function [spec_out, vel_out, status_flag, moments] =...
     peaknoise, ...      % peak noise of raw spectra
     flag_compress_spec,... % flag for compressed spectra
     flag_DualPol, ...   % flag for polarisation state
-    spec_hv)            % spectra for cross-polarisation (could be dummy)
+    spec_hv, ...        % spectra for cross-polarisation (could be dummy)
+    spec_re, ...        % real part of the covariance spectrum (could be dummy)
+    spec_im)            % imaginery part of the covariance spectrum (could be dummy)
 
 % output:
 %   spec_out: dealiased spectra of layer
@@ -42,10 +44,16 @@ n_levels = numel(idx); % from top to bottom
 spec_out = spec(idx,:);
 vel_out = NaN(n_levels,ss(2));
 
+spec_hv_out = NaN(size(spec_out));
+spec_re_out = NaN(size(spec_out));
+spec_im_out = NaN(size(spec_out));
+
 if flag_DualPol > 0
     spec_hv_out = spec_hv(idx,:);
-else
-    spec_hv_out = NaN(size(spec_out));
+end
+if flag_DualPol == 2
+    spec_re_out = spec_re(idx,:);
+    spec_im_out = spec_im(idx,:);
 end
 
 tempflag = false(size(ss(1))); % indicates if spectra were determined correctly
@@ -151,13 +159,20 @@ for ii = idxA:inc:idxB %
         ind2 = find(vel_chain == vel_out(cc,Nfft(r_idx)));
         spec_hv_out(cc,1:Nfft(r_idx)) =  spec_chain_hv(ind1:ind2);
         
+        % if full polarimetry, also shift the covariance spectrum
         if flag_DualPol == 2
-            disp('De-aliasing of fully polarimetric spectral capability not done')
+            
+            [spec_chain_re, ~] = dealias_spectra_concetenate_spectra(vm_guess, spec_re(:,1:Nfft(r_idx)), vn(r_idx), ii, next_chirp, Nfft(r_idx));
+            spec_re_out(cc,1:Nfft(r_idx)) =  spec_chain_re(ind1:ind2);
+            
+            [spec_chain_im, ~] = dealias_spectra_concetenate_spectra(vm_guess, spec_im(:,1:Nfft(r_idx)), vn(r_idx), ii, next_chirp, Nfft(r_idx));
+            spec_im_out(cc,1:Nfft(r_idx)) =  spec_chain_im(ind1:ind2);
+        
         end
     end
     
     % ############## calculate moments
-    tempstruct = radar_moments(spec_out(cc,1:Nfft(r_idx)),vel_out(cc,1:Nfft(r_idx)),nAvg(r_idx),'moment_str',moment_string,'linear',nf_string,nf,'nbins',nbins, 'compressed', flag_compress_spec, 'DualPol', flag_DualPol, spec_hv_out(cc,1:Nfft(r_idx)));
+    tempstruct = radar_moments(spec_out(cc,1:Nfft(r_idx)),vel_out(cc,1:Nfft(r_idx)),nAvg(r_idx),'moment_str',moment_string,'linear',nf_string,nf,'nbins',nbins, 'compressed', flag_compress_spec, 'DualPol', flag_DualPol, spec_hv_out(cc,1:Nfft(r_idx)), spec_re_out(cc,1:Nfft(r_idx)), spec_im_out(cc,1:Nfft(r_idx)));
     moments = dealias_spectra_write_tempmoments_to_finalmoments(moments, tempstruct, ii, moment_string);
 
     
@@ -173,6 +188,9 @@ end % ii
 
 if idxA > idxB % flip order of output
     spec_out = flip(spec_out,1);
+    spec_hv_out = flip(spec_hv_out,1);
+    spec_re_out = flip(spec_re_out,1);
+    spec_im_out = flip(spec_im_out,1);
     vel_out = flip(vel_out,1);
 end
 

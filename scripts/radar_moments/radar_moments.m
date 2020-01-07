@@ -67,17 +67,20 @@ else
     
     if flag_DualPol == 1
         spec_hv = varargin{ix+2};
-    end
     
+    elseif flag_DualPol == 2
+        spec_hv = varargin{ix+2};
+        spec_re = varargin{ix+3};
+        spec_im = varargin{ix+4};
+    end
 end
-
 
 % ######### calculate radar moments
 if idx_compress == true && isempty(idx_range_offsets)
     
     output = radar_moments_from_compressed_spectra(spec, velocity, moment_str, linflag);
 
-    if flag_DualPol == 1
+    if flag_DualPol > 0
         tempoutput = radar_moments_from_compressed_spectra(spec_hv, velocity, 'vm', linflag);
         
         output.Ze_hv = tempoutput.Ze;
@@ -91,10 +94,10 @@ elseif idx_compress == true && ~isempty(idx_range_offsets)
         
         case 0
             output = radar_moments_from_compressed_spectra_and_different_chirp_seq(spec, velocity, moment_str, varargin{idx_range_offsets}, linflag);
-        case 1
+        case {1, 2}
             output = radar_moments_from_compressed_spectra_and_different_chirp_seq(spec, velocity, moment_str, varargin{idx_range_offsets}, linflag, 'DualPol',flag_DualPol, spec_hv);
-        case 2 
-            disp('not done yet')
+%         case 2 %% add if some spectral treatment required
+%             disp('not done yet')
     end
 
     
@@ -103,7 +106,7 @@ elseif idx_compress == false && isempty(idx_range_offsets)
     output = radar_moments_from_spectra(spec, velocity, nAvg, varargin{:});
     
     
-    if flag_DualPol == 1
+    if flag_DualPol > 0 
         tempoutput =  radar_moments_from_spectra(spec_hv, velocity, nAvg, varargin{:});
         
         output.Ze_hv = tempoutput.Ze;
@@ -115,7 +118,7 @@ elseif idx_compress == false && ~isempty(idx_range_offsets)
     
     output = radar_moments_from_spectra_and_different_chrip_seq(spec, velocity, nAvg, varargin{:});    
     
-    if flag_DualPol == 1
+    if flag_DualPol > 0 
         
         tempvarargin = varargin;
         ix = find(strcmp(varargin, 'moment_str'));
@@ -138,4 +141,6 @@ if flag_DualPol > 0
     % compute linear depolarisation ratio
     output.LDR = output.Ze_hv ./ output.Ze;
 end
-
+if flag_DualPol == 2
+    disp('Hey! add here calculation of additional polarimetric variables - in function radar_moments.m')
+end

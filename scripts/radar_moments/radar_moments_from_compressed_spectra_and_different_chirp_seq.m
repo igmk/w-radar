@@ -35,7 +35,7 @@ else
     
     flag_DualPol = varargin{ix+1};
     
-    if flag_DualPol == 1
+    if flag_DualPol > 0
         spec_hv = varargin{ix+2};
         
         output.Ze_hv = NaN(s(1),1);
@@ -66,7 +66,7 @@ for ii = 1:numel(range_offsets)-1
     
     tempoutput = radar_moments_from_compressed_spectra(tempspec, velocity(ii,1:Nfft(ii)), moment_str, linflag);
     
-    if flag_DualPol == 1
+    if flag_DualPol > 0
         
         tempspec_hv = spec_hv(range_offsets(ii):range_offsets(ii+1)-1,1:Nfft(ii));
     

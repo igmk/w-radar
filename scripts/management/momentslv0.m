@@ -149,11 +149,13 @@ else
                 Nbin = 5;
                 data.spec = compress_spectra_filtering(data.spec, Nbin);
                 
-                if data.DualPol == 1
+                if data.DualPol > 0
                     data.spec_hv = compress_spectra_filtering(data.spec_hv, Nbin);
+                end
                 
-                elseif data.DualPol == 2
-                    disp('Not programmed yet')
+                if data.DualPol == 2
+                    data.spec_covRe = compress_spectra_filtering(data.spec_covRe, Nbin);
+                    data.spec_covIm = compress_spectra_filtering(data.spec_covIm, Nbin);
                 end
             end
             
