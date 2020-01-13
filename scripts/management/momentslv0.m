@@ -91,6 +91,9 @@ else
         %Reading the data
         disp('Loading data...');
         data = reader.lv0(infile);
+        if data.readerror % problem in reading file encountered, continuing with next file
+            continue
+        end
         disp('Loading data...done!');
         
         %If there are samples, the process starts, otherwise it follows

@@ -7,6 +7,7 @@ function data = read_lv0_v2(infile)
 
 %%%%%%%%%%%%%%%% open file
     fid = fopen(infile, 'r', 'l');
+    data.readerror = true; % flag for error in reading file
     
     if fid == -1
         disp(['error opening' infile])
@@ -268,8 +269,7 @@ function data = read_lv0_v2(infile)
     end % i
     
     fclose(fid);                    
-             
-                  
+       
+    data.readerror = false; % succesfull in reading file!                   
     
-
 end %function
