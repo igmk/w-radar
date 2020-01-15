@@ -22,6 +22,37 @@ if ne(data.H_altcount,0)
     did_H_range = netcdf.defDim(ncid,'H_range',data.H_altcount);
 end
 
+%% ######################## add global attributes
+glob = netcdf.getConstant('NC_GLOBAL');
+netcdf.putAtt(ncid,glob,'FillValue','NaN');
+netcdf.putAtt(ncid,glob,'program_name',data.progname);
+if data.modelno == 0
+    model = '94 GHz single pol.';
+else
+    model = '94 GHz dual pol.';
+end
+
+netcdf.putAtt(ncid,glob,'PI_NAME',config.pi_name);
+netcdf.putAtt(ncid,glob,'PI_AFFILIATION',config.pi_affiliation);
+netcdf.putAtt(ncid,glob,'PI_ADDRESS',config.pi_address);
+netcdf.putAtt(ncid,glob,'PI_MAIL',config.pi_mail);
+netcdf.putAtt(ncid,glob,'DO_NAME',config.do_name);
+netcdf.putAtt(ncid,glob,'DO_AFFILIATION',config.do_affiliation);
+netcdf.putAtt(ncid,glob,'DO_ADDRESS',config.do_address);
+netcdf.putAtt(ncid,glob,'DO_MAIL',config.do_mail);
+netcdf.putAtt(ncid,glob,'DS_NAME',config.ds_name);
+netcdf.putAtt(ncid,glob,'DS_AFFILIATION',config.ds_affiliation);
+netcdf.putAtt(ncid,glob,'DS_ADDRESS',config.ds_address);
+netcdf.putAtt(ncid,glob,'DS_MAIL',config.ds_mail);
+netcdf.putAtt(ncid,glob,'DATA_DESCRIPTION',config.data_description);
+netcdf.putAtt(ncid,glob,'DATA_DISCIPLINE',config.data_discipline);
+netcdf.putAtt(ncid,glob,'DATA_GROUP',config.data_group);
+netcdf.putAtt(ncid,glob,'DATA_LOCATION',config.data_location);
+netcdf.putAtt(ncid,glob,'DATA_SOURCE',config.data_source);
+netcdf.putAtt(ncid,glob,'DATA_PROCESSING',config.processing_script);
+netcdf.putAtt(ncid,glob,'FILL_VALUE','NaN');
+netcdf.putAtt(ncid,glob,'INSTRUMENT_MODEL',model);
+netcdf.putAtt(ncid,glob,'MDF_PROGRAM_USED',data.progname);
 
 
 %% ################ get variable ids and add attributes
@@ -127,6 +158,7 @@ id_range = netcdf.defVar(ncid,'range','nc_float',did_range);
 netcdf.putAtt(ncid,id_range,'standard_name','RANGE');
 netcdf.putAtt(ncid,id_range,'long_name','RANGE gate of the radar');
 netcdf.putAtt(ncid,id_range,'units','m');
+netcdf.putAtt(ncid,id_range,'valid_range', [min(data.range(:)), max(data.range(:))]);
 netcdf.putAtt(ncid,id_range,'comment','Range from antenna to the center of each range gate');
 
 %--- from here on the variables are not GEOMS formate conforme
@@ -145,8 +177,6 @@ if ne(data.H_altcount,0)
 end
 
 
-
-
 %%%%%%%% chirp_seq_dependent variables
 
 id_SeqAvg = netcdf.defVar(ncid,'seq_avg','nc_int',did_no_seq);
@@ -161,13 +191,14 @@ netcdf.putAtt(ncid,id_SeqIntTime,'units','seconds');
 id_DoppLen = netcdf.defVar(ncid,'dopp_len','nc_int',did_no_seq);
 netcdf.putAtt(ncid,id_DoppLen,'standard_name','radar.operation.parameter.spec_samples_per_chirp');
 netcdf.putAtt(ncid,id_DoppLen,'long_name','Number of samples in Dopppler spectra of each chirp sequence');
-netcdf.putAtt(ncid,id_DoppLen,'comment','Needed to calculate the Doppler resolution: DoppRes = 2*dopp_max/dopp_len');
+netcdf.putAtt(ncid,id_DoppLen,'comment','Needed to calculate the Doppler resolution: DoppRes = 2*nqv/dopp_len');
 
-id_DoppMax = netcdf.defVar(ncid,'dopp_max','nc_float',did_no_seq);
-netcdf.putAtt(ncid,id_DoppMax,'standard_name','radar.operation.parameter.vm_max_per_chirp');
-netcdf.putAtt(ncid,id_DoppMax,'long_name','Max. unambigious Doppler velocity for each chirp sequence.');
-netcdf.putAtt(ncid,id_DoppMax,'units','m/s');
-netcdf.putAtt(ncid,id_DoppMax,'comment','Needed to calculate the Doppler resolution: DoppRes = 2*dopp_max/dopp_len');
+id_DoppMax = netcdf.defVar(ncid,'nqv','nc_float',did_no_seq);
+netcdf.putAtt(ncid,id_DoppMax,'standard_name','NYQUIST.VELOCITY');
+netcdf.putAtt(ncid,id_DoppMax,'long_name',['Max. unambigious Doppler velocity for each chirp sequence; '...
+                                          'Nyquist velocity per chirp sequence']);
+netcdf.putAtt(ncid,id_DoppMax,'units','m s-1');
+netcdf.putAtt(ncid,id_DoppMax,'comment','Needed to calculate the Doppler resolution: DoppRes = 2*nqv/dopp_len');
 
 id_nAvg = netcdf.defVar(ncid,'n_avg','nc_int',did_no_seq);
 netcdf.putAtt(ncid,id_nAvg,'standard_name','radar.operation.parameter.no_spec_avg');
@@ -191,6 +222,7 @@ id_time = netcdf.defVar(ncid,'time','nc_uint',did_time);
 netcdf.putAtt(ncid,id_time,'standard_name','DATETIME');
 netcdf.putAtt(ncid,id_time,'long_name','DATETIME in UTC');
 netcdf.putAtt(ncid,id_time,'units','MJD2K');
+netcdf.putAtt(ncid,id_time,'valid_range', [min(data.time(:)), max(data.time(:))]);
 netcdf.putAtt(ncid,id_time,'comment','Time in sec since 2001.01.01. 00:00:00.');
 if isfield(data, 'totsampchangelabel' )
     netcdf.putAtt(ncid,id_time, 'quality_flag', 'Dublicate time stamps found in lv0-file, the first occurrence of the dublicate time is removed')
@@ -206,36 +238,48 @@ id_RR = netcdf.defVar(ncid,'rr','nc_float',did_time);
 netcdf.putAtt(ncid,id_RR,'standard_name','RAIN.RATE.SURFACE');
 netcdf.putAtt(ncid,id_RR,'long_name','RAIN.RATE of meteo-station of the radar system');
 netcdf.putAtt(ncid,id_RR,'units','mm h-1');
+netcdf.putAtt(ncid,id_RR,'valid_range',[min(data.RR(:)), max(data.RR(:))]);
+netcdf.putAtt(ncid,id_RR,'fill_value','NaNf');
 netcdf.putAtt(ncid,id_RR,'rain.rate.surface_source','Vaisala weather station WXT520 or WXT530');
 
 id_rh = netcdf.defVar(ncid,'rh','nc_float',did_time);
 netcdf.putAtt(ncid,id_rh,'standard_name','HUMIDITY.RELATIVE.SURFACE');
 netcdf.putAtt(ncid,id_rh,'long_name','Relative humidity of meteo-station');
 netcdf.putAtt(ncid,id_rh,'units','%');
+netcdf.putAtt(ncid,id_rh,'valid_range',[min(data.rh(:)), max(data.rh(:))]);
+netcdf.putAtt(ncid,id_rh,'fill_value','NaNf');
 netcdf.putAtt(ncid,id_rh,'humidity.relative.surface_source','Vaisala weather station WXT520 or WXT530');
 
 id_T_env = netcdf.defVar(ncid,'ta','nc_float',did_time);
 netcdf.putAtt(ncid,id_T_env,'standard_name','TEMPERATURE.SURFACE');
 netcdf.putAtt(ncid,id_T_env,'long_name','TEMPERATURE.SURFACE of the environment measured by the meteo-station');
 netcdf.putAtt(ncid,id_T_env,'units','K');
+netcdf.putAtt(ncid,id_T_env,'valid_range',[min(data.T_env(:)), max(data.T_env(:))]);
+netcdf.putAtt(ncid,id_T_env,'fill_value','NaNf');
 netcdf.putAtt(ncid,id_T_env,'temperature.surface_source','Vaisala weather station WXT520 or WXT530');
 
 id_pres = netcdf.defVar(ncid,'pa','nc_float',did_time);
 netcdf.putAtt(ncid,id_pres,'standard_name','SURFACE.PRESSURE');
 netcdf.putAtt(ncid,id_pres,'long_name','SURFACE.PRESSURE of the enviroment measured by the meteo-station');
 netcdf.putAtt(ncid,id_pres,'units','hPa');
+netcdf.putAtt(ncid,id_pres,'valid_range',[min(data.pres(:)), max(data.pres(:))]);
+netcdf.putAtt(ncid,id_pres,'fill_value','NaNf');
 netcdf.putAtt(ncid,id_pres,'surface.pressure_source','Vaisala weather station WXT520 or WXT530');
 
 id_ff = netcdf.defVar(ncid,'wspeed','nc_float',did_time);
 netcdf.putAtt(ncid,id_ff,'strandard_name','WIND.SPEED.SURFACE');
 netcdf.putAtt(ncid,id_ff,'long_name','WIND.SPEED measured at about 1.5 m by the meteo-station');
-netcdf.putAtt(ncid,id_ff,'units','km/h');
+netcdf.putAtt(ncid,id_ff,'units','m s-1');
+netcdf.putAtt(ncid,id_ff,'valid_range',[min(data.ff(:)), max(data.ff(:))]);
+netcdf.putAtt(ncid,id_ff,'fill_value','NaNf');
 netcdf.putAtt(ncid,id_ff,'wind.speed.surface_source','Vaisala weather station WXT520 or WXT530');
 
 id_fff = netcdf.defVar(ncid,'wdir','nc_float',did_time);
 netcdf.putAtt(ncid,id_fff,'standard_name','WIND.DIRECTION.SURFACE');
 netcdf.putAtt(ncid,id_fff,'long_name','WIND.DIRECTION measured at about 1.5 m by the meteo-station');
 netcdf.putAtt(ncid,id_fff,'units','degrees');
+netcdf.putAtt(ncid,id_fff,'valid_range',[min(data.fff(:)), max(data.fff(:))]);
+netcdf.putAtt(ncid,id_fff,'fill_value','NaNf');
 netcdf.putAtt(ncid,id_fff,'wind.direction.surface_source',['Vaisala weather '...
                            'station WXT520 or WXT530']);
 
@@ -243,13 +287,17 @@ id_Tb = netcdf.defVar(ncid,'tb','nc_float',did_time);
 netcdf.putAtt(ncid,id_Tb,'standard_name','TEMPERATURE.BRIGHTNESS');
 netcdf.putAtt(ncid,id_Tb,'long_name','Brightness temperature direct detection channel');
 netcdf.putAtt(ncid,id_Tb,'units','K');
+netcdf.putAtt(ncid,id_Tb,'valid_range',[min(data.Tb(:)), max(data.Tb(:))]);
+netcdf.putAtt(ncid,id_Tb,'fill_value','NaNf');
 netcdf.putAtt(ncid,id_Tb,'comment',['Brightness Temperature measurements from '...
                                     'the Passive 89-GHz Chanal of the radar']);
 
 id_lwp = netcdf.defVar(ncid,'lwp','nc_float',did_time);
 netcdf.putAtt(ncid,id_lwp,'standard_name','LIQUID.WATER.PATH');
 netcdf.putAtt(ncid,id_lwp,'long_name','Liquid water path (lwp) calculated by RPG software');
-netcdf.putAtt(ncid,id_lwp,'units','g/m^2');
+netcdf.putAtt(ncid,id_lwp,'units','g m-2');
+netcdf.putAtt(ncid,id_lwp,'valid_range',[min(data.lwp(:)), max(data.lwp(:))]);
+netcdf.putAtt(ncid,id_lwp,'fill_value','NaNf');
 netcdf.putAtt(ncid,id_lwp,'comment',['Liquid water path is calculated from '...
                                      'the tb measurement of the 89-GHz chanal. '...
                                      'The retrieval is developed by RPG and '...
@@ -263,6 +311,46 @@ netcdf.putAtt(ncid,id_status,'comment',['The quality flag shows the following '.
                                         '0/10 = blower on/off. The parameter '...
                                         'is recorded to check and monitor '...
                                         'the radar performance']);
+
+id_TransPow = netcdf.defVar(ncid,'p_trans','nc_float',did_time);
+netcdf.putAtt(ncid,id_TransPow,'standard_name','radar.operation.parameter.p_trans');
+netcdf.putAtt(ncid,id_TransPow,'long_name','Transmitted power');
+netcdf.putAtt(ncid,id_TransPow,'units','W');
+netcdf.putAtt(ncid,id_TransPow,'valid_range',[min(data.TransPow(:)), max(data.TransPow(:))]);
+netcdf.putAtt(ncid,id_TransPow,'fill_value','NaNf');
+netcdf.putAtt(ncid,id_TransPow,'comment',['The transmitted power is is recorded '...
+                                          'to check and monitor the radar performance '...
+                                          'and measurement quality']);
+                                 
+id_T_trans = netcdf.defVar(ncid,'t_trans','nc_float',did_time);
+netcdf.putAtt(ncid,id_T_trans,'standard_name','radar.operation.parameter.t_trans');
+netcdf.putAtt(ncid,id_T_trans,'long_name','Transmitter temperature');
+netcdf.putAtt(ncid,id_T_trans,'units','K');
+netcdf.putAtt(ncid,id_T_trans,'valid_range',[min(data.T_trans(:)), max(data.T_trans(:))]);
+netcdf.putAtt(ncid,id_T_trans,'fill_value','NaNf');
+netcdf.putAtt(ncid,id_T_trans,'comment',['The transmitter temperature is recorded '...
+                                         'to check and monitor the radar performance '...
+                                          'and measurement quality']);
+                                 
+id_T_rec = netcdf.defVar(ncid,'t_rec','nc_float',did_time);
+netcdf.putAtt(ncid,id_T_rec,'standard_name','radar.operation.parameter.t_rec');
+netcdf.putAtt(ncid,id_T_rec,'long_name','Receiver temperature');
+netcdf.putAtt(ncid,id_T_rec,'units','K');
+netcdf.putAtt(ncid,id_T_rec,'valid_range',[min(data.T_rec(:)), max(data.T_rec(:))]);
+netcdf.putAtt(ncid,id_T_rec,'fill_value','NaNf');
+netcdf.putAtt(ncid,id_T_rec,'comment',['The receiver temperature is recorded '...
+                                     'to check and monitor the radar performance '...
+                                     'and measurement quality']);
+                                 
+id_T_pc = netcdf.defVar(ncid,'t_pc','nc_float',did_time);
+netcdf.putAtt(ncid,id_T_pc,'standard_name','radar.operation.parameter.t_pc');
+netcdf.putAtt(ncid,id_T_pc,'long_name','radar PC temperature');
+netcdf.putAtt(ncid,id_T_pc,'units','K');
+netcdf.putAtt(ncid,id_T_pc,'valid_range',[min(data.T_pc(:)), max(data.T_pc(:))]);
+netcdf.putAtt(ncid,id_T_pc,'fill_value','NaNf');
+netcdf.putAtt(ncid,id_T_pc,'comment',['The radar PC temperature is recorded '...
+                                     'to check and monitor the radar performance '...
+                                     'and measurement quality']);
 
 id_vol = netcdf.defVar(ncid,'vol','nc_float',did_time);
 netcdf.putAtt(ncid,id_vol,'standard_name','radar.operation.parameter.vol');
@@ -284,38 +372,6 @@ netcdf.putAtt(ncid,id_az,'standard_name','radar.operation.parameter.system_azimu
 netcdf.putAtt(ncid,id_az,'long_name','Sensor azimuth angle');
 netcdf.putAtt(ncid,id_az,'units','degrees');
 
-id_TransPow = netcdf.defVar(ncid,'p_trans','nc_float',did_time);
-netcdf.putAtt(ncid,id_TransPow,'standard_name','radar.operation.parameter.p_trans');
-netcdf.putAtt(ncid,id_TransPow,'long_name','Transmitted power');
-netcdf.putAtt(ncid,id_TransPow,'units','W');
-netcdf.putAtt(ncid,id_TransPow,'comment',['The transmitted power is is recorded '...
-                                          'to check and monitor the radar performance '...
-                                          'and measurement quality']);
-                                 
-id_T_trans = netcdf.defVar(ncid,'t_trans','nc_float',did_time);
-netcdf.putAtt(ncid,id_T_trans,'standard_name','radar.operation.parameter.t_trans');
-netcdf.putAtt(ncid,id_T_trans,'long_name','Transmitter temperature');
-netcdf.putAtt(ncid,id_T_trans,'units','K');
-netcdf.putAtt(ncid,id_T_trans,'comment',['The transmitter temperature is recorded '...
-                                         'to check and monitor the radar performance '...
-                                          'and measurement quality']);
-                                 
-id_T_rec = netcdf.defVar(ncid,'t_rec','nc_float',did_time);
-netcdf.putAtt(ncid,id_T_rec,'standard_name','radar.operation.parameter.t_rec');
-netcdf.putAtt(ncid,id_T_rec,'long_name','Receiver temperature');
-netcdf.putAtt(ncid,id_T_rec,'units','K');
-netcdf.putAtt(ncid,id_T_rec,'comment',['The receiver temperature is recorded '...
-                                     'to check and monitor the radar performance '...
-                                     'and measurement quality']);
-                                 
-id_T_pc = netcdf.defVar(ncid,'t_pc','nc_float',did_time);
-netcdf.putAtt(ncid,id_T_pc,'standard_name','radar.operation.parameter.t_pc');
-netcdf.putAtt(ncid,id_T_pc,'long_name','radar PC temperature');
-netcdf.putAtt(ncid,id_T_pc,'units','K');
-netcdf.putAtt(ncid,id_T_pc,'comment',['The radar PC temperature is recorded '...
-                                     'to check and monitor the radar performance '...
-                                     'and measurement quality']);
-
 id_QF = netcdf.defVar(ncid,'qf_rad','nc_byte',did_time);
 netcdf.putAtt(ncid,id_QF,'standard_name','radar.operation.quality.flag.qf_radar');
 netcdf.putAtt(ncid,id_QF,'long_name','Quality flag given by radar');
@@ -326,8 +382,6 @@ netcdf.putAtt(ncid,id_QF,'comment', ['To get the bit entries, one has to'...
                                      'power leveling. Note that in the above '...
                                      'convention holds: bit1 = 2^3, '...
                                      'bit2 = 2^2, bit3 = 2^1, bit4 = 2^0'])
-
-
 
 
 %%%%%%%% multi-D variables
@@ -390,6 +444,8 @@ id_Ze = netcdf.defVar(ncid,'ze','nc_float',[did_range,did_time]);
 netcdf.putAtt(ncid,id_Ze,'standard_name','RADAR.REFLECTIVITY.FACTOR_VV');
 netcdf.putAtt(ncid,id_Ze,'long_name','Equivalent radar reflectivity factor Ze');
 netcdf.putAtt(ncid,id_Ze,'units','mm6 m-3');
+netcdf.putAtt(ncid,id_Ze,'valid_range',[min(data.Ze(:)), max(data.Ze(:))]);
+netcdf.putAtt(ncid,id_Ze,'fill_value','NaNf');
 netcdf.putAtt(ncid,id_Ze,'long_name',['The equivalent radar reflectivity '...
                           'factor Ze is obtained at vertical polarisation. '...
                           'If more polarisation states could be measured '...
@@ -400,41 +456,62 @@ if isfield(data, 'Ze_label') % Ze corrected, adding note
 end
 
 id_vm = netcdf.defVar(ncid,'vm','nc_float',[did_range,did_time]);
-netcdf.putAtt(ncid,id_vm,'standard_name','RADAR.DOPPLER.VELOCITY_MEAN');
-netcdf.putAtt(ncid,id_vm,'long_name','Mean RADAR.DOPPLER.VELOCITY');
+netcdf.putAtt(ncid,id_vm,'standard_name','DOPPLER.VELOCITY_MEAN');
+netcdf.putAtt(ncid,id_vm,'long_name','Mean DOPPLER.VELOCITY');
 netcdf.putAtt(ncid,id_vm,'units','m s-1');
+netcdf.putAtt(ncid,id_vm,'valid_range',[min(data.vm(:)), max(data.vm(:))]);
+netcdf.putAtt(ncid,id_vm,'fill_value','NaNf');
 netcdf.putAtt(ncid,id_vm,'comment',['radial velocities of scatterers, negative '...
                                     'velocities indicate particles motion '...
                                     'towards the radar'])
 
 id_sigma = netcdf.defVar(ncid,'sw','nc_float',[did_range,did_time]);
-netcdf.putAtt(ncid,id_sigma,'standard_name','RADAR.DOPPLER.SPECTRUM_WIDTH');
+netcdf.putAtt(ncid,id_sigma,'standard_name','DOPPLER.SPECTRUM_WIDTH');
 netcdf.putAtt(ncid,id_sigma,'long_name','Spectral width of Doppler velocity spectrum');
 netcdf.putAtt(ncid,id_sigma,'units','m s-1');
+netcdf.putAtt(ncid,id_sigma,'valid_range',[min(data.sigma(:)), max(data.sigma(:))]);
+netcdf.putAtt(ncid,id_sigma,'fill_value','NaNf');
+netcdf.putAtt(ncid,id_sigma,'comment',['Scectral width of Doppler spectrum at vertical '...
+                                    'polarisation'])
 
 id_skew = netcdf.defVar(ncid,'skew','nc_float',[did_range,did_time]);
-netcdf.putAtt(ncid,id_skew,'standard_name','RADAR.DOPPLER.SPECTRUM_SKEWNESS');
+netcdf.putAtt(ncid,id_skew,'standard_name','DOPPLER.SPECTRUM_SKEWNESS');
 netcdf.putAtt(ncid,id_skew,'long_name','Doppler spectrum skewness');
+netcdf.putAtt(ncid,id_skew,'valid_range',[min(data.skew(:)), max(data.skew(:))]);
+netcdf.putAtt(ncid,id_skew,'fill_value','NaNf');
+netcdf.putAtt(ncid,id_skew,'comment',['Doppler spectrum skewness of Doppler spectrum '...
+                                    'at vertical polarisation'])
 
 id_kurt = netcdf.defVar(ncid,'kurt','nc_float',[did_range,did_time]);
 netcdf.putAtt(ncid,id_kurt,'standard_name','RADAR.DOPPLER.SPECTRUM_KURTOSIS');
-netcdf.putAtt(ncid,id_kurt,'long_name','Kurtosis');
+netcdf.putAtt(ncid,id_kurt,'long_name','Doppler spectrum Kurtosis');
+netcdf.putAtt(ncid,id_kurt,'valid_range',[min(data.kurt(:)), max(data.kurt(:))]);
+netcdf.putAtt(ncid,id_kurt,'fill_value','NaNf');
+netcdf.putAtt(ncid,id_kurt,'comment',['Doppler spectrum Kurtosis of Doppler spectrum '...
+                                    'at vertical polarisation'])
 
 %Included by Bravo-Aranda, J.A. JABA
 id_ldr = netcdf.defVar(ncid,'ldr','nc_float',[did_range,did_time]);
-netcdf.putAtt(ncid,id_ldr,'standard_name','RADAR.LINEAR.DEPOLARIZATION.RATIO');
+netcdf.putAtt(ncid,id_ldr,'standard_name','LINEAR.DEPOLARIZATION.RATIO');
 netcdf.putAtt(ncid,id_ldr,'long_name','Linear depolarization ratio');
 netcdf.putAtt(ncid,id_ldr,'unite','mm6 m-3');
+netcdf.putAtt(ncid,id_ldr,'valid_range',[min(data.LDR(:)), max(data.LDR(:))]);
+netcdf.putAtt(ncid,id_ldr,'fill values','NaNf');
+netcdf.putAtt(ncid,id_ldr,'comment','L_dr = Ze_hv/Ze in [mm6 m-3]');
 if data.DualPol == 2
     id_xcorr = netcdf.defVar(ncid,'rho_hv','nc_float',[did_range,did_time]);
-    netcdf.putAtt(ncid,id_xcorr,'standard_name','RADAR.CRORRELATION.COEFFICIENT.');
+    netcdf.putAtt(ncid,id_xcorr,'standard_name','CRORRELATION.COEFFICIENT.');
     netcdf.putAtt(ncid,id_xcorr,'long_name','co-cross-channel correlation coefficient');
-
+    netcdf.putAtt(ncid,id_xcorr,'valid_range',[min(data.xcorr(:)), max(data.xcorr(:))]);
+    netcdf.putAtt(ncid,id_xcorr,'fill_value','NaNf');
+    
     id_difphase = netcdf.defVar(ncid,'phi_dp','nc_float',[did_range,did_time]);
-    netcdf.putAtt(ncid,id_difphase,'long_name','RADAR.DIFFERENTIAL.PHASE');
-    netcdf.putAtt(ncid,id_difphase,'long_name','co-cross-channel differential phase');    
+    netcdf.putAtt(ncid,id_difphase,'standard_name','DIFFERENTIAL.PHASE');
+    netcdf.putAtt(ncid,id_difphase,'long_name','co-cross-channel differential phase');   
+    netcdf.putAtt(ncid,id_difphase,'unite','degree');   
+    netcdf.putAtt(ncid,id_difphase,'valid_range',[min(data.difphase(:)), max(data.difphase(:))]); 
+    netcdf.putAtt(ncid,id_difphase,'fill_value','NaNf');
 end
-
 
 id_PNv = netcdf.defVar(ncid,'PNv','nc_float',[did_range,did_time]);
 netcdf.putAtt(ncid,id_PNv,'long_name','Total IF power in vertical polarization measured at ADC input');
@@ -442,23 +519,35 @@ netcdf.putAtt(ncid,id_PNv,'units','W');
 
 id_SLv = netcdf.defVar(ncid,'SLv','nc_float',[did_range,did_time]);
 netcdf.putAtt(ncid,id_SLv,'long_name','Linear sensitivity limit for vertical polarisation');
-netcdf.putAtt(ncid,id_SLv,'units','mm^6/mm^3');
+netcdf.putAtt(ncid,id_SLv,'units','mm6 mm-3');
 
-id_spec = netcdf.defVar(ncid,'spec','nc_float',[did_vel,did_range,did_time]);
+id_spec = netcdf.defVar(ncid,'sze','nc_float',[did_vel,did_range,did_time]);
+netcdf.putAtt(ncid,id_spec,'standard_name','RADAR.DOPPLER.SPECTRUM_VV');
 netcdf.putAtt(ncid,id_spec,'long_name','Doppler spectrum vertical polarization');
-netcdf.putAtt(ncid,id_spec,'units','mm^6/mm^3');
-netcdf.putAtt(ncid,id_spec,'comment',['This is the normalized Doppler spectrum. The integral of the spectra minus Ze gives the noise level, ',...
-    'i.e. integral(spec)-Ze = noise. The velocity array is asymmetric, i.e. the absolute values of maximum and minumum velocities are not equal. ',...
-    'Since the spectrum at -v_nyquist and +v_nyquist is the same, the entry at +v_nyquist was cut.']);
+netcdf.putAtt(ncid,id_spec,'units','mm6 mm-3');
+netcdf.putAtt(ncid,id_spec,'valid_range',[min(data.spec), max(data.spec)]);
+netcdf.putAtt(ncid,id_spec,'fill_value','NaNf');
+netcdf.putAtt(ncid,id_spec,'comment',['This is the normalized Doppler spectrum. '...
+                           'The integral of the spectra minus Ze gives the noise level, ',...
+                           'i.e. integral(spec)-Ze = noise. The velocity array is asymmetric, '...
+                           'i.e. the absolute values of maximum and minumum velocities are not equal. ',...
+                           'Since the spectrum at -v_nyquist and +v_nyquist is the same, '...
+                           'the entry at +v_nyquist was cut.']);
 
-id_VNoisePow_mean = netcdf.defVar(ncid,'VNoisePow_mean','nc_float',[did_range,did_time]);
+id_VNoisePow_mean = netcdf.defVar(ncid,'v_noise_pow_mean','nc_float',[did_range,did_time]);
+netcdf.putAtt(ncid,id_VNoisePow_mean,'standard_name','radar.doppler.spectrum_noise.power.mean_vv');
 netcdf.putAtt(ncid,id_VNoisePow_mean,'long_name','Bin Doppler spectrum mean noise power in vertical polarization');
-netcdf.putAtt(ncid,id_VNoisePow_mean,'units','mm^6/m^3');
+netcdf.putAtt(ncid,id_VNoisePow_mean,'units','mm6 m-3');
+netcdf.putAtt(ncid,id_VNoisePow_mean,'valid_range',[min(data.VNoisePow_mean), max(data.VNoisePow_mean)]);
+netcdf.putAtt(ncid,id_VNoisePow_mean,'fill_value','NaNf');
 netcdf.putAtt(ncid,id_VNoisePow_mean,'comment','If cal_mom == 3, then bin noise power is only calculated if CompEna == 1.');
 
-id_VNoisePow_peak = netcdf.defVar(ncid,'VNoisePow_peak','nc_float',[did_range,did_time]);
+id_VNoisePow_peak = netcdf.defVar(ncid,'v_noise_pow_peak','nc_float',[did_range,did_time]);
+netcdf.putAtt(ncid,id_VNoisePow_peak,'standard_name','radar.doppler.spectrum_noise.power.peak_vv');
 netcdf.putAtt(ncid,id_VNoisePow_peak,'long_name','Bin Doppler spectrum peak noise power in vertical polarization');
-netcdf.putAtt(ncid,id_VNoisePow_peak,'units','mm^6/m^3');
+netcdf.putAtt(ncid,id_VNoisePow_peak,'units','mm6 m-3');
+netcdf.putAtt(ncid,id_VNoisePow_peak,'valid_range',[min(data.VNoisePow_peak), max(data.VNoisePow_peak)]);
+netcdf.putAtt(ncid,id_VNoisePow_peak,'fill_value','NaNf');
 netcdf.putAtt(ncid,id_VNoisePow_peak,'comment','If cal_mom == 3, then bin noise power is only calculated if CompEna == 1.');
 
 id_QualFlag = netcdf.defVar(ncid,'qf_pro','nc_float',[did_range,did_time]);
@@ -480,107 +569,95 @@ netcdf.putAtt(ncid,id_QualFlag,'definition', ...
 
 if data.DualPol > 0
     
-    id_PNh = netcdf.defVar(ncid,'PNh','nc_float',[did_range,did_time]);
+    id_PNh = netcdf.defVar(ncid,'if_pow_hh','nc_float',[did_range,did_time]);
     netcdf.putAtt(ncid,id_PNh,'long_name','Total IF power in horizontal polarization measured at ADC input');
     netcdf.putAtt(ncid,id_PNh,'units','W');
     
-    id_SLh = netcdf.defVar(ncid,'SLh','nc_float',[did_range,did_time]);
+    id_SLh = netcdf.defVar(ncid,'sen_lim_vv','nc_float',[did_range,did_time]);
     netcdf.putAtt(ncid,id_SLh,'long_name','Linear sensitivity limit for vertical polarisation');
-    netcdf.putAtt(ncid,id_SLh,'units','mm^6/mm^3');
+    netcdf.putAtt(ncid,id_SLh,'units','mm6 mm-3');
     
     id_spec_h = netcdf.defVar(ncid,'sze_hh','nc_float',[did_vel,did_range,did_time]);
     netcdf.putAtt(ncid,id_spec_h,'long_name','Doppler spectrum horizontal polarization');
-    netcdf.putAtt(ncid,id_spec_h,'units','mm^6/mm^3');
+    netcdf.putAtt(ncid,id_spec_h,'units','mm6 mm-3');
     
     id_spec_covRe = netcdf.defVar(ncid,'scov_re','nc_float',[did_vel,did_range,did_time]);
     netcdf.putAtt(ncid,id_spec_covRe,'long_name','Real part of covariance spectrum');
-    netcdf.putAtt(ncid,id_spec_covRe,'units','mm^6/mm^3)');
+    netcdf.putAtt(ncid,id_spec_covRe,'units','mm6 mm-3');
     
     id_spec_covIm = netcdf.defVar(ncid,'scov_im','nc_float',[did_vel,did_range,did_time]);
     netcdf.putAtt(ncid,id_spec_covIm,'long_name','Real part of covariance spectrum');
-    netcdf.putAtt(ncid,id_spec_covIm,'units','mm^6/mm^3)');
+    netcdf.putAtt(ncid,id_spec_covIm,'units','mm6 mm-3');
 
-    %Included by Bravo-Aranda, J.A. JABA
-    id_ldr = netcdf.defVar(ncid,'ldr','nc_float',[did_range,did_time]);
-    netcdf.putAtt(ncid,id_ldr,'standard_name','RADAR.LINEAR.DEPOLARIZATION.RATIO');
-    netcdf.putAtt(ncid,id_ldr,'long_name','Linear depolarization ratio');
-    netcdf.putAtt(ncid,id_ldr,'unite','mm6 m-3');
-    if data.DualPol == 2
-        id_xcorr = netcdf.defVar(ncid,'rho_hv','nc_float',[did_range,did_time]);
-        netcdf.putAtt(ncid,id_xcorr,'standard_name','RADAR.CRORRELATION.COEFFICIENT.');
-        netcdf.putAtt(ncid,id_xcorr,'long_name','co-cross-channel correlation coefficient');
-
-        id_difphase = netcdf.defVar(ncid,'phi_dp','nc_float',[did_range,did_time]);
-        netcdf.putAtt(ncid,id_difphase,'long_name','RADAR.DIFFERENTIAL.PHASE');
-        netcdf.putAtt(ncid,id_difphase,'long_name','co-cross-channel differential phase');    
-    end
 end % if data.DualPol > 0
 
 
 if data.CompEna == 2 && data.DualPol == 2
     
-    id_d_spec = netcdf.defVar(ncid,'d_spec','nc_float',[did_vel,did_range,did_time]);
+    id_d_spec = netcdf.defVar(ncid,'sz_dr','nc_float',[did_vel,did_range,did_time]);
     netcdf.putAtt(ncid,id_d_spec,'long_name','Differntial spectral reflectivity');
-    netcdf.putAtt(ncid,id_d_spec,'units','dB');
+    netcdf.putAtt(ncid,id_d_spec,'units','mm6 mm-3');
+    netcdf.putAtt(ncid,id_d_spec,'valid_range',[min(data.d_spec), max(data.d_spec)]);
+    netcdf.putAtt(ncid,id_d_spec,'fill_value','NaNf');
     
-    id_CorrCoeff = netcdf.defVar(ncid,'CorrCoeff','nc_float',[did_vel,did_range,did_time]);
+    id_CorrCoeff = netcdf.defVar(ncid,'srho_hv','nc_float',[did_vel,did_range,did_time]);
     netcdf.putAtt(ncid,id_CorrCoeff,'long_name','Spectral correlation coefficient');
+    netcdf.putAtt(ncid,id_CorrCoeff,'valid_range',[min(data.CorrCoeff), max(data.CorrCoeff)]);
+    netcdf.putAtt(ncid,id_CorrCoeff,'fill_value','NaNf');
     
-    id_DiffPh = netcdf.defVar(ncid,'DiffPh','nc_float',[did_vel,did_range,did_time]);
+    id_DiffPh = netcdf.defVar(ncid,'sphi_dp','nc_float',[did_vel,did_range,did_time]);
     netcdf.putAtt(ncid,id_DiffPh,'long_name','Spectral differential phase');
-    netcdf.putAtt(ncid,id_DiffPh,'units','dB');
+    netcdf.putAtt(ncid,id_DiffPh,'units','degree');
+    netcdf.putAtt(ncid,id_DiffPh,'valid_range',[min(data.DiffPh), max(data.DiffPh)]);
+    netcdf.putAtt(ncid,id_DiffPh,'fill_value','NaNf');
     
 end % if data.CompEna == 2 && data.DualPol > 0
 
 
 if data.DualPol == 2 && data.CompEna == 2
     
-    id_SLDR = netcdf.defVar(ncid,'SLDR','nc_float',[did_vel,did_range,did_time]);
+    id_SLDR = netcdf.defVar(ncid,'slt_ldr','nc_float',[did_vel,did_range,did_time]);
     netcdf.putAtt(ncid,id_SLDR,'long_name','Spectral slanted LDR');
-    netcdf.putAtt(ncid,id_SLDR,'units','dB');
+    netcdf.putAtt(ncid,id_SLDR,'units','mm6 mm-3');
+    netcdf.putAtt(ncid,id_SLDR,'valid_range',[min(data.SLDR), max(data.SLDR)]);
+    netcdf.putAtt(ncid,id_SLDR,'fill_value','NaNf');
     
-    id_SCorrCoeff = netcdf.defVar(ncid,'SCOrrCoeff','nc_float',[did_vel,did_range,did_time]);
+    id_SCorrCoeff = netcdf.defVar(ncid,'sslt_ldr','nc_float',[did_vel,did_range,did_time]);
     netcdf.putAtt(ncid,id_SCorrCoeff,'long_name','Spectral slanted corellation coefficient');
+    netcdf.putAtt(ncid,id_SCorrCoeff,'valid_range',[min(data.SCorrCoeff), max(data.SCorrCoeff)]);
+    netcdf.putAtt(ncid,id_SCorrCoeff,'fill_value','NaNf');
     
     if data.CompEna == 2
         
-        id_KDP = netcdf.defVar(ncid,'KDP','nc_float',[did_range,did_time]);
+        id_KDP = netcdf.defVar(ncid,'kdp','nc_float',[did_range,did_time]);
         netcdf.putAtt(ncid,id_KDP,'long_name','Specific differential phase shift');
-        netcdf.putAtt(ncid,id_KDP,'units','rad/km');
+        netcdf.putAtt(ncid,id_KDP,'units','degree km-1');
+        netcdf.putAtt(ncid,id_KDP,'valid_range',[min(data.KDP), max(data.KDP)]);
+        netcdf.putAtt(ncid,id_KDP,'fill_value','NaNf');
         
-        id_DiffAtt = netcdf.defVar(ncid,'DiffAtt','nc_float',[did_range,did_time]);
+        id_DiffAtt = netcdf.defVar(ncid,'att_dif','nc_float',[did_range,did_time]);
         netcdf.putAtt(ncid,id_DiffAtt,'long_name','Differential attenuation');
-        netcdf.putAtt(ncid,id_DiffAtt,'units','dB/km');        
+        netcdf.putAtt(ncid,id_DiffAtt,'units','mm6 mm-3 km-1');    
+        netcdf.putAtt(ncid,id_DiffAtt,'valid_range',[min(data.DiffAtt), max(data.DiffAtt)]);
+        netcdf.putAtt(ncid,id_DiffAtt,'fill_value','NaNf');        
         
     end % if data.CompEna == 2
     
 end % if data.DualPol == 2 && data.CompEna == 2
 
 if data.CompEna > 0 && data.DualPol > 0
-         id_HNoisePow_mean = netcdf.defVar(ncid,'HNoisePow_mean','nc_float',[did_range,did_time]);
+         id_HNoisePow_mean = netcdf.defVar(ncid,'h_noise_pow_mean','nc_float',[did_range,did_time]);
+         netcdf.putAtt(ncid,id_HNoisePow_mean,'standard_name','radar.doppler.spectrum_noise.power.mean_hh');         
          netcdf.putAtt(ncid,id_HNoisePow_mean,'long_name','Bin Doppler spectrum mean noise power in horizontal polarization');
-         netcdf.putAtt(ncid,id_HNoisePow_mean,'units','mm^6/m^3');
+         netcdf.putAtt(ncid,id_HNoisePow_mean,'units','mm6 mm-3');
          netcdf.putAtt(ncid,id_HNoisePow_mean,'comment','If cal_mom == 3, then bin noise power is only calculated if CompEna == 1.');
          
-         id_HNoisePow_peak = netcdf.defVar(ncid,'HNoisePow_peak','nc_float',[did_range,did_time]);
+         id_HNoisePow_peak = netcdf.defVar(ncid,'h_noise_pow_peak','nc_float',[did_range,did_time]);
+         netcdf.putAtt(ncid,id_HNoisePow_peak,'standard_name','radar.doppler.spectrum_noise.power.peak_hh');                  
          netcdf.putAtt(ncid,id_HNoisePow_peak,'long_name','Bin Doppler spectrum peak noise power in horizontal polarization');
-         netcdf.putAtt(ncid,id_HNoisePow_peak,'units','mm^6/m^3');
+         netcdf.putAtt(ncid,id_HNoisePow_peak,'units','mm6 mm-3');
          netcdf.putAtt(ncid,id_HNoisePow_peak,'comment','If cal_mom == 3, then bin noise power is only calculated if CompEna == 1.');
 end % data.CompEna > 0
-
-
-%% ######################## add global attributes
-glob = netcdf.getConstant('NC_GLOBAL');
-netcdf.putAtt(ncid,glob,'FillValue','NaN');
-netcdf.putAtt(ncid,glob,'program_name',data.progname);
-if data.modelno == 0
-    model = '94 GHz single pol.';
-else
-    model = '94 GHz dual pol.';
-end
-netcdf.putAtt(ncid,glob,'model_type',model);
-netcdf.putAtt(ncid,glob,'contact',config.contactperson);
-netcdf.putAtt(ncid,glob,'processing script',config.processing_script);
 
 
 %% ###################### initialize copression
