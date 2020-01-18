@@ -331,14 +331,14 @@ if data.DualPol == 2
     id_xcorr = netcdf.defVar(ncid,'rho_hv','nc_float',[did_range,did_time]);
     netcdf.putAtt(ncid,id_xcorr,'standard_name','CRORRELATION.COEFFICIENT.');
     netcdf.putAtt(ncid,id_xcorr,'long_name','co-cross-channel correlation coefficient');
-    netcdf.putAtt(ncid,id_xcorr,'valid_range',[min(data.xcorr(:)), max(data.xcorr(:))]);
+    %netcdf.putAtt(ncid,id_xcorr,'valid_range',[min(data.xcorr(:)), max(data.xcorr(:))]);
     netcdf.putAtt(ncid,id_xcorr,'fill_value','NaNf');
     
     id_difphase = netcdf.defVar(ncid,'phi_dp','nc_float',[did_range,did_time]);
     netcdf.putAtt(ncid,id_difphase,'standard_name','DIFFERENTIAL.PHASE');
     netcdf.putAtt(ncid,id_difphase,'long_name','co-cross-channel differential phase');   
     netcdf.putAtt(ncid,id_difphase,'unite','degree');   
-    netcdf.putAtt(ncid,id_difphase,'valid_range',[min(data.difphase(:)), max(data.difphase(:))]); 
+    %netcdf.putAtt(ncid,id_difphase,'valid_range',[min(data.difphase(:)), max(data.difphase(:))]); 
     netcdf.putAtt(ncid,id_difphase,'fill_value','NaNf'); 
 end
 
@@ -457,8 +457,8 @@ end
 
 if data.DualPol == 2
     disp('WARNING! skipping writing id_xcorr and difphase into files, variables not available (yet??)')
-    netcdf.putVar(ncid,id_xcorr,[0,0],[data.n_levels,data.totsamp],data.xcorr'); %JABA
-    netcdf.putVar(ncid,id_difphase,[0,0],[data.n_levels,data.totsamp],data.difphase'); %JABA
+    % netcdf.putVar(ncid,id_xcorr,[0,0],[data.n_levels,data.totsamp],data.xcorr'); %JABA
+    % netcdf.putVar(ncid,id_difphase,[0,0],[data.n_levels,data.totsamp],data.difphase'); %JABA
 end
 
 netcdf.close(ncid);
