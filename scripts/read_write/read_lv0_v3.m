@@ -130,7 +130,7 @@ function data = read_lv0_v3(infile)
     data.T_trans(1:data.totsamp) = single(-999); % transmitter temperature [K]
     data.T_rec(1:data.totsamp) = single(-999); % receiver temperature [K]
     data.T_pc(1:data.totsamp) = single(-999); % PC temperature [K]
-    % data.reserved(1:3,1:data.totsamp) = single(-999);
+    data.reserved(1:3,1:data.totsamp) = single(-999);
     % data.Tprof(1:data.T_altcount,1:data.totsamp) = single(-999); % temperature profile
     % data.Qprof(1:data.H_altcount,1:data.totsamp) = single(-999); % abs hum profile
     % data.RHprof(1:data.H_altcount,1:data.totsamp) = single(-999); % rel hum profile
@@ -202,8 +202,9 @@ function data = read_lv0_v3(infile)
         data.T_trans(i) = fread(fid,1,'single');
         data.T_rec(i) = fread(fid,1,'single');
         data.T_pc(i) = fread(fid,1,'single');
-        % reserved: data.reserved(i,1:3) = fread(fid,3,'single'); % reserved
-        fread(fid,3,'single');
+        % reserved: 
+        data.reserved(i,1:3) = fread(fid,3,'single'); % reserved
+        %fread(fid,3,'single');
         fread(fid,data.T_altcount,'single'); % temp prof
         fread(fid,data.H_altcount,'single'); % abs hum prof
         fread(fid,data.H_altcount,'single'); % rel hum prof

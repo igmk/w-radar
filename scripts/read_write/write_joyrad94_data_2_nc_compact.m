@@ -275,7 +275,16 @@ netcdf.putAtt(ncid,id_QF,'comment', ['To get the bit entries, one has to'...
                                      'power leveling. Note that in the above '...
                                      'convention holds: bit1 = 2^3, '...
                                      'bit2 = 2^2, bit3 = 2^1, bit4 = 2^0'])
-                                 
+
+id_incel = netcdf.defVar(ncid,'incl_el','nc_float',did_time);
+netcdf.putAtt(ncid,id_incel,'long_name','Inclination angle; elevation');
+netcdf.putAtt(ncid,id_incel,'units','min');
+
+id_incea = netcdf.defVar(ncid,'incl_ea','nc_float',did_time);
+netcdf.putAtt(ncid,id_incea,'long_name','Inclination angle; angle of elevation axis');
+netcdf.putAtt(ncid,id_incea,'units','min');
+
+
 %%%%%%%% multi-D variables
 
 id_Ze = netcdf.defVar(ncid,'ze','nc_float',[did_range,did_time]);
@@ -383,6 +392,8 @@ netcdf.defVarDeflate(ncid,id_T_trans,true,true,9);
 netcdf.defVarDeflate(ncid,id_T_rec,true,true,9);
 netcdf.defVarDeflate(ncid,id_T_pc,true,true,9);
 netcdf.defVarDeflate(ncid,id_QF,true,true,9);
+netcdf.defVarDeflate(ncid,id_incel,true,true,9);
+netcdf.defVarDeflate(ncid,id_incea,true,true,9);
 netcdf.defVarDeflate(ncid,id_Ze,true,true,9);
 netcdf.defVarDeflate(ncid,id_vm,true,true,9);
 netcdf.defVarDeflate(ncid,id_sigma,true,true,9);
@@ -441,6 +452,8 @@ netcdf.putVar(ncid,id_T_trans,0,data.totsamp,data.T_trans);
 netcdf.putVar(ncid,id_T_rec,0,data.totsamp,data.T_rec);
 netcdf.putVar(ncid,id_T_pc,0,data.totsamp,data.T_pc);
 netcdf.putVar(ncid,id_QF,0,data.totsamp,data.QF);
+netcdf.putVar(ncid,id_incel,0,data.totsamp,data.reserved(:,2));
+netcdf.putVar(ncid,id_incea,0,data.totsamp,data.reserved(:,3));
 
 
 % multidimensional variables
