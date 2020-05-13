@@ -98,8 +98,8 @@ for i = 1:numel(data.time)
     data.MinVel(i,:) = tempvel(:,1)';
     
     if data.DualPol == 0
-        data.spec(i,:,:) = tempspec;
-        
+        data.spec(i,:,:) = tempspec.spec;
+
     else
         data.spec(i,:,:) = tempspec.spec;
         data.spec_hv(i,:,:) = tempspec.spec_hv;

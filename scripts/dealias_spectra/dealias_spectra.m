@@ -176,9 +176,15 @@ if flag_DualPol == 2
 end
 
 spec_out.spec = spec;
-spec_out.spec_hv = spec_hv;
-spec_out.spec_re = spec_re;
-spec_out.spec_im = spec_im;
+
+if flag_DualPol > 0
+    spec_out.spec_hv = spec_hv;
+end
+if flag_DualPol == 2
+    spec_out.spec_re = spec_re;
+    spec_out.spec_im = spec_im;
+end
+
 vel_out = NaN(ss);
 
 if sv(2) > 1 
@@ -296,22 +302,19 @@ for i = 1:numel(cbh_fin)
             dealias_spectra_from_idxA_to_idxB(idx_0+1, cth_fin(i), range_offsets, vel, delv, spec, vn,...
             moments, moment_string, nAvg, nf_string, nf, nbins, status_flag, dr, vm_prev_col, noise.peaknoise, flag_compress_spec, flag_DualPol, spec_hv, spec_re, spec_im);
             
-        
     end
     
-    
-
-
 end % for i = 
 
 % remove dummie variables from output
-if flag_DualPol == 0
-    spec_out = spec_out.spec;
+%if flag_DualPol == 0
+%    spec_out = spec_out.spec;
+%end
 
-elseif flag_DualPol == 1
-    spec_out = rmfield(spec_out, 'spec_re');
-    spec_out = rmfield(spec_out, 'spec_im');
-end    
+%if flag_DualPol == 1
+%    spec_out = rmfield(spec_out, 'spec_re');
+%    spec_out = rmfield(spec_out, 'spec_im');
+%end    
 
 end  % function
 
