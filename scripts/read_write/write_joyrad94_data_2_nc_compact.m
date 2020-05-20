@@ -309,7 +309,7 @@ netcdf.putAtt(ncid,id_Tb,'fill_value',str_fill_value);
 netcdf.putAtt(ncid,id_Tb,'comment',['The brightness temperature of a body is '...
                                     'the temperature of a black body which '...
                                     'radiates the same power per unit solid '...
-                                    'angle per unit area. Brightness Temperature '
+                                    'angle per unit area. Brightness Temperature '...
                                     'measurements at 89-GHz by the radar']);
 
 id_lwp = netcdf.defVar(ncid,'lwp','nc_float',did_time);
@@ -543,15 +543,15 @@ netcdf.putAtt(ncid,id_Aliasmask,'comment',['The mask shows, if AnitAlias = 1, '.
                                 '1 = aliasing detected; if any bin equals 1 '...
                                 '(while AntiAlias = 2) then the full column was dealiased.']);
 
-id_incel = netcdf.defVar(ncid,'ins_elevation','nc_float',did_time); angle_of_rotation_from_solar_azimuth_to_platform_azimuth
-netcdf.putAtt(ncid,id_incel,'GEOMS_name','ANGLE.ROLL');
+id_incel = netcdf.defVar(ncid,'ins_elevation','nc_float',did_time); 
+netcdf.putAtt(ncid,id_incel,'GEOMS_name','PLATFORM.ANGLE.ELEVATION');
 netcdf.putAtt(ncid,id_incel,'long_name','platform_roll_angle');
 netcdf.putAtt(ncid,id_incel,'standard_name','Inclination angle of the instrument; elevation');
 netcdf.putAtt(ncid,id_incel,'units','deg');
 
                             
 id_incea = netcdf.defVar(ncid,'ins_azimuth','nc_float',did_time);
-netcdf.putAtt(ncid,id_incea,'GEOMS_name','ANGLE.AZIMUTH');
+netcdf.putAtt(ncid,id_incea,'GEOMS_name','PLATFORM.ANGLE.AZIMUTH');
 netcdf.putAtt(ncid,id_incea,'long_name','angle_of_rotation_from_solar_azimuth_to_platform_azimuth');
 netcdf.putAtt(ncid,id_incea,'standard_name','Inclination angle of the instrument; azimuth');
 netcdf.putAtt(ncid,id_incea,'units','deg');
