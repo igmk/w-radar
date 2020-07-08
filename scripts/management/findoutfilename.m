@@ -12,12 +12,12 @@ filename = strrep(filename,config.nickstation, '');
 
 switch config.compact_flag
     case 0
-        outfile = fullfile(config.outputpath_tree, sprintf('%s_%s_%s.nc', config.nickradar, config.nickstation, filename));
+        outfile = fullfile(config.outputpath_tree, sprintf('%s_%s_%s_%s.nc', config.nickradar, config.nickstation, filename, config.filetag));
     case 1
-        outfile2 = fullfile(config.outputpath_tree, sprintf('%s_%s_%s_compact.nc', config.nickradar, config.nickstation, filename));
+        outfile2 = fullfile(config.outputpath_tree, sprintf('%s_%s_%s_compact_%s.nc', config.nickradar, config.nickstation, filename, config.filetag));
     case 2
-        outfile = fullfile(config.outputpath_tree, sprintf('%s_%s_%s.nc', config.nickradar, config.nickstation, filename));
-        outfile2 = fullfile(config.outputpath_tree, sprintf('%s_%s_%s_compact.nc', config.nickradar, config.nickstation, filename));
+        outfile = fullfile(config.outputpath_tree, sprintf('%s_%s_%s_%s.nc', config.nickradar, config.nickstation, filename, config.filetag));
+        outfile2 = fullfile(config.outputpath_tree, sprintf('%s_%s_%s_compact_%s.nc', config.nickradar, config.nickstation, filename, config.filetag));
 end
 
 

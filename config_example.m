@@ -24,6 +24,9 @@ config.filetype = '*lv0'; % (newer version)
 % define output path - folder structure will be: /yyyy/mm/dd/*.nc
 config.outputpath = '/data/obs/site/nya/joyrad94/l1';
 
+% tag added to the file name before the .nc
+config.filetag = 'v2.0_202007' ;
+
 % Instrument nickname:
 % - apears in the output file name
 % - name has to match the possible preprocessing and postprocessing matlab-
@@ -85,7 +88,7 @@ config.data_location     = 'Research station XYZ;Country';
 config.data_source       = strcat('Radar.Standard.Moments.Ldr_',config.nickradar,';run by UNI');
 % Name of the processing script inclouding version or the repository where 
 %   the script can be downloaded:
-config.processing_script = 'https://github.com/igmk/w-radar';
+config.processing_script = 'https://github.com/igmk/w-radar/releases/tag/v2.0_202007';
 
 % Debuging option
 % 0 - no debugging information given, code does not crash
