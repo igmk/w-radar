@@ -37,6 +37,7 @@ else
     Nh = 0;
     
     for h = stf:df:endf
+    %for h = 20    
         % start with level 0 (lv0) files
         infile = fullfile(path.lv0, files.lv0(h).name);        
         fprintf('Start processing with %s\n', infile);
