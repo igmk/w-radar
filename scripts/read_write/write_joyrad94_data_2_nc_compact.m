@@ -204,7 +204,7 @@ netcdf.putAtt(ncid,id_RR,'short_name','rr');
 netcdf.putAtt(ncid,id_RR,'units','mm h-1');
 netcdf.putAtt(ncid,id_RR,'valid_range',[nanmin(data.RR(:)), nanmax(data.RR(:))]);
 netcdf.putAtt(ncid,id_RR,'fill_value',str_fill_value);
-netcdf.putAtt(ncid,id_RR,'RAIN.RATE.SURFACE_SOURCE','Vaisala weather station WXT520 or WXT530');
+netcdf.putAtt(ncid,id_RR,'source','Vaisala weather station WXT520 or WXT530');
 
 id_rh = netcdf.defVar(ncid,'rh','nc_float',did_time);
 netcdf.putAtt(ncid,id_rh,'GEOMS_name','HUMIDITY.RELATIVE.SURFACE');
@@ -215,7 +215,7 @@ netcdf.putAtt(ncid,id_rh,'short_name','rh');
 netcdf.putAtt(ncid,id_rh,'units','%');
 netcdf.putAtt(ncid,id_rh,'valid_range',[nanmin(data.rh(:)), nanmax(data.rh(:))]);
 netcdf.putAtt(ncid,id_rh,'fill_value',str_fill_value);
-netcdf.putAtt(ncid,id_rh,'HUMIDITY.RELATIVE.SURFACE_SOURCE','Vaisala weather station WXT520 or WXT530');
+netcdf.putAtt(ncid,id_rh,'source','Vaisala weather station WXT520 or WXT530');
 
 id_T_env = netcdf.defVar(ncid,'ta','nc_float',did_time);
 netcdf.putAtt(ncid,id_T_env,'GEOMS_name','TEMPERATURE.SURFACE');
@@ -226,7 +226,7 @@ netcdf.putAtt(ncid,id_T_env,'short_name','ta');
 netcdf.putAtt(ncid,id_T_env,'units','K');
 netcdf.putAtt(ncid,id_T_env,'valid_range',[nanmin(data.T_env(:)), nanmax(data.T_env(:))]);
 netcdf.putAtt(ncid,id_T_env,'fill_value',str_fill_value);
-netcdf.putAtt(ncid,id_T_env,'TEMPERATURE.SURFACE_SOURCE','Vaisala weather station WXT520 or WXT530');
+netcdf.putAtt(ncid,id_T_env,'source','Vaisala weather station WXT520 or WXT530');
 netcdf.putAtt(ncid,id_T_env,'comment',['Air temperature is the bulk temperature '...
                                        'of the air, not the surface (skin) temperature.']);
 
@@ -239,7 +239,7 @@ netcdf.putAtt(ncid,id_pres,'short_name','pa');
 netcdf.putAtt(ncid,id_pres,'units','hPa');
 netcdf.putAtt(ncid,id_pres,'valid_range',[nanmin(data.pres(:)), nanmax(data.pres(:))]);
 netcdf.putAtt(ncid,id_pres,'fill_value',str_fill_value);
-netcdf.putAtt(ncid,id_pres,'SURFACE.PRESSURE_SOURCE','Vaisala weather station WXT520 or WXT530');
+netcdf.putAtt(ncid,id_pres,'source','Vaisala weather station WXT520 or WXT530');
 netcdf.putAtt(ncid,id_pres,'comment',['The surface called "surface" means the '...
                                       'lower boundary of the atmosphere. Air '...
                                       'pressure is the force per unit area '...
@@ -257,7 +257,7 @@ netcdf.putAtt(ncid,id_ff,'short_name','wspeed');
 netcdf.putAtt(ncid,id_ff,'units','m s-1');
 netcdf.putAtt(ncid,id_ff,'valid_range',[nanmin(data.ff(:)), nanmax(data.ff(:))]);
 netcdf.putAtt(ncid,id_ff,'fill_value',str_fill_value);
-netcdf.putAtt(ncid,id_ff,'WIND.SPEED.SURFACE_SOURCE','Vaisala weather station WXT520 or WXT530');
+netcdf.putAtt(ncid,id_ff,'source','Vaisala weather station WXT520 or WXT530');
 netcdf.putAtt(ncid,id_ff,'comment',['Speed is the magnitude of velocity. Wind '...
                                     'is defined as a two-dimensional (horizontal) '...
                                     'air velocity vector, with no vertical '...
@@ -274,8 +274,7 @@ netcdf.putAtt(ncid,id_fff,'short_name','wdir');
 netcdf.putAtt(ncid,id_fff,'units','degrees');
 netcdf.putAtt(ncid,id_fff,'valid_range',[nanmin(data.fff(:)), nanmax(data.fff(:))]);
 netcdf.putAtt(ncid,id_fff,'fill_value',str_fill_value);
-netcdf.putAtt(ncid,id_fff,'wind.direction.surface_source',['Vaisala weather '...
-                           'station WXT520 or WXT530']);
+netcdf.putAtt(ncid,id_fff,'source',['Vaisala weather station WXT520 or WXT530']);
 netcdf.putAtt(ncid,id_fff,'comment',['Wind is defined as a two-dimensional '...
                                      '(horizontal) air velocity vector, with '...
                                      'no vertical component. (Vertical motion '...
@@ -294,7 +293,32 @@ netcdf.putAtt(ncid,id_fff,'comment',['Wind is defined as a two-dimensional '...
                                      'is used in the construction X_from_direction '...
                                      'and indicates the direction from which '...
                                      'the velocity vector of X is coming.']);
-                       
+              
+id_RR_source = netcdf.defVar(ncid,'source_rr','nc_float',did_scalar);
+netcdf.putAtt(ncid,id_RR_source,'GEOMS_name','RAIN.RATE.SURFACE_SOURCE');
+netcdf.putAtt(ncid,id_RR_source,'RAIN.RATE.SURFACE_SOURCE','Vaisala weather station WXT520 or WXT530');
+
+id_rh_source = netcdf.defVar(ncid,'source_rh','nc_float',did_scalar);
+netcdf.putAtt(ncid,id_rh_source,'GEOMS_name','HUMIDITY.RELATIVE.SURFACE');
+netcdf.putAtt(ncid,id_rh_source,'HUMIDITY.RELATIVE.SURFACE','Vaisala weather station WXT520 or WXT530');
+
+id_T_env_source = netcdf.defVar(ncid,'source_ta','nc_float',did_scalar);
+netcdf.putAtt(ncid,id_T_env_source,'GEOMS_name','TEMPERATURE.SURFACE_SOURCE');
+netcdf.putAtt(ncid,id_T_env_source,'TEMPERATURE.SURFACE_SOURCE','Vaisala weather station WXT520 or WXT530');
+
+id_pres_source = netcdf.defVar(ncid,'source_pa','nc_float',did_scalar);
+netcdf.putAtt(ncid,id_pres_source,'GEOMS_name','SURFACE.PRESSURE_SOURCE');
+netcdf.putAtt(ncid,id_pres_source,'SURFACE.PRESSURE_SOURCE','Vaisala weather station WXT520 or WXT530');
+
+id_ff_source = netcdf.defVar(ncid,'source_wspeed','nc_float',did_scalar);
+netcdf.putAtt(ncid,id_ff_source,'GEOMS_name','WIND.SPEED.SURFACE_SOURCE');
+netcdf.putAtt(ncid,id_ff_source,'WIND.SPEED.SURFACE_SOURCE','Vaisala weather station WXT520 or WXT530');
+
+id_fff_source = netcdf.defVar(ncid,'source_wdir','nc_float',did_scalar);
+netcdf.putAtt(ncid,id_fff_source,'GEOMS_name','WIND.DIRECTION.SURFACE_SORCE');
+netcdf.putAtt(ncid,id_fff_source,'WIND.DIRECTION.SURFACE_SORCE','Vaisala weather station WXT520 or WXT530');
+
+                                 
 id_Tb = netcdf.defVar(ncid,'tb','nc_float',did_time);
 netcdf.putAtt(ncid,id_Tb,'GEOMS_name','TEMPERATURE.BRIGHTNESS');
 netcdf.putAtt(ncid,id_Tb,'long_name','brightness_temperature');
@@ -614,12 +638,21 @@ netcdf.endDef(ncid);
 % yourmatrix(isnan(yourmatrix)) = somevalue;
 
 % scalars
-netcdf.putVar(ncid,id_lat,0,data.Lat);
-netcdf.putVar(ncid,id_lon,0,data.Lon);
-netcdf.putVar(ncid,id_MSL,0,data.MSL);
-netcdf.putVar(ncid,id_freq,0, 299792458/(data.freq * 1e9) ); 
-netcdf.putVar(ncid,id_wl,0,data.freq * 1e9);
-netcdf.putVar(ncid,id_HPBW,0,data.HPBW);
+netcdf.putVar(ncid, id_lat, 0, data.Lat);
+netcdf.putVar(ncid, id_lon, 0, data.Lon);
+netcdf.putVar(ncid, id_MSL, 0, data.MSL);
+netcdf.putVar(ncid, id_freq, 0, 299792458/(data.freq * 1e9) ); 
+netcdf.putVar(ncid, id_wl, 0, data.freq * 1e9);
+netcdf.putVar(ncid, id_HPBW, 0, data.HPBW);
+
+temporary_data = 1;    %no need for terminator on longest lines
+netcdf.putVar(ncid, id_RR_source,    0, temporary_data);
+netcdf.putVar(ncid, id_rh_source,    0, temporary_data);
+netcdf.putVar(ncid, id_T_env_source, 0, temporary_data);
+netcdf.putVar(ncid, id_pres_source,  0, temporary_data);
+netcdf.putVar(ncid, id_ff_source,    0, temporary_data);
+netcdf.putVar(ncid, id_fff_source,   0, temporary_data);
+clear temporary_data ;
 
 % range dependet
 netcdf.putVar(ncid,id_range,0,data.n_levels,data.range);
