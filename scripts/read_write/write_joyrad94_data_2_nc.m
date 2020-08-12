@@ -924,13 +924,13 @@ if data.DualPol > 0
     netcdf.defVarDeflate(ncid,id_PNh,true,true,9);
     netcdf.defVarDeflate(ncid,id_SLh,true,true,9);
     netcdf.defVarDeflate(ncid,id_spec_h,true,true,9);
-    netcdf.defVarDeflate(ncid,id_spec_covRe,true,true,9);
-    netcdf.defVarDeflate(ncid,id_spec_covIm,true,true,9);
     netcdf.defVarDeflate(ncid,id_ldr,true,true,9); %JABA    
     netcdf.defVarDeflate(ncid,id_Ze_hv,true,true,9); %LP
     if data.DualPol == 2
         netcdf.defVarDeflate(ncid,id_difphase,true,true,9); %JABA    
         netcdf.defVarDeflate(ncid,id_xcorr,true,true,9); %JABA    
+        netcdf.defVarDeflate(ncid,id_spec_covRe,true,true,9);
+        netcdf.defVarDeflate(ncid,id_spec_covIm,true,true,9);
     end
 end
 

@@ -10,7 +10,7 @@ function data = read_lv0_v3(infile)
     data.readerror = true; % flag for error in reading file
     
     if fid == -1
-        disp(['error opening' infile])
+        disp(['>>> error opening' infile])
         return
     end
     
@@ -62,6 +62,11 @@ function data = read_lv0_v3(infile)
     data.Lon = single(fread(fid,1,'single')); % GPS longitude
     data.CalInt = int32(fread(fid,1,'int')); % period of automatic zero calibrations in number of samples
     data.n_levels = int32(fread(fid,1,'int')); % number of radar altitude layers
+    if any(data.n_levels <= 0 | data.n_levels > 7500 | ~isinteger(data.n_levels)) | isempty(data.n_levels)
+        disp(['>>> error opening' infile])
+        disp(['>>> file not processed - no of range bins either below 0 or above 7500, empty or not an integer'])
+        return
+    end
     data.T_altcount = int32(fread(fid,1,'int')); % number of temperature profile altitude layers
     data.H_altcount = int32(fread(fid,1,'int')); % number of humidity profile altitude layers
     data.no_chirp_seq = fread(fid,1,'int'); % number of chirp sequences
@@ -102,6 +107,15 @@ function data = read_lv0_v3(infile)
     fread(fid,10000,'uint');
     
     data.totsamp = int32(fread(fid,1,'int'));  % total number of samples
+    
+    % check if binary file contains reasonable number of samples :
+    
+    if any( data.totsamp <= 0 | data.totsamp > 3600 | ~isinteger(data.totsamp) ) | isempty(data.totsamp)
+        disp(['>>> error opening' infile])
+        disp(['>>> file not processed - no of samples/profiles below 0 or above 3600, empty or not an integer'])
+        return
+    end
+    
     
     % ################################# header ends
        
@@ -208,7 +222,7 @@ function data = read_lv0_v3(infile)
         fread(fid,data.T_altcount,'single'); % temp prof
         fread(fid,data.H_altcount,'single'); % abs hum prof
         fread(fid,data.H_altcount,'single'); % rel hum prof
-        
+
         data.PNv(i,1:data.n_levels) = fread(fid,[1, data.n_levels],'single');
         if data.DualPol > 0
             data.PNh(i,1:data.n_levels) = fread(fid,[1, data.n_levels],'single');
