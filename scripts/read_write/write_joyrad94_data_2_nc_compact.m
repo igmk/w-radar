@@ -182,7 +182,7 @@ netcdf.putAtt(ncid,id_time,'long_name','time');
 netcdf.putAtt(ncid,id_time,'rpg_name','time');
 netcdf.putAtt(ncid,id_time,'standard_name','time stamp of the radar measurements');
 netcdf.putAtt(ncid,id_time,'short_name','time');
-netcdf.putAtt(ncid,id_time,'units','Time in sec since 2001.01.01. 00:00:00.');
+netcdf.putAtt(ncid,id_time,'units','seconds since 2001.01.01. 00:00:00.');
 netcdf.putAtt(ncid,id_time,'valid_range', [nanmin(data.time(:)), nanmax(data.time(:))]);
 netcdf.putAtt(ncid,id_time,'comment','Time formate is MJD2K');
 if isfield(data, 'totsampchangelabel' )
@@ -317,7 +317,6 @@ netcdf.putAtt(ncid,id_ff_source,'WIND.SPEED.SURFACE_SOURCE','Vaisala weather sta
 id_fff_source = netcdf.defVar(ncid,'source_wdir','nc_float',did_scalar);
 netcdf.putAtt(ncid,id_fff_source,'GEOMS_name','WIND.DIRECTION.SURFACE_SORCE');
 netcdf.putAtt(ncid,id_fff_source,'WIND.DIRECTION.SURFACE_SORCE','Vaisala weather station WXT520 or WXT530');
-
                                  
 id_Tb = netcdf.defVar(ncid,'tb','nc_float',did_time);
 netcdf.putAtt(ncid,id_Tb,'GEOMS_name','TEMPERATURE.BRIGHTNESS');

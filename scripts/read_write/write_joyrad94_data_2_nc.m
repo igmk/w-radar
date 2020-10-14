@@ -283,7 +283,7 @@ netcdf.putAtt(ncid,id_time,'long_name','time');
 netcdf.putAtt(ncid,id_time,'rpg_name','time');
 netcdf.putAtt(ncid,id_time,'standard_name','time stamp of the radar measurements');
 netcdf.putAtt(ncid,id_time,'short_name','time');
-netcdf.putAtt(ncid,id_time,'units','Time in sec since 2001.01.01. 00:00:00.');
+netcdf.putAtt(ncid,id_time,'units','Seconds since 2001.01.01. 00:00:00.');
 netcdf.putAtt(ncid,id_time,'valid_range', [nanmin(data.time(:)), nanmax(data.time(:))]);
 netcdf.putAtt(ncid,id_time,'comment','Time formate is MJD2K');
 if isfield(data, 'totsampchangelabel' )
