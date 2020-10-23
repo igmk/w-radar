@@ -245,6 +245,10 @@ else
             disp('No postprocessing function found.')
         end
         
+        % when debugging, plot radar moments for checking
+        if config.debuging
+            plotcheck(data)
+        end
 
         disp('Saving data...')    
         savedata(data, config);    
