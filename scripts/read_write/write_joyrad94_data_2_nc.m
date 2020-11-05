@@ -59,6 +59,18 @@ netcdf.putAtt(ncid,glob,'INSTRUMENT_MODEL',model);
 netcdf.putAtt(ncid,glob,'MDF_PROGRAM_USED',data.progname);
 
 
+% variables for dimensions
+id_scal = netcdf.defVar(ncid,'scalar','nc_int',did_scalar);
+netcdf.putAtt(ncid,id_scal,'comment','Variable for scalar-dimension');
+
+id_no_seq = netcdf.defVar(ncid,'number.chirp.sequences','nc_int',did_no_seq);
+netcdf.putAtt(ncid,id_no_seq,'comment','Variable for number.chirp.sequences-dimension');
+
+id_veldim = netcdf.defVar(ncid,'velocity','nc_int',did_vel);
+netcdf.putAtt(ncid,id_veldim,'comment','Variable for velocity-dimension');
+
+
+
 %% ################ get variable ids and add attributes
 
 %%%%%%%%%% scalar variables
@@ -731,7 +743,7 @@ if data.DualPol == 2
     netcdf.putAtt(ncid,id_xcorr,'rpg_name','CorrCoeff');    
     netcdf.putAtt(ncid,id_xcorr,'standard_name','co-cross-channel correlation coefficient');
     netcdf.putAtt(ncid,id_xcorr,'short_name','rho_hv');        
-    netcdf.putAtt(ncid,id_xcorr,'valid_range',[nanmin(data.xcorr(:)), nanmax(data.xcorr(:))]);
+    %netcdf.putAtt(ncid,id_xcorr,'valid_range',[nanmin(data.xcorr(:)), nanmax(data.xcorr(:))]);
     netcdf.putAtt(ncid,id_xcorr,'fill_value',str_fill_value);
     
     id_difphase = netcdf.defVar(ncid,'phi_dp','nc_float',[did_range,did_time]);
@@ -741,7 +753,7 @@ if data.DualPol == 2
     netcdf.putAtt(ncid,id_difphase,'standard_name','co-cross-channel differential phase');   
     netcdf.putAtt(ncid,id_difphase,'short_name','phi_dp');        
     netcdf.putAtt(ncid,id_difphase,'unite','degree');   
-    netcdf.putAtt(ncid,id_difphase,'valid_range',[nanmin(data.difphase(:)), nanmax(data.difphase(:))]); 
+    %netcdf.putAtt(ncid,id_difphase,'valid_range',[nanmin(data.difphase(:)), nanmax(data.difphase(:))]); 
     netcdf.putAtt(ncid,id_difphase,'fill_value',str_fill_value); 
 end
 
@@ -955,6 +967,13 @@ if data.CompEna > 0 && data.DualPol > 0
     netcdf.defVarDeflate(ncid,id_HNoisePow_peak,true,true,9);
 end    
 
+% variables for dimensions
+netcdf.defVarDeflate(ncid,id_scal,true,true,9);
+netcdf.defVarDeflate(ncid,id_no_seq,true,true,9);
+netcdf.defVarDeflate(ncid,id_veldim,true,true,9);
+
+
+
 netcdf.endDef(ncid);
 
 
@@ -984,6 +1003,13 @@ netcdf.putVar(ncid,id_freq,0,data.freq);
 netcdf.putVar(ncid,id_lon,0,data.Lon);
 netcdf.putVar(ncid,id_lat,0,data.Lat);
 netcdf.putVar(ncid,id_MSL,0,data.MSL);
+
+% variables for dimensions
+netcdf.putVar(ncid,id_scal,0,1);
+netcdf.putVar(ncid,id_no_seq,0,data.no_chirp_seq,1:data.no_chirp_seq);
+netcdf.putVar(ncid,id_veldim,0,max(data.DoppLen), 1:max(data.DoppLen));
+
+
 
 % range dependet
 netcdf.putVar(ncid,id_range,0,data.n_levels,data.range);

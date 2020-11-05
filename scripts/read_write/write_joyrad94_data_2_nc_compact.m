@@ -56,6 +56,17 @@ netcdf.putAtt(ncid,glob,'INSTRUMENT_MODEL',model);
 netcdf.putAtt(ncid,glob,'MDF_PROGRAM_USED',data.progname);
 
 
+
+% variables for dimensions
+id_scal = netcdf.defVar(ncid,'scalar','nc_int',did_scalar);
+netcdf.putAtt(ncid,id_scal,'comment','Variable for scalar-dimension');
+
+id_no_seq = netcdf.defVar(ncid,'number.chirp.sequences','nc_int',did_no_seq);
+netcdf.putAtt(ncid,id_no_seq,'comment','Variable for number.chirp.sequences-dimension');
+
+
+
+
 %% ################ get variable ids and add attributes
 
 %%%%%%%%%% scalar variables
@@ -544,7 +555,7 @@ if data.DualPol == 2
     netcdf.putAtt(ncid,id_xcorr,'rpg_name','CorrCoeff');    
     netcdf.putAtt(ncid,id_xcorr,'standard_name','co-cross-channel correlation coefficient');
     netcdf.putAtt(ncid,id_xcorr,'short_name','rho_hv');        
-    netcdf.putAtt(ncid,id_xcorr,'valid_range',[nanmin(data.xcorr(:)), nanmax(data.xcorr(:))]);
+    %netcdf.putAtt(ncid,id_xcorr,'valid_range',[nanmin(data.xcorr(:)), nanmax(data.xcorr(:))]);
     netcdf.putAtt(ncid,id_xcorr,'fill_value',str_fill_value);
     
     id_difphase = netcdf.defVar(ncid,'phi_dp','nc_float',[did_range,did_time]);
@@ -554,7 +565,7 @@ if data.DualPol == 2
     netcdf.putAtt(ncid,id_difphase,'standard_name','co-cross-channel differential phase');   
     netcdf.putAtt(ncid,id_difphase,'short_name','phi_dp');        
     netcdf.putAtt(ncid,id_difphase,'unite','degree');   
-    netcdf.putAtt(ncid,id_difphase,'valid_range',[nanmin(data.difphase(:)), nanmax(data.difphase(:))]); 
+    %netcdf.putAtt(ncid,id_difphase,'valid_range',[nanmin(data.difphase(:)), nanmax(data.difphase(:))]); 
     netcdf.putAtt(ncid,id_difphase,'fill_value',str_fill_value); 
 end
 
@@ -630,6 +641,12 @@ end
 netcdf.defVarDeflate(ncid,id_QualFlag,true,true,9);
 netcdf.defVarDeflate(ncid,id_Aliasmask,true,true,9);
 
+% variables for dimensions
+netcdf.defVarDeflate(ncid,id_scal,true,true,9);
+netcdf.defVarDeflate(ncid,id_no_seq,true,true,9);
+
+
+
 netcdf.endDef(ncid);
 
 %% ####################### put variables into file
@@ -652,6 +669,10 @@ netcdf.putVar(ncid, id_pres_source,  0, temporary_data);
 netcdf.putVar(ncid, id_ff_source,    0, temporary_data);
 netcdf.putVar(ncid, id_fff_source,   0, temporary_data);
 clear temporary_data ;
+
+% variables for dimensions
+netcdf.putVar(ncid,id_scal,0,1);
+netcdf.putVar(ncid,id_no_seq,0,data.no_chirp_seq,1:data.no_chirp_seq);
 
 % range dependet
 netcdf.putVar(ncid,id_range,0,data.n_levels,data.range);
