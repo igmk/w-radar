@@ -286,6 +286,17 @@ netcdf.putAtt(ncid,id_dr,'GEOMS_name','radar.operation.parameter.dz_chirp');
 netcdf.putAtt(ncid,id_dr,'standard_name','Range resolution for chirp sequences');
 netcdf.putAtt(ncid,id_dr,'units','m');
 
+%--- from here on the variables are not GEOMS formate conforme
+
+id_ChrpIntTime = netcdf.defVar(ncid,'chirp_seq_int_time','nc_float',did_no_seq); % added by RG 4.12.2020
+netcdf.putAtt(ncid,id_ChrpIntTime,'standard_name',['Integration time of each chirp sequence, ' ...
+                                                  'calculated from chirp repetition frequency ' ...
+                                                  'and number of repetitions']);
+netcdf.putAtt(ncid,id_ChrpIntTime,'units','seconds');
+netcdf.putAtt(ncid,id_ChrpIntTime,'comment',['This variable corresponds to the chirp ' ...
+                                             'integration time set in the chirp table ' ...
+                                             'during mdf definition']);
+                                         
 
 %%%%%%%% time dependend variables
 
@@ -1030,7 +1041,7 @@ netcdf.putVar(ncid,id_DoppLen,0,data.no_chirp_seq,data.DoppLen);
 netcdf.putVar(ncid,id_SeqAvg,0,data.no_chirp_seq,data.SeqAvg);
 netcdf.putVar(ncid,id_SeqIntTime,0,data.no_chirp_seq,data.SeqIntTime);
 netcdf.putVar(ncid,id_nAvg,0,data.no_chirp_seq,data.nAvg);
-
+netcdf.putVar(ncid,id_ChrpIntTime,0,data.no_chirp_seq,data.ChirpIntTime); % added by RG 4.12.2020
 
 % time dependent variables
 netcdf.putVar(ncid,id_time,0,data.totsamp,data.time);
