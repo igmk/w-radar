@@ -65,10 +65,12 @@ end
 % ########### check if peak noise faktor was provided
 idx_pnf = find(strcmp(varargin,'pnf'), 1) + 1;
 idx_mnf = find(strcmp(varargin,'mnf'), 1) + 1;
+pnf_flag = false;
 if isempty(idx_pnf) && isempty(idx_mnf)
     pnf = 1.0;
 elseif ~isempty(idx_pnf)
     pnf = varargin{idx_pnf};
+    pnf_flag = true;
 else
     mnf = varargin{idx_mnf};
 end
@@ -112,7 +114,7 @@ for i = 1:numel(range_offsets)-1
         idxnew = false(1,Nfft(i));  %indicates location of significant signal
          
         % find all spectral entries larger than pnf*peaknoise
-        if exist('pnf','var')
+        if pnf_flag%exist('pnf','var')
             idx = spec(r_idx(ii),1:Nfft(i)) > pnf*output.peaknoise(r_idx(ii),1);
         else
             idx = spec(r_idx(ii),1:Nfft(i)) > mnf*output.meannoise(r_idx(ii),1);
