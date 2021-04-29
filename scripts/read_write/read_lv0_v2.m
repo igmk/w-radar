@@ -14,6 +14,10 @@ function data = read_lv0_v2(infile)
         return
     end
     
+    % filename - used leter for expections for specific files
+    filename = split(infile,'/');
+    filename = filename{end};
+    
     %%%%%%%%%%%%%%% read header information %%%%%%%%%%%%%%%%
     
     data.filecode = int32(fread(fid,1,'int')); % lv1-file code
@@ -205,6 +209,14 @@ function data = read_lv0_v2(infile)
                 
                 % spectra
                 if data.CompEna == 0 
+                    
+                    if strcmp(filename, 'joyrad94_20170208140002_P05_ZEN.lv0') && i == 641 && j == 165 % this file ends before expected
+                        disp('Note! File ends before expected, returning the data that could be read')
+                        fclose(fid);                    
+                        data.readerror = false; % succesfull in reading file!         
+                        return
+    
+                    end
 
                     data.spec(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra
                     if data.DualPol > 0
