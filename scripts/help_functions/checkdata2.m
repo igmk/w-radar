@@ -19,6 +19,9 @@ xarray = 1:length(data.time);
 
 data.time(indnan) = round(interp1(xarray(~indnan), double(data.time(~indnan)), xarray(indnan) ));
 
+if isnan(data.time(end)) % if last time stamp is same as previous, it does not get interpolated by the function above - replacing none with value before so that next block deals with this
+    data.time(end) = data.time(end-1);
+end
     
 % data.time should be integers, but it is possible that interpolation
 % creates real values that are rounded to integers that already exist ->
