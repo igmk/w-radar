@@ -68,6 +68,7 @@ idx_mnf = find(strcmp(varargin,'mnf'), 1) + 1;
 pnf_flag = false;
 if isempty(idx_pnf) && isempty(idx_mnf)
     pnf = 1.0;
+    % should introduce a default mnf value as well!
 elseif ~isempty(idx_pnf)
     pnf = varargin{idx_pnf};
     pnf_flag = true;
@@ -75,6 +76,13 @@ else
     mnf = varargin{idx_mnf};
 end
 
+if ~pnf_flag && isempty(idx_mnf) % RG 5.5.2021: should make better fix and choose a default mnf...
+    disp('In function radar_moments_from_spectra_and_different_chrip_seq:')
+    disp('No default option for mean noise factor has been set, ')
+    disp('error will be raised for missing vairable mnf.')    
+    disp('Provide factor for function or use peak noise instead...')
+end    
+    
 % ########## get range offsets
 range_offsets = varargin{find(strcmp(varargin,'range_offsets'), 1) + 1};
 % adjust range_offsets

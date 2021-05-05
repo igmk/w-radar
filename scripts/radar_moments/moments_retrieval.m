@@ -4,11 +4,11 @@ for i = 1:numel(data.time)
     
     % 0 = single pol radar, 1 = dual pol radar LDR conf., 2 = dual pol radar STSR mode
     if data.DualPol == 0
-
+    
         tempmoments = radar_moments(squeeze(data.spec(i,:,:)),data.velocity',data.nAvg,'range_offsets',...
                             data.range_offsets,'moment_str','kurt',...
                             'nbins',3, 'compressed', data.compress_spec,...
-                            'DualPol', data.DualPol);
+                            'DualPol', data.DualPol, 'pnf', 1);
 
     elseif data.DualPol == 1
 
