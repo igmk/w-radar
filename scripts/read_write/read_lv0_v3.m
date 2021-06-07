@@ -110,7 +110,7 @@ function data = read_lv0_v3(infile)
     
     % check if binary file contains reasonable number of samples :
     
-    if any( data.totsamp <= 0 | data.totsamp > 3600 | ~isinteger(data.totsamp) ) | isempty(data.totsamp)
+    if any( data.totsamp <= 0 | data.totsamp > 3600 | ~isinteger(data.totsamp) ) || isempty(data.totsamp)
         disp(['>>> error opening' infile])
         disp(['>>> file not processed - no of samples/profiles below 0 or above 3600, empty or not an integer'])
         return
@@ -239,16 +239,18 @@ function data = read_lv0_v3(infile)
                         
             if data.mask(i,j) == 1
                 
-                % find number of current chirp index
-                chirp_idx = int32(find(data.range_offsets(2:end) - j > 0,1,'first'));
-                if isempty(chirp_idx) % then j is within last chirp
-                    chirp_idx = data.no_chirp_seq;
-                end
+
                 
                 fread(fid,1,'int'); % number of bytes of the followng spectral block
                 
                 % spectra
                 if data.CompEna == 0 
+
+                    % find number of current chirp index
+                    chirp_idx = int32(find(data.range_offsets(2:end) - j > 0,1,'first'));
+                    if isempty(chirp_idx) % then j is within last chirp
+                        chirp_idx = data.no_chirp_seq;
+                    end
 
                     data.spec(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra
                     if data.DualPol > 0
@@ -273,34 +275,56 @@ function data = read_lv0_v3(infile)
                                 return
                              end
                         end
-                        
-                        if data.DualPol > 0
-                            try
+                    end % jj
+                    
+                    if data.DualPol > 0
+                         
+                        try
+
+                            for jj = 1:Nblocks
                                 data.spec_hv(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
-                                data.spec_covRe(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
-                                data.spec_covIm(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
-                            catch
-                                disp('what?')
-                                if feof(fid)
-                                    endoffileerrormessage
-                                    return
-                                end
                             end
-                             
+                        
+                            for jj = 1:Nblocks
+                                data.spec_covRe(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
+                            end
+                        
+                            for jj = 1:Nblocks
+                                data.spec_covIm(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
+                            end
+                            
+                        catch
+                            disp('what?')
+                            if feof(fid)
+                                endoffileerrormessage
+                                return
+                            end
                         end
                         
-                        if data.CompEna == 2
-                            data.d_spec(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
-                            data.CorrCoeff(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
-                            data.DiffPh(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
+                    if data.CompEna == 2
+                        
+                        disp('!!WARNING!! in read_lv0_v3: the combination of DualPol > 0 and CompEna == 2 has not been tested')
 
-                            if data.DualPol == 2
+                        for jj = 1:Nblocks
+                            data.d_spec(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
+                        end
+                        for jj = 1:Nblocks
+                            data.CorrCoeff(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
+                        end
+                        for jj = 1:Nblocks
+                            data.DiffPh(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
+                        end
+
+                        if data.DualPol == 2
+                            for jj = 1:Nblocks
                                 data.SLDR(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
+                            end
+                            for jj = 1:Nblocks
                                 data.SCorrCoeff(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
                             end 
                         end
                            
-                    end % jj
+                    end %fi
                     
                     if data.DualPol == 2 && data.CompEna == 2
                         data.KDP(i,j) = fread(fid,1,'single');
