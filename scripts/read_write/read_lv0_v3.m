@@ -300,6 +300,7 @@ function data = read_lv0_v3(infile)
                                 return
                             end
                         end
+                    end % if
                         
                     if data.CompEna == 2
                         
