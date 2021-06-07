@@ -9,15 +9,22 @@ config.filename = filename;
 filename = strrep(config.filename,config.nickradar, '');
 filename = strrep(filename,config.nickstation, '');
 
+if isempty( strfind(config.filetag, '_') ) && ~isempty(config.filetag)
+
+    config.filetag = [ '_' config.filetag];
+end
 
 switch config.compact_flag
     case 0
-        outfile = fullfile(config.outputpath_tree, sprintf('%s_%s_%s_%s.nc', config.nickradar, config.nickstation, filename, config.filetag));
+        outfile = fullfile(config.outputpath_tree, sprintf('%s_%s_%s%s.nc', config.nickradar, config.nickstation, filename, config.filetag));
     case 1
-        outfile2 = fullfile(config.outputpath_tree, sprintf('%s_%s_%s_compact_%s.nc', config.nickradar, config.nickstation, filename, config.filetag));
+        outfile2 = fullfile(config.outputpath_tree, sprintf('%s_%s_%s_compact%s.nc', config.nickradar, config.nickstation, filename, config.filetag));
     case 2
-        outfile = fullfile(config.outputpath_tree, sprintf('%s_%s_%s_%s.nc', config.nickradar, config.nickstation, filename, config.filetag));
-        outfile2 = fullfile(config.outputpath_tree, sprintf('%s_%s_%s_compact_%s.nc', config.nickradar, config.nickstation, filename, config.filetag));
+        outfile = fullfile(config.outputpath_tree, sprintf('%s_%s_%s%s.nc', config.nickradar, config.nickstation, filename, config.filetag));
+        outfile2 = fullfile(config.outputpath_tree, sprintf('%s_%s_%s_compact%s.nc', config.nickradar, config.nickstation, filename, config.filetag));
+    case 3
+        outfile = fullfile(config.outputpath_tree, sprintf('%s_%s_%s%s.nc', config.nickradar, config.nickstation, filename, config.filetag));
+        outfile2 = fullfile(config.outputpath_tree, sprintf('%s_%s_%s_technical%s.nc', config.nickradar, config.nickstation, filename, config.filetag));
 end
 
 
