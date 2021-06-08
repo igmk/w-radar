@@ -13,33 +13,55 @@ for ii = 1:specsize(1)
     end
 end
    
-% write full file
-if config.compact_flag ~=1
+if config.compact_flag == 3  % two file approach
+       
     if exist(config.outfile,'file')
         delete(config.outfile);
     end
-    
+    if exist(config.outfile2,'file')
+        delete(config.outfile2);
+    end
+
     [pathstr,~ ,~] = fileparts(config.outfile);
     if ~exist(pathstr,'dir')
         mkdir(pathstr);
     end
 
     disp(['Writing file ' config.outfile])
-    write_joyrad94_data_2_nc(data,config.outfile, config);  
-end
+    write_data_2_nc_physparam(data,config);  
+    write_data_2_nc_technical(data,config);  
+    
+else % default
+
+    % write full file
+    if config.compact_flag ~=1
+        if exist(config.outfile,'file')
+            delete(config.outfile);
+        end
+
+        [pathstr,~ ,~] = fileparts(config.outfile);
+        if ~exist(pathstr,'dir')
+            mkdir(pathstr);
+        end
+
+        disp(['Writing file ' config.outfile])
+        write_joyrad94_data_2_nc(data,config.outfile, config);  
+    end
 
 
-% write compact file
-if config.compact_flag~=0
-    if exist(config.outfile2,'file')
-        delete(config.outfile2);
+    % write compact file
+    if config.compact_flag~=0
+        if exist(config.outfile2,'file')
+            delete(config.outfile2);
+        end
+
+        [pathstr,~ ,~] = fileparts(config.outfile2);
+        if ~exist(pathstr,'dir')
+            mkdir(pathstr);
+        end
+
+        disp(['Writing file ' config.outfile2])
+        write_joyrad94_data_2_nc_compact(data,config.outfile2, config);
     end
     
-    [pathstr,~ ,~] = fileparts(config.outfile2);
-    if ~exist(pathstr,'dir')
-        mkdir(pathstr);
-    end
-    
-    disp(['Writing file ' config.outfile2])
-    write_joyrad94_data_2_nc_compact(data,config.outfile2, config);
 end
