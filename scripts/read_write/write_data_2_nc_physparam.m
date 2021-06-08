@@ -336,7 +336,11 @@ id_Ze = netcdf.defVar(ncid,'ze','nc_float',[did_range,did_time]);
 netcdf.putAtt(ncid,id_Ze,'GEOMS_name','RADAR.REFLECTIVITY.FACTOR_VV');
 netcdf.putAtt(ncid,id_Ze,'long_name','equivalent_reflectivity_factor');
 netcdf.putAtt(ncid,id_Ze,'rpg_name','Ze');
-netcdf.putAtt(ncid,id_Ze,'standard_name','Equivalent radar reflectivity factor at vertical polarisation');
+if data.DualPol == 0
+    netcdf.putAtt(ncid,id_Ze,'standard_name','Equivalent radar reflectivity factor');
+else
+    netcdf.putAtt(ncid,id_Ze,'standard_name','Equivalent radar reflectivity factor at vertical polarisation');
+end
 netcdf.putAtt(ncid,id_Ze,'units','mm6 m-3');
 netcdf.putAtt(ncid,id_Ze,'valid_range',[nanmin(data.Ze(:)), nanmax(data.Ze(:))]);
 netcdf.putAtt(ncid,id_Ze,'fill_value',str_fill_value);
@@ -360,7 +364,11 @@ id_vm = netcdf.defVar(ncid,'vm','nc_float',[did_range,did_time]);
 netcdf.putAtt(ncid,id_vm,'GEOMS_name','DOPPLER.VELOCITY_MEAN');
 netcdf.putAtt(ncid,id_vm,'long_name','mean_doppler_velocity');
 netcdf.putAtt(ncid,id_vm,'rpg_name','vm');
-netcdf.putAtt(ncid,id_vm,'standard_name','Mean Doppler velocity at vertical polarisation');
+if data.DualPol == 0
+    netcdf.putAtt(ncid,id_vm,'standard_name','Mean Doppler velocity');
+else
+    netcdf.putAtt(ncid,id_vm,'standard_name','Mean Doppler velocity at vertical polarisation');
+end
 netcdf.putAtt(ncid,id_vm,'short_name','vm');
 netcdf.putAtt(ncid,id_vm,'units','m s-1');
 netcdf.putAtt(ncid,id_vm,'valid_range',[nanmin(data.vm(:)), nanmax(data.vm(:))]);
@@ -375,7 +383,11 @@ id_sigma = netcdf.defVar(ncid,'sw','nc_float',[did_range,did_time]);
 netcdf.putAtt(ncid,id_sigma,'GEOMS_name','DOPPLER.SPECTRUM_WIDTH');
 netcdf.putAtt(ncid,id_sigma,'long_name','doppler_spectrum_width');
 netcdf.putAtt(ncid,id_sigma,'rpg_name','sigma');
-netcdf.putAtt(ncid,id_sigma,'standard_name','Doppler spectrum width at vertical polarisation');
+if data.DualPol == 0
+    netcdf.putAtt(ncid,id_sigma,'standard_name','Doppler spectrum width');
+else
+    netcdf.putAtt(ncid,id_sigma,'standard_name','Doppler spectrum width at vertical polarisation');
+end
 netcdf.putAtt(ncid,id_sigma,'short_name','sw');
 netcdf.putAtt(ncid,id_sigma,'units','m s-1');
 netcdf.putAtt(ncid,id_sigma,'valid_range',[nanmin(data.sigma(:)), nanmax(data.sigma(:))]);
@@ -387,7 +399,11 @@ id_skew = netcdf.defVar(ncid,'sk','nc_float',[did_range,did_time]);
 netcdf.putAtt(ncid,id_skew,'GEOMS_name','DOPPLER.SPECTRUM_SKEWNESS');
 netcdf.putAtt(ncid,id_skew,'long_name','doppler_spectrum_skewnes');
 netcdf.putAtt(ncid,id_skew,'rpg_name','skew');
-netcdf.putAtt(ncid,id_skew,'standard_name','Doppler spectrum skewness at vertical polarisation');
+if data.DualPol == 0
+    netcdf.putAtt(ncid,id_skew,'standard_name','Doppler spectrum skewness');
+else
+    netcdf.putAtt(ncid,id_skew,'standard_name','Doppler spectrum skewness at vertical polarisation');
+end    
 netcdf.putAtt(ncid,id_skew,'short_name','skew');
 netcdf.putAtt(ncid,id_skew,'valid_range',[nanmin(data.skew(:)), nanmax(data.skew(:))]);
 netcdf.putAtt(ncid,id_skew,'fill_value',str_fill_value);
@@ -465,7 +481,11 @@ end
 
 id_spec = netcdf.defVar(ncid,'spec','nc_float',[did_vel,did_range,did_time]);
 netcdf.putAtt(ncid,id_spec,'GEOMS_name','RADAR.DOPPLER.SPECTRUM_VV');
-netcdf.putAtt(ncid,id_spec,'standard_name','Doppler spectrum vertical polarization');
+if data.DualPol == 0
+    netcdf.putAtt(ncid,id_spec,'standard_name','Doppler spectrum');
+else
+    netcdf.putAtt(ncid,id_spec,'standard_name','Doppler spectrum vertical polarization');
+end        
 netcdf.putAtt(ncid,id_spec,'units','mm6 mm-3');
 netcdf.putAtt(ncid,id_spec,'valid_range',[nanmin(data.spec(:)), nanmax(data.spec(:))]);
 netcdf.putAtt(ncid,id_spec,'fill_value','NaNf');
@@ -510,8 +530,8 @@ if data.DualPol > 0
     netcdf.putAtt(ncid,id_spec_h,'standard_name','Doppler spectrum horizontal polarization');
     netcdf.putAtt(ncid,id_spec_h,'units','mm6 mm-3');
     
-    id_SLh = netcdf.defVar(ncid,'sen_lim_vv','nc_float',[did_range,did_time]);
-    netcdf.putAtt(ncid,id_SLh,'standard_name','Linear sensitivity limit for vertical polarisation');
+    id_SLh = netcdf.defVar(ncid,'sen_lim_h','nc_float',[did_range,did_time]);
+    netcdf.putAtt(ncid,id_SLh,'standard_name','Linear sensitivity limit for horizontal polarisation');
     netcdf.putAtt(ncid,id_SLh,'units','mm6 mm-3');
 
     if data.DualPol > 1
