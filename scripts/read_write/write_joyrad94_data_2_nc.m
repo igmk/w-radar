@@ -225,12 +225,12 @@ netcdf.putAtt(ncid,id_Fr,'standard_name','Range factors, see manual eq. (2.5.6)'
 
 if ne(data.T_altcount,0)
     id_T_levels = netcdf.defVar(ncid,'T_levels','nc_float',did_T_range);
-    netcdf.putAtt(ncid,id_T_levels,'standard_name','No. levels of temperature profile');
+    netcdf.putAtt(ncid,id_T_levels,'standard_name','Levels of temperature profile');
 end
 
 if ne(data.H_altcount,0)
     id_H_levels = netcdf.defVar(ncid,'H_levels','nc_float',did_H_range);
-    netcdf.putAtt(ncid,id_H_levels,'standard_name','No. levels of humidity profiles');
+    netcdf.putAtt(ncid,id_H_levels,'standard_name','Levels of humidity profiles');
 end
 
 
@@ -830,7 +830,7 @@ if data.DualPol > 0
         netcdf.putAtt(ncid,id_spec_covRe,'units','mm6 mm-3');
     
         id_spec_covIm = netcdf.defVar(ncid,'scov_im','nc_float',[did_vel,did_range,did_time]);
-        netcdf.putAtt(ncid,id_spec_covIm,'standard_name','Real part of covariance spectrum');
+        netcdf.putAtt(ncid,id_spec_covIm,'standard_name','Imaginary part of covariance spectrum');
         netcdf.putAtt(ncid,id_spec_covIm,'units','mm6 mm-3');
     end
 
@@ -1011,6 +1011,7 @@ end
 netcdf.putVar(ncid,id_AntiAlias,0,data.AntiAlias);
 netcdf.putVar(ncid,id_cal_mom,0,data.cal_mom);
 netcdf.putVar(ncid,id_freq,0,data.freq);
+netcdf.putVar(ncid, id_wl, 0, data.freq * 1e9);
 netcdf.putVar(ncid,id_lon,0,data.Lon);
 netcdf.putVar(ncid,id_lat,0,data.Lat);
 netcdf.putVar(ncid,id_MSL,0,data.MSL);
