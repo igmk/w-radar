@@ -18,7 +18,7 @@ fill_value     = NaN  ;
 did_time   = netcdf.defDim(ncid,'time',netcdf.getConstant('NC_UNLIMITED'));
 did_range  = netcdf.defDim(ncid,'range',data.n_levels);
 did_vel    = netcdf.defDim(ncid,'velocity',max(data.DoppLen));
-did_no_seq = netcdf.defDim(ncid,'number.chirp.sequences',data.no_chirp_seq);
+did_no_seq = netcdf.defDim(ncid,'chirp',data.no_chirp_seq);
 did_scalar = netcdf.defDim(ncid,'scalar',1);
 
 if ne(data.T_altcount,0) && isfield(data,'Tprof')
@@ -67,8 +67,8 @@ netcdf.putAtt(ncid,glob,'MDF_PROGRAM_USED',data.progname);
 id_scal = netcdf.defVar(ncid,'scalar','nc_int',did_scalar);
 netcdf.putAtt(ncid,id_scal,'comment','Variable for scalar-dimension');
 
-id_no_seq = netcdf.defVar(ncid,'number.chirp.sequences','nc_int',did_no_seq);
-netcdf.putAtt(ncid,id_no_seq,'comment','Variable for number.chirp.sequences-dimension');
+id_no_seq = netcdf.defVar(ncid,'chirp','nc_int',did_no_seq);
+netcdf.putAtt(ncid,id_no_seq,'comment','Variable for chirp-dimension');
 
 id_veldim = netcdf.defVar(ncid,'velocity','nc_int',did_vel);
 netcdf.putAtt(ncid,id_veldim,'comment','Variable for velocity-dimension');
@@ -383,7 +383,7 @@ netcdf.putAtt(ncid,id_sigma,'fill_value',str_fill_value);
 netcdf.putAtt(ncid,id_sigma,'comment',['Doppler spectrum width of the measured Doppler spectrum'...
                                        'at vertical polarisation.']);
 
-id_skew = netcdf.defVar(ncid,'skew','nc_float',[did_range,did_time]);
+id_skew = netcdf.defVar(ncid,'sk','nc_float',[did_range,did_time]);
 netcdf.putAtt(ncid,id_skew,'GEOMS_name','DOPPLER.SPECTRUM_SKEWNESS');
 netcdf.putAtt(ncid,id_skew,'long_name','doppler_spectrum_skewnes');
 netcdf.putAtt(ncid,id_skew,'rpg_name','skew');
@@ -394,7 +394,7 @@ netcdf.putAtt(ncid,id_skew,'fill_value',str_fill_value);
 netcdf.putAtt(ncid,id_skew,'comment',['Doppler spectrum skewness of measured Doppler spectrum '...
                                       'at vertical polarisation.']);
 
-id_kurt = netcdf.defVar(ncid,'kurt','nc_float',[did_range,did_time]);
+id_kurt = netcdf.defVar(ncid,'ku','nc_float',[did_range,did_time]);
 netcdf.putAtt(ncid,id_kurt,'standard_name','RADAR.DOPPLER.SPECTRUM_KURTOSIS');
 netcdf.putAtt(ncid,id_kurt,'long_name','Doppler spectrum Kurtosis');
 netcdf.putAtt(ncid,id_kurt,'valid_range',[nanmin(data.kurt(:)), nanmax(data.kurt(:))]);
@@ -463,7 +463,7 @@ if data.DualPol == 2
 end
 
 
-id_spec = netcdf.defVar(ncid,'sze','nc_float',[did_vel,did_range,did_time]);
+id_spec = netcdf.defVar(ncid,'spec','nc_float',[did_vel,did_range,did_time]);
 netcdf.putAtt(ncid,id_spec,'GEOMS_name','RADAR.DOPPLER.SPECTRUM_VV');
 netcdf.putAtt(ncid,id_spec,'standard_name','Doppler spectrum vertical polarization');
 netcdf.putAtt(ncid,id_spec,'units','mm6 mm-3');
@@ -480,13 +480,22 @@ if isfield(data, 'Ze_label') % Ze corrected, adding note
     netcdf.putAtt(ncid,id_spec,'corretion_dB',data.Ze_corr);
 end                           
 
-id_SLv = netcdf.defVar(ncid,'SLv','nc_float',[did_range,did_time]);
-netcdf.putAtt(ncid,id_SLv,'standard_name','Linear sensitivity limit for vertical polarisation');
+id_SLv = netcdf.defVar(ncid,'sens_limit','nc_float',[did_range,did_time]);
+if data.DualPol == 0
+    netcdf.putAtt(ncid,id_SLv,'standard_name','Linear sensitivity limit');
+else
+    netcdf.putAtt(ncid,id_SLv,'standard_name','Linear sensitivity limit for vertical polarization');
+end
 netcdf.putAtt(ncid,id_SLv,'units','mm6 mm-3');
 
-id_VNoisePow_mean = netcdf.defVar(ncid,'v_noise_pow_mean','nc_float',[did_range,did_time]);
+id_VNoisePow_mean = netcdf.defVar(ncid,'mean_noise','nc_float',[did_range,did_time]);
 netcdf.putAtt(ncid,id_VNoisePow_mean,'GEOMS_name','radar.doppler.spectrum_noise.power.mean_vv');
-netcdf.putAtt(ncid,id_VNoisePow_mean,'standard_name','Bin Doppler spectrum mean noise power in vertical polarization');
+if data.DualPol == 0
+    netcdf.putAtt(ncid,id_VNoisePow_mean,'standard_name','Bin Doppler spectrum mean noise power');
+else
+    netcdf.putAtt(ncid,id_VNoisePow_mean,'standard_name','Bin Doppler spectrum mean noise power in vertical polarization');
+end    
+
 netcdf.putAtt(ncid,id_VNoisePow_mean,'units','mm6 m-3');
 netcdf.putAtt(ncid,id_VNoisePow_mean,'valid_range',[nanmin(data.VNoisePow_mean(:)), nanmax(data.VNoisePow_mean(:))]);
 netcdf.putAtt(ncid,id_VNoisePow_mean,'fill_value','NaNf');
