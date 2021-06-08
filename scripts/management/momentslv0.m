@@ -169,6 +169,8 @@ else
                 end
             end
             
+            data = remove_speckle(data);
+            
             if config.dealias  % If the user wants to do it
                 
                 if data.AntiAlias
