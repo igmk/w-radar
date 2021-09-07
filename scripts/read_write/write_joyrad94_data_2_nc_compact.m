@@ -1,11 +1,11 @@
 function write_joyrad94_data_2_nc_compact(data, outfile, config)
 
 % this function writes joyrad94 data into netcdf4
-% Changes of all the 
+% Changes of all the
 
 %% ################## Create a netCDF file.
 
-ncid = netcdf.create(outfile,'NETCDF4'); 
+ncid = netcdf.create(outfile,'NETCDF4');
 
 
 %% ################## General settings for the fill values of the data
@@ -136,7 +136,7 @@ id_AntiAlias = netcdf.defVar(ncid,'alias_flag','nc_byte',did_scalar);
 netcdf.putAtt(ncid,id_AntiAlias,'GEOMS_name','processing.flag.alias_flag');
 netcdf.putAtt(ncid,id_AntiAlias,'long_name','Quality flag for dealiasing');
 netcdf.putAtt(ncid,id_AntiAlias,'comment',['The flag index shows: '...
-                                           '0 = no dealiasing applied, '... 
+                                           '0 = no dealiasing applied, '...
                                            '1 = dealiasing by RPG, '...
                                            '2 = dealiasing by the applied code (see DATA_SOURCE)']);
 
@@ -304,7 +304,7 @@ netcdf.putAtt(ncid,id_fff,'comment',['Wind is defined as a two-dimensional '...
                                      'is used in the construction X_from_direction '...
                                      'and indicates the direction from which '...
                                      'the velocity vector of X is coming.']);
-              
+
 id_RR_source = netcdf.defVar(ncid,'source_rr','nc_float',did_scalar);
 netcdf.putAtt(ncid,id_RR_source,'GEOMS_name','RAIN.RATE.SURFACE_SOURCE');
 netcdf.putAtt(ncid,id_RR_source,'RAIN.RATE.SURFACE_SOURCE','Vaisala weather station WXT520 or WXT530');
@@ -328,7 +328,7 @@ netcdf.putAtt(ncid,id_ff_source,'WIND.SPEED.SURFACE_SOURCE','Vaisala weather sta
 id_fff_source = netcdf.defVar(ncid,'source_wdir','nc_float',did_scalar);
 netcdf.putAtt(ncid,id_fff_source,'GEOMS_name','WIND.DIRECTION.SURFACE_SORCE');
 netcdf.putAtt(ncid,id_fff_source,'WIND.DIRECTION.SURFACE_SORCE','Vaisala weather station WXT520 or WXT530');
-                                 
+
 id_Tb = netcdf.defVar(ncid,'tb','nc_float',did_time);
 netcdf.putAtt(ncid,id_Tb,'GEOMS_name','TEMPERATURE.BRIGHTNESS');
 netcdf.putAtt(ncid,id_Tb,'long_name','brightness_temperature');
@@ -388,7 +388,7 @@ netcdf.putAtt(ncid,id_TransPow,'fill_value',str_fill_value);
 netcdf.putAtt(ncid,id_TransPow,'comment',['The transmitted power of the radar instrument '...
                                           'is part of the house keeping data and '...
                                           'used to monitor its the performance.']);
-                                 
+
 id_T_trans = netcdf.defVar(ncid,'t_trans','nc_float',did_time);
 netcdf.putAtt(ncid,id_T_trans,'GEOMS_name','TRANSMITTER.TEMPERATURE');
 netcdf.putAtt(ncid,id_T_trans,'long_name','platform_transmitter_temperature');
@@ -402,7 +402,7 @@ netcdf.putAtt(ncid,id_T_trans,'comment',['The transmitter temperature of the rad
                                          'instrument is part of the house keeping data '...
                                          'and used to monitor its the performance. '...
                                          'For a stable performance 309K < t_trans < 313K.']);
-                                 
+
 id_T_rec = netcdf.defVar(ncid,'t_rec','nc_float',did_time);
 netcdf.putAtt(ncid,id_T_rec,'GEOMS_name','RECEIVER.TEMPERATURE');
 netcdf.putAtt(ncid,id_T_rec,'long_name','platform_receiver_temperature');
@@ -416,7 +416,7 @@ netcdf.putAtt(ncid,id_T_rec,'comment',['The receiver temperature of the radar '.
                                        'instrument is part of the house keeping data '...
                                        'and used to monitor its the performance. '...
                                        'For a stable performance 306K < t_rec < 312K.']);
-                                 
+
 id_T_pc = netcdf.defVar(ncid,'t_pc','nc_float',did_time);
 netcdf.putAtt(ncid,id_T_pc,'GEOMS_name','COMPUTER.TEMPERATURE');
 netcdf.putAtt(ncid,id_T_pc,'long_name','platform_computer_temperature');
@@ -435,9 +435,9 @@ id_QF = netcdf.defVar(ncid,'rad_qf','nc_byte',did_time);
 netcdf.putAtt(ncid,id_QF,'GEOMS_name','FLAG.MEASUREMENT.QUALITY');
 netcdf.putAtt(ncid,id_QF,'long_name','quality_falg_platform_measurement');
 netcdf.putAtt(ncid,id_QF,'rpg_name','QF');
-netcdf.putAtt(ncid,id_QF,'standard_name',['Quality flag related to the radar operation '... 
+netcdf.putAtt(ncid,id_QF,'standard_name',['Quality flag related to the radar operation '...
                                       'given by radar software from RPG']);
-netcdf.putAtt(ncid,id_QF,'short_name','rad_qf');                                  
+netcdf.putAtt(ncid,id_QF,'short_name','rad_qf');
 netcdf.putAtt(ncid,id_QF,'comment', ['To get the bit entries, one has to'...
                                      'convert the integer into a 4 bit binary. '...
                                      'bit4 = ADC saturation, bit3 = spectral '...
@@ -445,7 +445,7 @@ netcdf.putAtt(ncid,id_QF,'comment', ['To get the bit entries, one has to'...
                                      'power leveling. Note that in the above '...
                                      'convention holds: bit1 = 2^3, '...
                                      'bit2 = 2^2, bit3 = 2^1, bit4 = 2^0'])
-                                 
+
 %%%%%%%% multi-D variables
 
 id_Ze = netcdf.defVar(ncid,'ze','nc_float',[did_range,did_time]);
@@ -530,7 +530,7 @@ if data.DualPol > 0
                                         'depend on the size distribution and '...
                                         'composition of the particles within the '...
                                         'target volume and these are often unknown.']);
-    
+
     id_ldr = netcdf.defVar(ncid,'ldr','nc_float',[did_range,did_time]);
     netcdf.putAtt(ncid,id_ldr,'GEOMS_name','LINEAR.DEPOLARIZATION.RATIO');
     netcdf.putAtt(ncid,id_ldr,'long_name','linear_depolarisation_ratio');
@@ -552,21 +552,21 @@ if data.DualPol == 2
     id_xcorr = netcdf.defVar(ncid,'rho_hv','nc_float',[did_range,did_time]);
     netcdf.putAtt(ncid,id_xcorr,'GEOMS_name','CORRELATION.COEFFICIENT.');
     netcdf.putAtt(ncid,id_xcorr,'long_name','correlation_coefficient');
-    netcdf.putAtt(ncid,id_xcorr,'rpg_name','CorrCoeff');    
+    netcdf.putAtt(ncid,id_xcorr,'rpg_name','CorrCoeff');
     netcdf.putAtt(ncid,id_xcorr,'standard_name','co-cross-channel correlation coefficient');
-    netcdf.putAtt(ncid,id_xcorr,'short_name','rho_hv');        
+    netcdf.putAtt(ncid,id_xcorr,'short_name','rho_hv');
     %netcdf.putAtt(ncid,id_xcorr,'valid_range',[nanmin(data.xcorr(:)), nanmax(data.xcorr(:))]);
     netcdf.putAtt(ncid,id_xcorr,'fill_value',str_fill_value);
-    
+
     id_difphase = netcdf.defVar(ncid,'phi_dp','nc_float',[did_range,did_time]);
     netcdf.putAtt(ncid,id_difphase,'GEOMS_name','DIFFERENTIAL.PHASE');
     netcdf.putAtt(ncid,id_difphase,'long_name','differential_phase');
-    netcdf.putAtt(ncid,id_difphase,'rpg_name','difphase');    
-    netcdf.putAtt(ncid,id_difphase,'standard_name','co-cross-channel differential phase');   
-    netcdf.putAtt(ncid,id_difphase,'short_name','phi_dp');        
-    netcdf.putAtt(ncid,id_difphase,'unite','degree');   
-    %netcdf.putAtt(ncid,id_difphase,'valid_range',[nanmin(data.difphase(:)), nanmax(data.difphase(:))]); 
-    netcdf.putAtt(ncid,id_difphase,'fill_value',str_fill_value); 
+    netcdf.putAtt(ncid,id_difphase,'rpg_name','difphase');
+    netcdf.putAtt(ncid,id_difphase,'standard_name','co-cross-channel differential phase');
+    netcdf.putAtt(ncid,id_difphase,'short_name','phi_dp');
+    netcdf.putAtt(ncid,id_difphase,'unite','degree');
+    %netcdf.putAtt(ncid,id_difphase,'valid_range',[nanmin(data.difphase(:)), nanmax(data.difphase(:))]);
+    netcdf.putAtt(ncid,id_difphase,'fill_value',str_fill_value);
 end
 
 id_QualFlag = netcdf.defVar(ncid,'pro_qf','nc_byte',[did_range,did_time]);
@@ -592,13 +592,13 @@ netcdf.putAtt(ncid,id_Aliasmask,'comment',['AliasMask indicates the bins where a
                                            '0 = no aliasing; 1 = aliasing occurs. Only applicable if '...
                                            'variable alias_flag is 2.']);
 
-id_incel = netcdf.defVar(ncid,'ins_elevation','nc_float',did_time); 
+id_incel = netcdf.defVar(ncid,'ins_elevation','nc_float',did_time);
 netcdf.putAtt(ncid,id_incel,'GEOMS_name','PLATFORM.ANGLE.ELEVATION');
 netcdf.putAtt(ncid,id_incel,'long_name','platform_roll_angle');
 netcdf.putAtt(ncid,id_incel,'standard_name','Inclination angle of the instrument; elevation');
 netcdf.putAtt(ncid,id_incel,'units','deg');
 
-                            
+
 id_incea = netcdf.defVar(ncid,'ins_azimuth','nc_float',did_time);
 netcdf.putAtt(ncid,id_incea,'GEOMS_name','PLATFORM.ANGLE.AZIMUTH');
 netcdf.putAtt(ncid,id_incea,'long_name','angle_of_rotation_from_solar_azimuth_to_platform_azimuth');
@@ -630,14 +630,14 @@ netcdf.defVarDeflate(ncid,id_vm,true,true,9);
 netcdf.defVarDeflate(ncid,id_sigma,true,true,9);
 netcdf.defVarDeflate(ncid,id_skew,true,true,9);
 if data.DualPol > 0
-    netcdf.defVarDeflate(ncid,id_ldr,true,true,9); %JABA    
+    netcdf.defVarDeflate(ncid,id_ldr,true,true,9); %JABA
     netcdf.defVarDeflate(ncid,id_Ze_hv,true,true,9); %LP
-end 
-if data.DualPol == 2
-    netcdf.defVarDeflate(ncid,id_difphase,true,true,9); %JABA    
-    netcdf.defVarDeflate(ncid,id_xcorr,true,true,9); %JABA  
 end
-%processing related variables 
+if data.DualPol == 2
+    netcdf.defVarDeflate(ncid,id_difphase,true,true,9); %JABA
+    netcdf.defVarDeflate(ncid,id_xcorr,true,true,9); %JABA
+end
+%processing related variables
 netcdf.defVarDeflate(ncid,id_QualFlag,true,true,9);
 netcdf.defVarDeflate(ncid,id_Aliasmask,true,true,9);
 
@@ -657,7 +657,7 @@ netcdf.endDef(ncid);
 netcdf.putVar(ncid, id_lat, 0, data.Lat);
 netcdf.putVar(ncid, id_lon, 0, data.Lon);
 netcdf.putVar(ncid, id_MSL, 0, data.MSL);
-netcdf.putVar(ncid, id_freq, 0, 299792458/(data.freq * 1e9) ); 
+netcdf.putVar(ncid, id_freq, 0, 299792458/(data.freq * 1e9) );
 netcdf.putVar(ncid, id_wl, 0, data.freq * 1e9);
 netcdf.putVar(ncid, id_HPBW, 0, data.HPBW);
 
