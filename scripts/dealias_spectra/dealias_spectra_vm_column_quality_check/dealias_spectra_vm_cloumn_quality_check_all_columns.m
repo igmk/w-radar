@@ -1,10 +1,11 @@
-function [vm, correction] = dealias_spectra_vm_cloumn_quality_check_all_columns(vm, vn, idx, noise_fac, correction, aliasmask, , varargin)
+function [vm, correction] = dealias_spectra_vm_cloumn_quality_check_all_columns(vm, ze, vn, idx, noise_fac, correction, aliasmask, varargin)
 
 % this function corrects mean doppler velocities considering neighbouring
 % columns
 
 % input:
 %   vm: mean Doppler velocity (time x height)
+%   ze: reflectivity (time x height) [dB] 
 %   idx_columns: (time) index arrays indicating wrogly dealiased colmuns
 %   vn: Nyquist velocities
 %   idx: last bin to include
@@ -104,7 +105,21 @@ while  any(abs(dv) > noise_fac*noise.peaknoise) && noise.peaknoise > 1 && max(ab
     end
     
     % ########## get mean profile of the last 60 seconds
-    vm_prof = nanmean(vm(a:b,:));
+    
+    % only include values with similar reflectivity, to address genuine
+    % discontinuities (usually fall streaks)
+        
+    for yy = 1:svm(2)
+        
+        ind_incl = zeros(svm(1),1);
+        ind_incl(a:b) = 1; % include profiles a to b
+        ind_incl = ind_incl & abs(ze(idx_flag,yy) - ze(:,yy)) < 5;
+        
+        vm_prof(yy) = nanmean(vm(ind_incl,yy));
+        
+    end
+    
+%     vm_prof = nanmean(vm(a:b,:));
         
     % correct for all chirp sequences
     for ii = 1:numel(range_offsets)-1
