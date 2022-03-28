@@ -107,13 +107,15 @@ while  any(abs(dv) > noise_fac*noise.peaknoise) && noise.peaknoise > 1 && max(ab
         
         
         % check if vm_prof contains signal
-        idx_value = ~isnan(vm_prof(r_idx));
+%         idx_value = ~isnan(vm_prof(r_idx));
+        temp_neigh = vm_prof(r_idx);
+        idx_value = ~isnan(temp_neigh);
         if sum(idx_value) < 2
             continue
         end
         
         % interpolate nighbouring velocities
-        vm_neighbour = interp1( r_idx(idx_value), vm_prof(idx_value), r_idx, 'linear','extrap');
+        vm_neighbour = interp1( r_idx(idx_value), temp_neigh(idx_value), r_idx, 'linear','extrap');
         
         % subtract/add vn, to correct for dealiasing into wrong
         % direction, i.e. causing an offset of +-k*2*v_n, k = 1,2,...,N
