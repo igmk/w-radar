@@ -159,7 +159,7 @@ end % i = 1:numel
         
 % compare adjacent columns regarding vm and correct MinVel and vm
 %if dealiasing was not performed properly
-[data.AliasStatus, data.vm, data.MinVel_Correction] = dealias_spectra_vm_column_qualitiy_check( data.vm, data.range, data.AliasStatus, abs(data.velocity(:,1)), data.MinVel_Correction, data.range_offsets );
+[data.AliasStatus, data.vm, data.MinVel_Correction] = dealias_spectra_vm_column_qualitiy_check( data.vm, data.range, data.AliasStatus, data.Aliasmask, abs(data.velocity(:,1)), data.MinVel_Correction, data.range_offsets );
 
 % correct MinVel
 data.MinVel = data.MinVel + data.MinVel_Correction;

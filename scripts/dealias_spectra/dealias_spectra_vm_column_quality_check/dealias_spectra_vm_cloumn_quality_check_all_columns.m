@@ -1,4 +1,4 @@
-function [vm, correction] = dealias_spectra_vm_cloumn_quality_check_all_columns(vm, vn, idx, noise_fac, correction, varargin)
+function [vm, correction] = dealias_spectra_vm_cloumn_quality_check_all_columns(vm, vn, idx, noise_fac, correction, aliasmask, , varargin)
 
 % this function corrects mean doppler velocities considering neighbouring
 % columns
@@ -10,6 +10,7 @@ function [vm, correction] = dealias_spectra_vm_cloumn_quality_check_all_columns(
 %   idx: last bin to include
 %   noise_fac: factor of peaknoise level that must be exceeded
 %   correction: value that must be added to the velocity offset
+%   aliasmask: mask for bins where aliasing detected
 %   varargin:
 %      range_offsets: start of chirp sequences
 %
@@ -76,6 +77,12 @@ while  any(abs(dv) > noise_fac*noise.peaknoise) && noise.peaknoise > 1 && max(ab
     if isempty(idx_flag) % then there is no signal
         break
     end
+    
+    % check that aliasing detected in the column 
+    if ~any(find(any(aliasmask,2)) == idx_flag)
+        continue
+    end
+           
     
     % ######### if column is again identified as peak set vm_temp to NaN
     % and skip this peak
