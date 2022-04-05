@@ -13,3 +13,10 @@ data = checkdata1(data);
 % interpolating between neighbouring times.
 % RG & LP 16.8.2019        
 data = checkdata2(data);
+
+
+% Sometimes when measurements are interrupted, the last profile of the 
+% file contains nonphysical values - remove all profiles where 
+% Ze > 50 dB is found
+% RG 7.9.2021        
+data = zesanitycheck(data);
