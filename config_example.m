@@ -17,12 +17,15 @@
 config.datapath = '/data/obs/site/nya/joyrad94/l0';
 
 % select input-file-type
-% his needs to be a case sensitive match to the file name
+%   his needs to be a case sensitive match to the file name
 %config.filetype = '*nc'; % (older version)
 config.filetype = '*lv0'; % (newer version)
 
 % define output path - folder structure will be: /yyyy/mm/dd/*.nc
 config.outputpath = '/data/obs/site/nya/joyrad94/l1';
+
+% tag added to the file name before the .nc
+config.filetag = 'v2.0_202007' ;
 
 % Instrument nickname:
 % - apears in the output file name
@@ -31,17 +34,61 @@ config.outputpath = '/data/obs/site/nya/joyrad94/l1';
 config.nickradar = 'joyrad94';
 
 % station nick name (used for file naming):
-% naming convention to use: 3 letters refering to the station measured
-% example: JOYCE = joy
+% - naming convention to use: 3 letters refering to the station measured
+%   example: JOYCE = joy
 config.nickstation = 'joy';   
 
 % height above mean sea level [m] of the instrument platform
-% stored in the metadata 
+%   stored in the metadata 
 config.MSL = 11;
 
-% further info for output file (metadata for the netcdf-output file)
-config.contactperson = 'radarscientist@university.web';
-config.processing_script = [mfilename('fullpath') '.m'];
+% further info for output file (metadata for the netcdf-output file) 
+%   These inforamtion will be placed in the golbal attributes of the NetCDF
+%   file
+% Name of the PROJECT_PI
+config.pi_name           = 'Surname;Name';                                 
+ % AFFILIATION of the PI
+config.pi_affiliation    = 'Example University (UNI);State';               
+% ADDRESS of the PIs AFFILIATION
+config.pi_address        = 'Example University,Institute;Street;Postcode;City;State'; 
+% Mail address of the PI
+config.pi_mail           = 'pi.example@example-uni.com';                   
+% Name of the organisation responsible for quality controll of the data 
+config.do_name           = 'Example Institution (INST);State';             
+ % officiel AFFILIATION of the DO_NAMEs\
+config.do_affiliation    = 'Example Institution;State';
+% ADDRESS of the DOs AFFILIATION
+config.do_address        = 'Example Institution;Adress'; 
+% Mail address of the DO
+config.do_mail           = 'do.example@example-uni.com'; 
+% Name of the responible data submitter 
+config.ds_name           = 'Example Institution (INST);State'; 
+% officiel AFFILIATION of the DS_NAMEs\
+config.ds_affiliation    = 'Example Institution;State'; 
+ % ADDRESS of the DSs AFFILIATION
+config.ds_address        = 'Example Institution;Adress';
+% Mail address of the DS_name
+config.ds_mail           = 'ds.example@example-uni.com'; 
+% Optional – brief description of the file’s containing data
+config.data_description  = 'daily radar measurements at station XYZ;Country'; 
+% Describes field of research to which the data  belongs and the data 
+%   acquisition method
+config.data_discipline   = 'Atmospheric.Physics;Remote.Sensing;Radar.Profiler'; 
+% Specifies the origin of the data (EXPERIMENTAL, MODAL, or both) and the 
+%   spatial characteristic of the data set.Spatial dimensions are: 
+%   0D = SCALAR; 1D = PROFILE; 2D for or more dimensions = FIELD. 
+%   STATIONARY for fixed locations and MOVING for moving platforms
+config.data_group        = 'Experimantal;Profile;Stationary'; 
+% Contains the identification of the location of the reported geophysical 
+%   quantities
+config.data_location     = 'Research station XYZ;Country'; 
+% Consist of two information, first, the instrument type used for 
+%   measurements, second, the acronym of the operating institution. It may 
+%   differ from the PIs or DOs affiliation
+config.data_source       = strcat('Radar.Standard.Moments.Ldr_',config.nickradar,';run by UNI');
+% Name of the processing script inclouding version or the repository where 
+%   the script can be downloaded:
+config.processing_script = 'https://github.com/igmk/w-radar/releases/tag/v2.0_202007';
 
 % Debuging option
 % 0 - no debugging information given, code does not crash

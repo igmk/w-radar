@@ -11,6 +11,12 @@ function data = read_netcdf_v1(infile)
 
     varlist = get_varlist; % variable names that are importet. see function below.
     data = netcdf2struct(infile,varlist);
+ 
+    data.readerror = true; % flag for error in reading file
+    if ~isstruct(data)
+        disp(['error opening' infile])
+        return
+    end
 
     %%%%%%%%%%%%%%%%%%%%%%% rename variables to be consistent with other
     %%%%%%%%%%%%%%%%%%%%%%% reading routines
@@ -91,9 +97,12 @@ function data = read_netcdf_v1(infile)
     data.PNv = NaN(data.totsamp,data.n_levels); % total IF power in v-pol measured at the ADC input
     data.SLv = NaN(data.totsamp,data.n_levels); % linear sensitivity limit in Ze units for vertical polarisation
     
+    data.reserved = NaN(data.totsamp,3);
+
     % set radar constant to a single value
     data.C = data.C(1);    
     
+    data.readerror = false; % succesfull in reading file!    
 
 end % function read_netcdf_v1
 

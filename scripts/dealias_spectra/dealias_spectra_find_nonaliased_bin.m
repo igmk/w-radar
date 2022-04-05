@@ -1,4 +1,4 @@
-function [tempstruct, no_clean_signal, idx_0] = dealias_spectra_find_nonaliased_bin(cth_fin, cbh_fin, spec, range_offsets, vel, nAvg, moment_string, nf_string, nf, nbins, alias_flag, noise, Nfft, flag_compress_spec, flag_DualPol, spec_hv)
+function [tempstruct, no_clean_signal, idx_0] = dealias_spectra_find_nonaliased_bin(cth_fin, cbh_fin, spec, range_offsets, vel, nAvg, moment_string, nf_string, nf, nbins, alias_flag, noise, Nfft, flag_compress_spec, flag_DualPol, spec_hv, spec_re, spec_im)
 
 % this function looks for a range bin where no aliasing occurs. if there is
 % a clean bin, the function will calculate the higher moments in this bin
@@ -48,7 +48,7 @@ while leave == false && cc < n_cloudbins && no_clean_signal == false % look unti
     tempnoise.peaknoise = noise.peaknoise(idx_0);
     
     % calculate moments
-    tempstruct = radar_moments(spec(idx_0,1:Nfft),vel(1:Nfft,r_idx),nAvg(r_idx),'noise', tempnoise, 'linear', 'moment_str',moment_string, nf_string,nf,'nbins',nbins, 'compressed', flag_compress_spec, 'DualPol', flag_DualPol, spec_hv(idx_0,1:Nfft));
+    tempstruct = radar_moments(spec(idx_0,1:Nfft),vel(1:Nfft,r_idx),nAvg(r_idx),'noise', tempnoise, 'linear', 'moment_str',moment_string, nf_string,nf,'nbins',nbins, 'compressed', flag_compress_spec, 'DualPol', flag_DualPol, spec_hv(idx_0,1:Nfft), spec_re(idx_0,1:Nfft), spec_im(idx_0,1:Nfft));
         
     
     

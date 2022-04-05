@@ -65,14 +65,24 @@ end
 % ########### check if peak noise faktor was provided
 idx_pnf = find(strcmp(varargin,'pnf'), 1) + 1;
 idx_mnf = find(strcmp(varargin,'mnf'), 1) + 1;
+pnf_flag = false;
 if isempty(idx_pnf) && isempty(idx_mnf)
     pnf = 1.0;
+    % should introduce a default mnf value as well!
 elseif ~isempty(idx_pnf)
     pnf = varargin{idx_pnf};
+    pnf_flag = true;
 else
     mnf = varargin{idx_mnf};
 end
 
+if ~pnf_flag && isempty(idx_mnf) % RG 5.5.2021: should make better fix and choose a default mnf...
+    disp('In function radar_moments_from_spectra_and_different_chrip_seq:')
+    disp('No default option for mean noise factor has been set, ')
+    disp('error will be raised for missing vairable mnf.')    
+    disp('Provide factor for function or use peak noise instead...')
+end    
+    
 % ########## get range offsets
 range_offsets = varargin{find(strcmp(varargin,'range_offsets'), 1) + 1};
 % adjust range_offsets
@@ -112,7 +122,7 @@ for i = 1:numel(range_offsets)-1
         idxnew = false(1,Nfft(i));  %indicates location of significant signal
          
         % find all spectral entries larger than pnf*peaknoise
-        if exist('pnf','var')
+        if pnf_flag%exist('pnf','var')
             idx = spec(r_idx(ii),1:Nfft(i)) > pnf*output.peaknoise(r_idx(ii),1);
         else
             idx = spec(r_idx(ii),1:Nfft(i)) > mnf*output.meannoise(r_idx(ii),1);

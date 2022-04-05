@@ -10,8 +10,15 @@ data.vm =  NaN(specsize(1:2));
 data.sigma =  NaN(specsize(1:2));
 data.skew =  NaN(specsize(1:2));
 data.kurt =  NaN(specsize(1:2));
-if data.DualPol
+
+if data.DualPol > 0
     data.LDR = NaN(specsize(1:2));
+    data.Ze_hv = NaN(specsize(1:2));
+    data.vm_hv = NaN(specsize(1:2));
+end
+
+if data.DualPol == 2
+    disp('Hey! add here initialization of additional polarimetric variables - in function dealias.m')
 end
 
 % oldspec = data.spec;  
@@ -21,6 +28,11 @@ for i = 1:numel(data.time)
 
     if data.DualPol > 0
         temp_hv = squeeze(data.spec_hv(i,:,:));
+    end
+    
+    if data.DualPol == 2
+        temp_re = squeeze(data.spec_covRe(i,:,:));
+        temp_im = squeeze(data.spec_covIm(i,:,:));
     end
         
     % check if any data found for this time step - if not, continue with
@@ -61,9 +73,18 @@ for i = 1:numel(data.time)
             'moment_str','kurt','pnf',1.,'nbins',3,'range_offsets',data.range_offsets,...
             'linear', 'comp_flag', data.compress_spec, 'DualPol', data.DualPol, temp_hv);
         
+    elseif data.DualPol == 2
+
+        [tempspec,tempvel,tempmoments,alias_flag,status_flag] = ...
+            dealias_spectra(temp,data.velocity',data.nAvg,data.dr,vm_prev_col,...
+            'moment_str','kurt','pnf',1.,'nbins',3,'range_offsets',data.range_offsets,...
+            'linear', 'comp_flag', data.compress_spec, ...
+            'DualPol', data.DualPol, temp_hv, temp_re, temp_im);
+        
     else
-        disp('Dealiasing for full polarimetric radar not prgrammed yet - July 2019')
-       
+        
+        disp('Unkown polarimetric setting, no dealiasing performed.')
+        return
     end
 
 %     fig = pcolor_spectra_with_different_velocities(tempvel,tempspec,'height',data.range,'range_offsets',data.range_offsets);
@@ -73,9 +94,24 @@ for i = 1:numel(data.time)
 %     ylim([300,700])
 % 
     % update spectrum
-    data.spec(i,:,:) = tempspec;
+    
     data.MinVel(i,:) = tempvel(:,1)';
+    
+    if data.DualPol == 0
+        data.spec(i,:,:) = tempspec.spec;
 
+    else
+        data.spec(i,:,:) = tempspec.spec;
+        data.spec_hv(i,:,:) = tempspec.spec_hv;
+    
+        if data.DualPol == 2
+            
+            data.spec_covRe(i,:,:) = tempspec.spec_re;
+            data.spec_covIm(i,:,:) = tempspec.spec_im;
+            
+        end
+        
+    end
     % get alias mask and status
     data.Aliasmask(i,:) = alias_flag'; % alias = 1; dealiasing was applied
             
@@ -114,6 +150,10 @@ for i = 1:numel(data.time)
         data.Ze_hv(i,:) = tempmoments.Ze_hv';
         data.vm_hv(i,:) = tempmoments.vm_hv';
     end 
+    
+    if data.DualPol == 2
+        disp('Hey! add here copying of additional polarimetric variables (tempmoments to data) - in function dealias.m')
+    end
     
 end % i = 1:numel
         

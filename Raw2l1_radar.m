@@ -59,6 +59,7 @@ for tmpdate = dateini:dateend
         error = momentslv0(config, tmpdate, opF);                    
         if ~error
             disp('Retrieving radar moments from level-0 files... done!');
+            
         end           
         
     elseif config.moments2calculate == 3

@@ -8,6 +8,7 @@ tempvar = data.QualFlag;
 data.QualFlag = zeros(specsize(1),specsize(2));
 for ii = 1:specsize(1)
     for jj = 1:specsize(2)
+        if sum(tempvar(ii,jj,:)) == 0; continue; end
         data.QualFlag(ii,jj) = bin2dec(num2str(tempvar(ii,jj,:)));
     end
 end
