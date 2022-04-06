@@ -162,7 +162,9 @@ else
                     data.spec_covIm = compress_spectra_filtering(data.spec_covIm, Nbin);
                 end
             end
-
+            
+            data = remove_speckle(data);
+            
             if config.dealias  % If the user wants to do it
 
                 if data.AntiAlias
