@@ -106,6 +106,7 @@ config.overwrite = 0;
 % 1 - only compact file is generated (only moments, some metadata 
 %     inforation)
 % 2 - both files are gerenrated (both files above are generated)
+% 3 - all variables are included in output, but data are split in 2 files (physical variables and technical parameters)
 config.compact_flag = 2;
 
 %Dealias:

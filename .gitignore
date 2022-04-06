@@ -6,9 +6,10 @@
 *.png
 
 # ignore individual radars config, pre-and postprocessing files
-*joyrad*.m
+#*joyrad*.m
 *mirac*.m
 *inoe*.m
 *smhi*.m
+*msm94*.m
 
 config*

@@ -11,6 +11,8 @@ function [] = Raw2l1_radar(infopath, varargin)
 %   - Varargin: 0=today and yesterday; 1=specific date [format 'yyyymmdd'];
 %               2=period with dateini and dateend [both with format 'yyyymmdd']-
 
+%restoredefaultpath
+
 % Add functions in subfolders
 addpath(genpath('./scripts/'))
 

@@ -68,7 +68,13 @@ else
                         disp('Output files already exist. Continue with the next file.');
                         continue
                     end
-
+                    
+                case 3 % 2 file approach - if one file missing, both re-created
+                    if ~(isempty(dir(config.outfile)) && isempty(dir(config.outfile2))) 
+                        disp('Output files already exist. Continue with the next file.'); 
+                        continue            
+                    end
+                    
             end
         end
 
@@ -209,6 +215,11 @@ else
             if config.debuging
                 %Plots of the mean Doppler velocity
                 dealias_spectra_plot_control_figures(data)
+            end
+            
+            % calculating Doppler velocity arrays for output
+            if config.compact_flag == 3
+                data.velocitymatrix = calculate_doppler_arrays(data);
             end
         else
             fprintf('%s is empty.\n', infile);
