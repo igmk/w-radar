@@ -151,9 +151,9 @@ netcdf.putAtt(ncid,id_time,'long_name','time');
 netcdf.putAtt(ncid,id_time,'rpg_name','time');
 netcdf.putAtt(ncid,id_time,'standard_name','time stamp of the radar measurements');
 netcdf.putAtt(ncid,id_time,'short_name','time');
-netcdf.putAtt(ncid,id_time,'units','Seconds since 2001.01.01. 00:00:00.');
+netcdf.putAtt(ncid,id_time,'units','seconds since 2001-1-1 0:0:0');
 netcdf.putAtt(ncid,id_time,'valid_range', [nanmin(data.time(:)), nanmax(data.time(:))]);
-netcdf.putAtt(ncid,id_time,'comment','Time formate is MJD2K');
+netcdf.putAtt(ncid,id_time,'comment','Time in UTC');
 if isfield(data, 'totsampchangelabel' )
     netcdf.putAtt(ncid,id_time, 'quality_flag', 'Dublicate time stamps found in lv0-file, the first occurrence of the dublicate time is removed')
 end
