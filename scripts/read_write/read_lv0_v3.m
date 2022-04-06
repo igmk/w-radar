@@ -115,6 +115,14 @@ function data = read_lv0_v3(infile)
         disp(['>>> file not processed - no of samples/profiles below 0 or above 3600, empty or not an integer'])
         return
     end
+
+    % for this file, data transfer did not complete, stopping reading data at last full profile - RG 10.9.2021
+    if data.filecode == 889346 && data.starttime == 652622431 && data.endtime == 652625997 ...
+        && data.n_levels == 765 && all(data.range_offsets == [1 95 202 388]) ... % strcmp(data.custname, 'Univ. Cologne (Jülich) ')
+        && all(data.SeqAvg == [4096 3072 2048 1536]) && all(data.DoppLen == [512 512 512 256])
+
+        data.totsamp = 853;
+    end
     
     
     % ################################# header ends
@@ -228,10 +236,21 @@ function data = read_lv0_v3(infile)
             data.PNh(i,1:data.n_levels) = fread(fid,[1, data.n_levels],'single');
         end
             
-        data.SLv(i,1:data.n_levels) = fread(fid,[1, data.n_levels],'single');
+            
+        try
+            data.SLv(i,1:data.n_levels) = fread(fid,[1, data.n_levels],'single');
         if data.DualPol > 0
             data.SLh(i,1:data.n_levels) = fread(fid,[1, data.n_levels],'single');
         end
+
+        catch
+             if feof(fid)
+                endoffileerrormessage
+                return
+             end
+        end
+
+            
         
         data.mask(i,1:data.n_levels) = int8(fread(fid,[1, data.n_levels],'char*1'));        
         
@@ -252,11 +271,20 @@ function data = read_lv0_v3(infile)
                         chirp_idx = data.no_chirp_seq;
                     end
 
-                    data.spec(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra
-                    if data.DualPol > 0
-                        data.spec_hv(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra 
-                        data.spec_covRe(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra 
-                        data.spec_covIm(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra 
+                     try
+
+                        data.spec(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra
+                        if data.DualPol > 0
+                            data.spec_hv(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra 
+                            data.spec_covRe(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra 
+                            data.spec_covIm(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra 
+                        end
+
+                    catch
+                         if feof(fid)
+                            endoffileerrormessage
+                            return
+                         end
                     end
                     
                 
