@@ -61,7 +61,15 @@ else % default
         end
 
         disp(['Writing file ' config.outfile2])
-        write_joyrad94_data_2_nc_compact(data,config.outfile2, config);
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %Modified by A.Pschera on 2021-11-17 - deleted second criteria:
+        if (config.compact_flag_geoms == 0); %&& config.compact_flag == 1);
+            write_joyrad94_data_2_nc_compact(data,config.outfile2, config);
+        end
+        if (config.compact_flag_geoms == 1); %&& config.compact_flag == 1);    
+            write_joyrad94_data_2_nc_geoms(data,config.outfile2, config);
+        end
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%
     end
-    
+
 end

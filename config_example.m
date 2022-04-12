@@ -109,6 +109,15 @@ config.overwrite = 0;
 % 3 - all variables are included in output, but data are split in 2 files (physical variables and technical parameters)
 config.compact_flag = 2;
 
+%%%%%%%%%%%%%%
+%Added on 2021-11-10 by apschera:
+% compact-flag_ geoms_naming convention: 
+% 0 - old university of Cologne naming convertion for the compact file is
+%     used
+% 1 - the compact file name follows the GEOMS naming convertion
+config.compact_flag_geoms = 1;
+%%%%%%%%%%%%%%
+
 %Dealias:
 % true - dealiasing is applied
 % fales - dealiasing not appleied
