@@ -164,8 +164,10 @@ netcdf.putAtt(ncid,id_H_levels,'standard_name','Number of range levels of hum. p
 
 id_no_chirp_seq = netcdf.defVar(ncid,'no_chirp_seq','nc_int',did_scalar);
 netcdf.putAtt(ncid,id_no_chirp_seq,'standard_name','Number of chirp sequences');
-netcdf.putAtt(ncid,id_no_chirp_seq,'comment',...
-    'The radar can be programmed to run different resolution modes for different layers spanning several range gates');
+netcdf.putAtt(ncid,id_no_chirp_seq,'comment',['The radar can be programmed '...
+                                              'to run different resolution ' ...
+                                              'modes for different layers ' ...
+                                              'spanning several range gates']);
 
 id_CalInt = netcdf.defVar(ncid,'CalInt','nc_int',did_scalar);
 netcdf.putAtt(ncid,id_CalInt,'standard_name','Sample interval for automated zero calibrations');
@@ -201,8 +203,10 @@ end
 
 id_cal_mom = netcdf.defVar(ncid,'cal_mom','nc_byte',did_scalar);
 netcdf.putAtt(ncid,id_cal_mom,'standard_name','Integer indicating how moments were calculated.');
-netcdf.putAtt(ncid,id_cal_mom,'comment',...
-    'Set in config file. 2 = moments were calculated from spectra. 3 = moments are taken from RPG processing sofware (lv1).');
+netcdf.putAtt(ncid,id_cal_mom,'comment',['Set in config file. ' ...
+                                         '2 = moments were calculated from ' ...
+                                         'spectra. 3 = moments are taken ' ...
+                                         'from RPG processing sofware (lv1).']);
 
 
 %%%%%%% range variables
@@ -225,12 +229,12 @@ netcdf.putAtt(ncid,id_Fr,'standard_name','Range factors, see manual eq. (2.5.6)'
 
 if ne(data.T_altcount,0)
     id_T_levels = netcdf.defVar(ncid,'T_levels','nc_float',did_T_range);
-    netcdf.putAtt(ncid,id_T_levels,'standard_name','Levels of temperature profile');
+    netcdf.putAtt(ncid,id_T_levels,'standard_name','No. levels of temperature profile');
 end
 
 if ne(data.H_altcount,0)
     id_H_levels = netcdf.defVar(ncid,'H_levels','nc_float',did_H_range);
-    netcdf.putAtt(ncid,id_H_levels,'standard_name','Levels of humidity profiles');
+    netcdf.putAtt(ncid,id_H_levels,'standard_name','No. levels of humidity profiles');
 end
 
 

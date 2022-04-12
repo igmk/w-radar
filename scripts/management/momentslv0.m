@@ -51,14 +51,14 @@ else
             switch config.compact_flag
                 case 0 % general file
                     if ~isempty(dir(config.outfile))
-                        disp('Output file already exist. Continue with the next file.');
+                        disp('Output file already exists. Continue with the next file.');
                         continue
                     end
 
                 case 1  % compact file
 
                     if ~isempty(dir(config.outfile2))
-                        disp('Output file already exist. Continue with the next file.');
+                        disp('Output file already exists. Continue with the next file.');
                         continue
                     end
 

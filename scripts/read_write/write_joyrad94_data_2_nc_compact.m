@@ -17,8 +17,8 @@ fill_value     = -999  ;
 
 %did_time = netcdf.defDim(ncid,'time',data.totsamp);
 %Changed by J.A. Bravo-Aranda
-did_time = netcdf.defDim(ncid,'time',netcdf.getConstant('NC_UNLIMITED'));
-did_range = netcdf.defDim(ncid,'range',data.n_levels);
+did_time   = netcdf.defDim(ncid,'time',netcdf.getConstant('NC_UNLIMITED'));
+did_range  = netcdf.defDim(ncid,'range',data.n_levels);
 did_no_seq = netcdf.defDim(ncid,'number.chirp.sequences',data.no_chirp_seq);
 did_scalar = netcdf.defDim(ncid,'scalar',1);
 
