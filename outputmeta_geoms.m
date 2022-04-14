@@ -5,6 +5,8 @@
 % Meta data required for the GEOMS output file.
 
 
+config.MSL = 0; % height above mean sea level [m] of the instrument platform
+
 config.pi_name           = ''; % Name of the PROJECT_PI
 config.pi_affiliation    = ''; % AFFILIATION of the PI
 config.pi_address        = ''; % ADDRESS of the PIs AFFILIATION

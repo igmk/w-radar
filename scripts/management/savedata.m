@@ -69,7 +69,7 @@ function write_ucoldefaultcompact(data, config)
     % RG 13.4.2022
     
     disp(['Writing file ' config.outfiles.file1])
-    write_joyrad94_data_2_nc_compact(data,config.outfile1, config);
+    write_joyrad94_data_2_nc_compact(data,config.outfiles.file1, config);
     
 end % function
 
@@ -82,7 +82,7 @@ function write_ucoldefault(data, config)
     write_joyrad94_data_2_nc(data,config.outfiles.file1, config); 
     
     disp(['Writing file ' config.outfiles.file2])
-    write_joyrad94_data_2_nc_compact(datadata,config.outfile2, config);
+    write_joyrad94_data_2_nc_compact(data,config.outfiles.file2, config);
     
 end % function
 
@@ -92,7 +92,7 @@ function write_geoms(data, config)
     % RG 13.4.2022
     
     disp(['Writing file ' config.outfiles.file1])
-    write_joyrad94_data_2_nc_geoms(data,data,config.outfile1, config);
+    write_joyrad94_data_2_nc_geoms(data,config.outfiles.file1, config);
     
 end % function
 
@@ -102,10 +102,10 @@ function write_eurec4a(data, config)
     % RG 13.4.2022
     
     disp(['Writing file ' config.outfiles.file1])
-    write_data_2_nc_physparam(data, data,config.outfile1, config);  
+    write_data_2_nc_physparam(data, config.outfiles.file1, config);
         
     disp(['Writing file ' config.outfiles.file2])
-    write_data_2_nc_technical(data,data,config.outfile1, config);     
+    write_data_2_nc_technical(data,config.outfiles.file2, config);
      
     
 end % function
