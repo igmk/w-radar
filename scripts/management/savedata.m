@@ -1,4 +1,6 @@
 function [] = savedata(data, config)
+% Updated to be flexible for different output filenaming conventions.
+% RG 13.4.2022
 
 % finding output filename moved to it's own function findoutfilename - RG
 
@@ -13,63 +15,97 @@ for ii = 1:specsize(1)
     end
 end
    
-if config.compact_flag == 3  % two file approach
-       
-    if exist(config.outfile,'file')
-        delete(config.outfile);
-    end
-    if exist(config.outfile2,'file')
-        delete(config.outfile2);
-    end
+% if output file already exists (could happen when overwrite requested, or 
+% when only some of the requested output files exist), delete the existing
+% files
 
-    [pathstr,~ ,~] = fileparts(config.outfile);
-    if ~exist(pathstr,'dir')
-        mkdir(pathstr);
-    end
 
-    disp(['Writing file ' config.outfile])
-    write_data_2_nc_physparam(data,config);  
-    write_data_2_nc_technical(data,config);  
+fn = fieldnames(config.outfiles);
+for k=1:numel(fn) % loop over output files
     
-else % default
-
-    % write full file
-    if config.compact_flag ~=1
-        if exist(config.outfile,'file')
-            delete(config.outfile);
-        end
-
-        [pathstr,~ ,~] = fileparts(config.outfile);
-        if ~exist(pathstr,'dir')
-            mkdir(pathstr);
-        end
-
-        disp(['Writing file ' config.outfile])
-        write_joyrad94_data_2_nc(data,config.outfile, config);  
-    end
-
-
-    % write compact file
-    if config.compact_flag~=0
-        if exist(config.outfile2,'file')
-            delete(config.outfile2);
-        end
-
-        [pathstr,~ ,~] = fileparts(config.outfile2);
-        if ~exist(pathstr,'dir')
-            mkdir(pathstr);
-        end
-
-        disp(['Writing file ' config.outfile2])
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %Modified by A.Pschera on 2021-11-17 - deleted second criteria:
-        if (config.compact_flag_geoms == 0); %&& config.compact_flag == 1);
-            write_joyrad94_data_2_nc_compact(data,config.outfile2, config);
-        end
-        if (config.compact_flag_geoms == 1); %&& config.compact_flag == 1);    
-            write_joyrad94_data_2_nc_geoms(data,config.outfile2, config);
-        end
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    if exist(config.outfiles.(fn{k}), 'file')
+        delete(config.outfiles.(fn{k}));
     end
 
 end
+
+% create directories, in case missing (currently multiple output
+% directories not supported)
+
+[pathstr,~ ,~] = fileparts(config.outfiles.(fn{1}));
+if ~exist(pathstr,'dir')
+    mkdir(pathstr);
+end
+
+
+% call write function(s) for output type
+outfilefunc = str2func(['write_' config.outputtype]);
+outfilefunc(data, config);
+
+
+
+end % function
+
+
+
+
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+% local functions for calling write functions
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+
+
+function write_ucoldefaultall(data, config)
+    % write output file for U. Cologne default option (full file)
+    % RG 13.4.2022
+    
+    disp(['Writing file ' config.outfiles.file1])
+    write_joyrad94_data_2_nc(data,config.outfiles.file1, config);  
+    
+end % function
+
+
+function write_ucoldefaultcompact(data, config)
+    % write output file for U. Cologne default option (compact file)
+    % RG 13.4.2022
+    
+    disp(['Writing file ' config.outfiles.file1])
+    write_joyrad94_data_2_nc_compact(data,config.outfile1, config);
+    
+end % function
+
+
+function write_ucoldefault(data, config)
+    % write output file for U. Cologne default option (compact and full file)
+    % RG 13.4.2022
+    
+    disp(['Writing file ' config.outfiles.file1])
+    write_joyrad94_data_2_nc(data,config.outfiles.file1, config); 
+    
+    disp(['Writing file ' config.outfiles.file2])
+    write_joyrad94_data_2_nc_compact(datadata,config.outfile2, config);
+    
+end % function
+
+
+function write_geoms(data, config)
+    % write output file for geoms-type output
+    % RG 13.4.2022
+    
+    disp(['Writing file ' config.outfiles.file1])
+    write_joyrad94_data_2_nc_geoms(data,data,config.outfile1, config);
+    
+end % function
+
+
+function write_eurec4a(data, config)
+    % write output file for U. Cologne default option (compact and full file)
+    % RG 13.4.2022
+    
+    disp(['Writing file ' config.outfiles.file1])
+    write_data_2_nc_physparam(data, data,config.outfile1, config);  
+        
+    disp(['Writing file ' config.outfiles.file2])
+    write_data_2_nc_technical(data,data,config.outfile1, config);     
+     
+    
+end % function

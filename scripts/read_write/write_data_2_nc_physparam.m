@@ -1,9 +1,9 @@
-function write_data_2_nc_physparam(data, config)
+function write_data_2_nc_physparam(data, outfile, config)
 % this function writes joyrad94 data into netcdf4
 
 %################## Create a netCDF file.
 
-ncid = netcdf.create(config.outfile,'NETCDF4'); 
+ncid = netcdf.create(outfile,'NETCDF4'); 
 
 
 

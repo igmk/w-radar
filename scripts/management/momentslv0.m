@@ -43,39 +43,28 @@ else
         fprintf('Start processing with %s\n', infile);
 
 
-        % i) check if output file already exist
-        % output file name
+        % i) create output file name(s) and check if file(s) already exist
+        
+        % construct output file name(s)
         [config] = findoutfilename(config, files.lv0(h).name);
 
-        if ~config.overwrite
-            switch config.compact_flag
-                case 0 % general file
-                    if ~isempty(dir(config.outfile))
-                        disp('Output file already exists. Continue with the next file.');
-                        continue
-                    end
-
-                case 1  % compact file
-
-                    if ~isempty(dir(config.outfile2))
-                        disp('Output file already exists. Continue with the next file.');
-                        continue
-                    end
-
-                case 2  % both
-
-                    if ~(isempty(dir(config.outfile)) || isempty(dir(config.outfile2)))
-                        disp('Output files already exist. Continue with the next file.');
-                        continue
-                    end
-                    
-                case 3 % 2 file approach - if one file missing, both re-created
-                    if ~(isempty(dir(config.outfile)) && isempty(dir(config.outfile2))) 
-                        disp('Output files already exist. Continue with the next file.'); 
-                        continue            
-                    end
-                    
+        % check if file(s) already exist
+        if ~config.overwrite % if overwrite requested, doesn't matter if files exist or not
+            
+            fn = fieldnames(config.outfiles);
+            fileexist = false(size(fn));
+            
+            for k=1:numel(fn)
+                if ~isempty(dir(config.outfiles.(fn{k})))
+                    fileexist(k) = true;
+                end
             end
+            
+            if all(fileexist) % all outputfiles exist: continue with next file
+                disp('Output file(s) already exists. Continuing with the next file.');
+                continue
+            end
+            
         end
 
         % counter for how many files are actually processed
