@@ -52,6 +52,15 @@ catch
     return
 end
 
+%Read metadata for output file
+try
+    run(config.metadatafile);
+catch
+    disp(['Impossible to read output metadata file: ' config.metadatafile])
+    return
+end
+
+
 %Run code for each date
 for tmpdate = dateini:dateend
 
