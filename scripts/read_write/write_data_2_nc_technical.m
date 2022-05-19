@@ -561,7 +561,7 @@ netcdf.putVar(ncid,id_veldim,0,max(data.DoppLen), 1:max(data.DoppLen));
 % scalars
 netcdf.putVar(ncid,id_lat,0,data.Lat);
 netcdf.putVar(ncid,id_lon,0,data.Lon);
-netcdf.putVar(ncid,id_MSL,0,data.MSL);
+netcdf.putVar(ncid,id_MSL,0,config.MSL);
 netcdf.putVar(ncid,id_freq,0,data.freq);
 netcdf.putVar(ncid, id_wl, 0, data.freq * 1e9);
 netcdf.putVar(ncid,id_HPBW,0,data.HPBW);

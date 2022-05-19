@@ -95,9 +95,6 @@ else
     data.compress_spec = false;
 end
 
-% copy from the value given in config file
-data.MSL = config.MSL;
-
 % create variable for chirp integration times
 data.ChirpIntTime = NaN(1,data.no_chirp_seq);
 

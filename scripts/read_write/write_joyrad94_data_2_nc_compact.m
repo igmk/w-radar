@@ -656,7 +656,7 @@ netcdf.endDef(ncid);
 % scalars
 netcdf.putVar(ncid, id_lat, 0, data.Lat);
 netcdf.putVar(ncid, id_lon, 0, data.Lon);
-netcdf.putVar(ncid, id_MSL, 0, data.MSL);
+netcdf.putVar(ncid, id_MSL, 0, config.MSL);
 netcdf.putVar(ncid, id_freq, 0, 299792458/(data.freq * 1e9) );
 netcdf.putVar(ncid, id_wl, 0, data.freq * 1e9);
 netcdf.putVar(ncid, id_HPBW, 0, data.HPBW);
