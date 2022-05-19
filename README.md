@@ -198,8 +198,9 @@ type structure).
 
 ### iv) Additional variables added into "data" and missing values set to NaN.
 
-    Function setting_data.m. If you want to add any variables into "data", 
-    do it here.
+Function setting_data.m. If you want to add any variables into "data", 
+initialize them here. Note, that variables only needed for output files
+should be given in outputmeta_<outputtype\>.m -file (see Sect. 3.2.iii)
 
 ### v) Radar specific settings to be applied before dealiasing. 
 
@@ -249,9 +250,8 @@ postprocessing function see postprocessing_exampleradar.m.
 ### viii) Write output data
 
 Output file(s) are created and data is written to file(s). Function
-savedata.m calls function write_joyrad94_data_2_nc.m for general file 
-and function write_joyrad94_data_2_nc_compact.m for compact file. To 
-add variables in output, edit the write***.m function(s).
+savedata.m calls the function(s) creating the output files. For more details
+see Sect. 3.2.
 
 ## 4.2. Dealiasing routine description ##
 
