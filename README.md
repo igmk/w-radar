@@ -105,7 +105,7 @@ Different types of output files are available, using different naming
 conventions for the file names and variables in the files. Also the number of 
 files and variables included in the files vary.
 
-The outputfile type is given in the config file with parameter *config.outfiletype*. 
+The outputfile type is given in the config file with parameter *config.outputtype*. 
 Currently available options: 
 ucoldefault, ucoldefaultcompact, ucoldefaultall, geoms, eurec4a.
 
@@ -135,9 +135,9 @@ write access to the target directory.
 
 A variety of user-specific meta data is needed for the output netcdf files 
 (i.e. creator of the data set, contact information, project acknowledgement). 
-All such parameters are contained in the outputmeta_<outfiletype\>.m file. 
-The file name of the outputmeta_\***.m file has to agree with the outfiletype 
-given in the config-file.
+All such parameters are contained in the outputmeta_<outputtype\>.m file. 
+The file name of the outputmeta_\***.m file has to agree with the output file \
+type given in the config-file.
 
 ### iv) Creating new output file types
 
@@ -150,7 +150,7 @@ which writing function(s) should be called.
 - To add new kind of netcdf file, create a function that makes a netcdf file 
 exactly the way you want it to be.
 - Any metadata required for your output file, which is not contained in the 
-lv0 data files, should be given in file outputmeta_<outfiletype\>.m.
+lv0 data files, should be given in file outputmeta_<outputtype\>.m.
 
 
 
