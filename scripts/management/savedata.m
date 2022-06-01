@@ -101,6 +101,9 @@ function write_eurec4a(data, config)
     % write output file for U. Cologne default option (compact and full file)
     % RG 13.4.2022
     
+    % calculating Doppler velocity arrays for output
+    data.velocitymatrix = calculate_doppler_arrays(data);
+    
     disp(['Writing file ' config.outfiles.file1])
     write_data_2_nc_physparam(data, config.outfiles.file1, config);
         

@@ -206,10 +206,6 @@ else
                 dealias_spectra_plot_control_figures(data)
             end
             
-            % calculating Doppler velocity arrays for output
-            if config.compact_flag == 3
-                data.velocitymatrix = calculate_doppler_arrays(data);
-            end
         else
             fprintf('%s is empty.\n', infile);
             error = 1;
