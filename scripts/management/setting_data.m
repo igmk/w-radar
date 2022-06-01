@@ -101,6 +101,23 @@ data.ChirpIntTime = NaN(1,data.no_chirp_seq);
 % set -999 values to NaN
 data = fill2nan_struct(data,-999); 
     
+
+% separate blower and heater flags 
+data.blower = NaN(size(data.status));
+data.heater = NaN(size(data.status));
+
+% 0/1 = heater on/off; 0/10 = blower on/off.
+
+% set blower status
+data.blower( data.status >= 10 ) = 1;
+data.blower( data.status < 10 ) = 0;
+
+% heater status is what is left when removing blower status
+data.heater = data.status;
+data.heater(data.status >= 10) = data.heater(data.status >= 10) - 10;
+
+
+
 % linflag == false only of data has been processed with software
 % version 1 - THIS SHOULD BE DONE IN THE PREPROCESSING FUNCTION
 % if config.linflag == false % convert spectra into linear units
