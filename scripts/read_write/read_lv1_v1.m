@@ -90,7 +90,7 @@ fid = fopen(infile, 'r', 'l');
     data.sigma(1:data.totsamp,1:data.n_levels) = single(-999); % spectral width [m/s]
     data.skew(1:data.totsamp,1:data.n_levels) = single(-999); % skewness
     data.kurt(1:data.totsamp,1:data.n_levels) = single(-999); %  kurtosis
-    data.spec(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % doppler spectrum
+    data.spec(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); %single(-999); % doppler spectrum % filling with NaNs instead of -999 to avoid having to convert missing values to NaNs later
     
     for i = 1:data.totsamp
         data.samplen(i) = fread(fid,1,'int');

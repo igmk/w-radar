@@ -22,7 +22,9 @@ function data = read_lv0_v3(infile)
     data.endtime = int32(fread(fid,1,'uint')); % time of last sample in file
     data.progno = int32(fread(fid,1,'int')); % program number, as definded in the host-pc software
     data.modelno = int32(fread(fid,1,'int')); % =0 singel pol., = 1 dual pol, 2 = dual pol. LDR configuration
-    
+        % modelno contains same information as DualPol, but different
+        % definition - don't use to avoid confusion. RG 19.9.2022
+        
     cc = 0;
     count = 1;
     while cc == 0
@@ -158,25 +160,25 @@ function data = read_lv0_v3(infile)
     data.RHprof(1:data.totsamp,1:data.H_altcount) = single(-999); % rel hum profile
     data.PNv(1:data.totsamp,1:data.n_levels) = single(-999); % total IF power in v-pol measured at the ADC input
     data.SLv(1:data.totsamp,1:data.n_levels) = single(-999); % linear sensitivity limit in Ze units for vertical polarisation
-    data.spec(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % vertical pol doppler spectrum linear units
+    data.spec(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) =  NaN('single'); % vertical pol doppler spectrum linear units % filling with NaNs instead of -999 to avoid having to convert missing values to NaNs later
     if data.DualPol > 0
         data.PNh(1:data.totsamp,1:data.n_levels) = single(-999); % total IF power in h-pol measured at ADT unput
         data.SLh(1:data.totsamp,1:data.n_levels) = single(-999); % linear sensitivity limit in Ze units for horizontal polarisation
-        data.spec_hv(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % hor pol doppler spectrum linear units
-        data.spec_covRe(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % real part of covariance spectrum
-        data.spec_covIm(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % imaginary part of covariance spectrum
+        data.spec_hv(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); % hor pol doppler spectrum linear units
+        data.spec_covRe(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); % real part of covariance spectrum
+        data.spec_covIm(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); % imaginary part of covariance spectrum
     end      
     data.mask(1:data.totsamp,1:data.n_levels) = int8(0); % data.mask array of occupied range cells: 0=not occupied, 1=occupied
     
     if data.CompEna == 2 && data.DualPol > 0
-        data.d_spec(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % spectral differential reflectivity [dB]
-        data.CorrCoeff(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % rho_hv, spectral corellation coefficient [0,1]
-        data.DiffPh(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % spectral differential phase [rad]
+        data.d_spec(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); % spectral differential reflectivity [dB]
+        data.CorrCoeff(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); % rho_hv, spectral corellation coefficient [0,1]
+        data.DiffPh(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); % spectral differential phase [rad]
     end
     
     if data.DualPol == 2 && data.CompEna == 2
-        data.SLDR(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % compressed spectral slanted LDR [dB]
-        data.SCorrCoeff(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % compressed spectral slanted correlation coefficient [0,1]
+        data.SLDR(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); % compressed spectral slanted LDR [dB]
+        data.SCorrCoeff(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); % compressed spectral slanted correlation coefficient [0,1]
         if data.CompEna == 2
             data.KDP(1:data.totsamp,1:data.n_levels) = single(-999); % specific differential phase shift [rad/km]
             data.DiffAtt(1:data.totsamp,1:data.n_levels) = single(-999); % differential attenuation [dB/km]             
@@ -240,9 +242,9 @@ function data = read_lv0_v3(infile)
             
         try
             data.SLv(i,1:data.n_levels) = fread(fid,[1, data.n_levels],'single');
-        if data.DualPol > 0
-            data.SLh(i,1:data.n_levels) = fread(fid,[1, data.n_levels],'single');
-        end
+            if data.DualPol > 0
+                data.SLh(i,1:data.n_levels) = fread(fid,[1, data.n_levels],'single');
+            end
 
         catch
              if feof(fid)
