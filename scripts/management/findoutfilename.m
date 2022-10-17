@@ -100,3 +100,15 @@ function out = outname_eurec4a(config, filename)
 end % function
 
 
+
+
+function out = outname_ac3(config, filename)
+    % output filenames used for ac3 data set
+    % RG 1.6.2022
+
+    out.file1 = fullfile(config.outputpath_tree, sprintf('%s_%s_%s_%s.nc', config.nickradar, config.nickstation, config.filetag, filename));
+    out.file2 = fullfile(config.outputpath_tree, sprintf('%s_%s_spectra_%s_%s.nc', config.nickradar, config.nickstation, config.filetag, filename));
+    out.file3 = fullfile(config.outputpath_tree, sprintf('%s_%s_housekeep_%s_%s.nc', config.nickradar, config.nickstation, config.filetag, filename));
+    
+end % function
+

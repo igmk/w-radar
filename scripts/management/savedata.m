@@ -98,7 +98,8 @@ end % function
 
 
 function write_eurec4a(data, config)
-    % write output file for U. Cologne default option (compact and full file)
+    % write output file for EURECa campaign: physical and technical
+    % parameters file
     % RG 13.4.2022
     
     % calculating Doppler velocity arrays for output
@@ -110,5 +111,22 @@ function write_eurec4a(data, config)
     disp(['Writing file ' config.outfiles.file2])
     write_data_2_nc_technical(data,config.outfiles.file2, config);
      
+    
+end % function
+
+
+
+function write_ac3(data, config)
+    % write output files for ac3 data set
+    % RG 1.6.2022
+    
+    disp(['Writing file ' config.outfiles.file1])
+    write_data_2_nc_moments(data, config.outfiles.file1, config);
+        
+    disp(['Writing file ' config.outfiles.file2])
+    write_data_2_nc_spectra(data, config.outfiles.file2, config);
+     
+    disp(['Writing file ' config.outfiles.file3])
+    write_data_2_nc_housekeep(data, config.outfiles.file3, config);
     
 end % function
