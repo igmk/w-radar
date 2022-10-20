@@ -20,3 +20,9 @@ data = checkdata2(data);
 % Ze > 50 dB is found
 % RG 7.9.2021        
 data = zesanitycheck(data);
+
+
+% Sometimes in the temperature variables found 0 values, replacing these
+% with NaNs since a temperature of 0 K is obviously wrong
+% RG 20.10.2022
+data = temperaturecheck(data);
