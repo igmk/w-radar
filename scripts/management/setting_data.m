@@ -115,13 +115,3 @@ data.blower( data.status < 10 ) = 0;
 % heater status is what is left when removing blower status
 data.heater = data.status;
 data.heater(data.status >= 10) = data.heater(data.status >= 10) - 10;
-
-
-
-% linflag == false only of data has been processed with software
-% version 1 - THIS SHOULD BE DONE IN THE PREPROCESSING FUNCTION
-% if config.linflag == false % convert spectra into linear units
-%     data.spec = 10.^(data.spec/10);
-%     data.Ze = 10.^(data.Ze/10);
-% end
-

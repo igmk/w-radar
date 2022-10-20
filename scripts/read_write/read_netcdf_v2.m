@@ -6,8 +6,6 @@ function data = read_netcdf_v2(infile)
 
 % reads netcdf files that contain joyrad94 data produced with the first
 % software version
-% adds variables manually that are available with the newsoftware version.
-% this is for homogenizing further processing
 
     vinfo = ncinfo(infile);
     
