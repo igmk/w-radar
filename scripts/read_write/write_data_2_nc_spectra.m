@@ -123,7 +123,7 @@ id_range_offsets = defh.range_offsets(ncid,did_no_seq);
 
 id_DoppMax = defh.DoppMax(ncid, did_no_seq);
 
-id_DoppLen = netcdf.defVar(ncid,'spec_N','nc_int',did_no_seq);
+id_DoppLen = netcdf.defVar(ncid,'spec_length','nc_int',did_no_seq);
 netcdf.putAtt(ncid,id_DoppLen,'long_name','number of bins in Doppler spectra of each chirp sequence');
 netcdf.putAtt(ncid,id_DoppLen,'_FillValue',int32(-999));
 netcdf.putAtt(ncid,id_DoppLen,'comment','same as the Doppler FFT; the dimension of the corresponding velocity array might differ from spec_length due to the dealiasing algorithm');
@@ -156,7 +156,12 @@ netcdf.putAtt(ncid,id_VNoisePow_peak,'units','dBz');
 netcdf.putAtt(ncid,id_VNoisePow_peak,'_FillValue',NaN('single'));
 netcdf.putAtt(ncid,id_VNoisePow_peak,'comment','calculated from the Doppler spectra following Hildebrand and Sekhon, 1974');
 
-id_SLv = defh.SLv(ncid, did_height, did_time);
+if isfield(data, 'SLv')
+    id_SLv = defh.SLv(ncid, did_height, did_time);
+end
+if isfield(data, 'std_noise') % from RPG software version 1
+    id_NStd = defh.noisestd(ncid, did_no_seq, did_time);
+end
 
 %%%%%%%%%% other variables
 id_swv = defh.radar_software(ncid);
@@ -177,7 +182,13 @@ netcdf.defVarDeflate(ncid,id_sampleTms,true,true,9);
 % multi-D variables
 netcdf.defVarDeflate(ncid,id_VNoisePow_mean,true,true,9);
 netcdf.defVarDeflate(ncid,id_VNoisePow_peak,true,true,9);
-netcdf.defVarDeflate(ncid,id_SLv,true,true,9);
+
+if isfield(data, 'SLv')
+    netcdf.defVarDeflate(ncid,id_SLv,true,true,9);
+end
+if isfield(data, 'std_noise') % from RPG software version 1
+    netcdf.defVarDeflate(ncid,id_NStd,true,true,9);
+end 
 
 % variables for spectra
 for ch = 1:data.no_chirp_seq
@@ -221,7 +232,12 @@ netcdf.putVar(ncid,id_sampleTms,0,data.totsamp,data.sampleTms);
 
 netcdf.putVar(ncid,id_VNoisePow_mean,[0,0],[data.n_levels,data.totsamp],10.*log10(data.VNoisePow_mean'));
 netcdf.putVar(ncid,id_VNoisePow_peak,[0,0],[data.n_levels,data.totsamp],10.*log10(data.VNoisePow_peak'));
-netcdf.putVar(ncid,id_SLv,[0,0],[data.n_levels,data.totsamp],10.*log10(data.SLv'));
+if isfield(data, 'SLv')
+    netcdf.putVar(ncid,id_SLv,[0,0],[data.n_levels,data.totsamp],10.*log10(data.SLv'));
+end
+if isfield(data, 'std_noise') % from RPG software version 1
+    netcdf.putVar(ncid,id_NStd,[0,0],[data.no_chirp_seq,data.totsamp],(data.std_noise'));
+end
 
 % variables for spectra
 

@@ -15,13 +15,20 @@ did_range  = netcdf.defDim(ncid,'range',data.n_levels);
 did_no_seq = netcdf.defDim(ncid,'chirp_sequence',data.no_chirp_seq);
 did_str = netcdf.defDim(ncid,'string',50); % assuming 50 charachters would be enough
 
-
-if ne(data.T_altcount,0)
-    did_T_range = netcdf.defDim(ncid,'T_levels',data.T_altcount);
+Temp_ret_flag = false;
+if isfield(data, 'T_altcount')
+    if ne(data.T_altcount,0)
+        did_T_range = netcdf.defDim(ncid,'T_levels',data.T_altcount);
+        Temp_ret_flag = true;
+    end    
 end
 
-if ne(data.H_altcount,0)
-    did_H_range = netcdf.defDim(ncid,'H_levels',data.H_altcount);
+Hum_ret_flag = false;
+if isfield(data, 'H_altcount')
+    if ne(data.H_altcount,0)
+        did_H_range = netcdf.defDim(ncid,'H_levels',data.H_altcount);
+        Hum_ret_flag = true;
+    end
 end
 
 
@@ -47,7 +54,7 @@ netcdf.putAtt(ncid,id_range,'rpg_name','RAlts');
 
 id_no_seq = defh.chirp_sequence(ncid, did_no_seq);
 
-if ne(data.T_altcount,0)
+if Temp_ret_flag
     id_coord_Tlevels = netcdf.defVar(ncid,'T_levels','nc_float',did_T_range);
     netcdf.putAtt(ncid,id_coord_Tlevels,'long_name','height levels for retrieved temperature profile');
     netcdf.putAtt(ncid,id_coord_Tlevels,'units','m');
@@ -55,7 +62,7 @@ if ne(data.T_altcount,0)
     netcdf.putAtt(ncid,id_coord_Tlevels,'rpg_name','TAlts');
 end
 
-if ne(data.H_altcount,0)
+if Hum_ret_flag
     id_coord_Hlevels = netcdf.defVar(ncid,'H_levels','nc_float',did_H_range);
     netcdf.putAtt(ncid,id_coord_Hlevels,'long_name','height levels for retrieved humidity profiles');
     netcdf.putAtt(ncid,id_coord_Hlevels,'units','m');
@@ -83,10 +90,11 @@ netcdf.putAtt(ncid,id_progno,'_FillValue',int32(-999));
 netcdf.putAtt(ncid,id_progno,'comment','used to identify specific chirp tables');
 netcdf.putAtt(ncid,id_progno,'rpg_name','ProgNo');
 
-id_custname = netcdf.defVar(ncid,'customer_name','nc_char',did_str);
-netcdf.putAtt(ncid,id_custname,'comment','customer name as given in RPG software');
-netcdf.putAtt(ncid,id_custname,'rpg_name','CustName');
-
+if isfield(data, 'custname')
+    id_custname = netcdf.defVar(ncid,'customer_name','nc_char',did_str);
+    netcdf.putAtt(ncid,id_custname,'comment','customer name as given in RPG software');
+    netcdf.putAtt(ncid,id_custname,'rpg_name','CustName');
+end
 
 % commented out, because does not provide any info - the variables range,
 % time and chirp_sequence alrady tells how many bins in the data. RG 20.9.2022
@@ -160,54 +168,75 @@ netcdf.putAtt(ncid,id_AntDia,'long_name','Antenna diameter');
 netcdf.putAtt(ncid,id_AntDia,'units','m');
 netcdf.putAtt(ncid,id_AntDia,'_FillValue',NaN('single'));
 netcdf.putAtt(ncid,id_AntDia,'rpg_name','AntDia'); 
+ 
+if strcmp(data.radarsw, '1.00') % the "radar constant" variable given in data for first software version is defined differently (see manual for details)
+    id_C = netcdf.defVar(ncid,'radar_constant','nc_float',did_time);
+    netcdf.putAtt(ncid,id_C,'long_name','Radar constant');
+    netcdf.putAtt(ncid,id_C,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_C,'comment','note that radar constant given in different format for software version 1, see manual for details');
+    netcdf.putAtt(ncid,id_C,'rpg_name','RadC');
+else
+    id_C = netcdf.defVar(ncid,'radar_constant','nc_float',[]);
+    netcdf.putAtt(ncid,id_C,'long_name','Radar constant');
+    netcdf.putAtt(ncid,id_C,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_C,'comment','see manual for details');
+    netcdf.putAtt(ncid,id_C,'rpg_name','Cr'); 
+end
 
-id_C = netcdf.defVar(ncid,'radar_constant','nc_float',[]);
-netcdf.putAtt(ncid,id_C,'long_name','Radar constant');
-netcdf.putAtt(ncid,id_C,'_FillValue',NaN('single'));
-netcdf.putAtt(ncid,id_C,'comment','see manual for details');
-netcdf.putAtt(ncid,id_C,'rpg_name','Cr'); 
+if isfield(data, 'SampRate')
+    id_smprt = netcdf.defVar(ncid,'ADC_sampling_rate','nc_float',[]);
+    netcdf.putAtt(ncid,id_smprt,'comment','ADC sampling rate');
+    netcdf.putAtt(ncid,id_smprt,'units','Hz');
+    netcdf.putAtt(ncid,id_smprt,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_smprt,'rpg_name','SampRate'); % data.SampRate
+end
 
-id_smprt = netcdf.defVar(ncid,'ADC_sampling_rate','nc_float',[]);
-netcdf.putAtt(ncid,id_smprt,'comment','ADC sampling rate');
-netcdf.putAtt(ncid,id_smprt,'units','Hz');
-netcdf.putAtt(ncid,id_smprt,'_FillValue',NaN('single'));
-netcdf.putAtt(ncid,id_smprt,'rpg_name','SampRate'); % data.SampRate
+if isfield(data, 'MaxRange')
+    id_maxr = netcdf.defVar(ncid,'max_range','nc_float',[]);
+    netcdf.putAtt(ncid,id_maxr,'long_name','maximum unambiguous range');
+    netcdf.putAtt(ncid,id_maxr,'units','m');
+    netcdf.putAtt(ncid,id_maxr,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_maxr,'rpg_name','MaxRange'); % data.MaxRange
+end
 
-id_maxr = netcdf.defVar(ncid,'max_range','nc_float',[]);
-netcdf.putAtt(ncid,id_maxr,'long_name','maximum unambiguous range');
-netcdf.putAtt(ncid,id_maxr,'units','m');
-netcdf.putAtt(ncid,id_maxr,'_FillValue',NaN('single'));
-netcdf.putAtt(ncid,id_maxr,'rpg_name','MaxRange'); % data.MaxRange
+if isfield(data, 'SupPowLev')
+    id_powesup = netcdf.defVar(ncid,'power_level_suppression','nc_float',[]);
+    netcdf.putAtt(ncid,id_powesup,'long_name','Power level suppression');
+    netcdf.putAtt(ncid,id_powesup,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_powesup,'comment','indicates if power levelling has been used (0=yes, 1=no)');
+    netcdf.putAtt(ncid,id_powesup,'rpg_name','SupPowLev'); % data.SupPowLev
+end
 
-id_powesup = netcdf.defVar(ncid,'power_level_suppression','nc_float',[]);
-netcdf.putAtt(ncid,id_powesup,'long_name','Power level suppression');
-netcdf.putAtt(ncid,id_powesup,'_FillValue',NaN('single'));
-netcdf.putAtt(ncid,id_powesup,'comment','indicates if power levelling has been used (0=yes, 1=no)');
-netcdf.putAtt(ncid,id_powesup,'rpg_name','SupPowLev'); % data.SupPowLev
+if isfield(data, 'SpkFilEna')
+    id_sfil = netcdf.defVar(ncid,'spike_filter','nc_float',[]);
+    netcdf.putAtt(ncid,id_sfil,'long_name','spike filter');
+    netcdf.putAtt(ncid,id_sfil,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_sfil,'comment','indicates if spike/plankton filter has been used in RPG software(0=yes, 1=no)');
+    netcdf.putAtt(ncid,id_sfil,'rpg_name','SpkFilEna'); % data.SpkFilEna
+end
 
-id_sfil = netcdf.defVar(ncid,'spike_filter','nc_float',[]);
-netcdf.putAtt(ncid,id_sfil,'long_name','spike filter');
-netcdf.putAtt(ncid,id_sfil,'_FillValue',NaN('single'));
-netcdf.putAtt(ncid,id_sfil,'comment','indicates if spike/plankton filter has been used in RPG software(0=yes, 1=no)');
-netcdf.putAtt(ncid,id_sfil,'rpg_name','SpkFilEna'); % data.SpkFilEna
+if isfield(data, 'FFTWindow')
+    id_fftwin = netcdf.defVar(ncid,'FFT_window','nc_char',did_str);
+    netcdf.putAtt(ncid,id_fftwin,'long_name','FFT window');
+    netcdf.putAtt(ncid,id_fftwin,'comment','FFT window used in signal processing');
+    netcdf.putAtt(ncid,id_fftwin,'rpg_name','FFTWindow'); % data.FFTWindow
+end
 
-id_fftwin = netcdf.defVar(ncid,'FFT_window','nc_char',did_str);
-netcdf.putAtt(ncid,id_fftwin,'long_name','FFT window');
-netcdf.putAtt(ncid,id_fftwin,'comment','FFT window used in signal processing');
-netcdf.putAtt(ncid,id_fftwin,'rpg_name','FFTWindow'); % data.FFTWindow
+if isfield(data, 'FFTInputRng')
+    id_finrn = netcdf.defVar(ncid,'ADC_input_voltage_range','nc_float',[]);
+    netcdf.putAtt(ncid,id_finrn,'long_name','ADC input voltage range (+/-)');
+    netcdf.putAtt(ncid,id_finrn,'units','mV');
+    netcdf.putAtt(ncid,id_finrn,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_finrn,'rpg_name','FFTInputRng'); % data.FFTInputRng
+end
 
-id_finrn = netcdf.defVar(ncid,'ADC_input_voltage_range','nc_float',[]);
-netcdf.putAtt(ncid,id_finrn,'long_name','ADC input voltage range (+/-)');
-netcdf.putAtt(ncid,id_finrn,'units','mV');
-netcdf.putAtt(ncid,id_finrn,'_FillValue',NaN('single'));
-netcdf.putAtt(ncid,id_finrn,'rpg_name','FFTInputRng'); % data.FFTInputRng
-
-id_noisfil = netcdf.defVar(ncid,'noise_filter','nc_float',[]);
-netcdf.putAtt(ncid,id_noisfil,'long_name','noise filter factor');
-netcdf.putAtt(ncid,id_noisfil,'_FillValue',NaN('single'));
-netcdf.putAtt(ncid,id_noisfil,'comment','Determines the threshold used for data logging, which is the STD of noise multiplied with the noise filter factor');
-netcdf.putAtt(ncid,id_noisfil,'rpg_name','NoiseFilt'); % data.NoiseFilt
-
+if isfield(data, 'NoiseFilt')
+    id_noisfil = netcdf.defVar(ncid,'noise_filter','nc_float',[]);
+    netcdf.putAtt(ncid,id_noisfil,'long_name','noise filter factor');
+    netcdf.putAtt(ncid,id_noisfil,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_noisfil,'comment','Determines the threshold used for data logging, which is the STD of noise multiplied with the noise filter factor');
+    netcdf.putAtt(ncid,id_noisfil,'rpg_name','NoiseFilt'); % data.NoiseFilt
+end
 id_SampDur = netcdf.defVar(ncid,'sample_duration','nc_float',[]);
 netcdf.putAtt(ncid,id_SampDur,'long_name','full sample duration');
 netcdf.putAtt(ncid,id_SampDur,'units','sec');
@@ -233,13 +262,13 @@ end
 %%%%%%% range variables     
 
 
-
-id_Fr = netcdf.defVar(ncid,'Fr','nc_int',did_range);
-netcdf.putAtt(ncid,id_Fr,'long_name','Range factors');
-netcdf.putAtt(ncid,id_Fr,'_FillValue',int32(-999));
-netcdf.putAtt(ncid,id_Fr,'comment','See manual for details');
-netcdf.putAtt(ncid,id_Fr,'rpg_name','Fr');
-
+if isfield(data, 'Fr')
+    id_Fr = netcdf.defVar(ncid,'Fr','nc_int',did_range);
+    netcdf.putAtt(ncid,id_Fr,'long_name','Range factors');
+    netcdf.putAtt(ncid,id_Fr,'_FillValue',int32(-999));
+    netcdf.putAtt(ncid,id_Fr,'comment','See manual for details');
+    netcdf.putAtt(ncid,id_Fr,'rpg_name','Fr');
+end
 
 %%%%%%%% chirp_seq_dependent variables
 
@@ -253,73 +282,97 @@ netcdf.putAtt(ncid,id_SeqAvg,'long_name','Number of averaged chirps in each chir
 netcdf.putAtt(ncid,id_SeqAvg,'_FillValue',int32(-999));
 netcdf.putAtt(ncid,id_SeqAvg,'rpg_name','ChirpReps');
 
-id_bw = netcdf.defVar(ncid,'channel_bandwidth','nc_float',did_no_seq);
-netcdf.putAtt(ncid,id_bw,'long_name','bandwidth of individual radar channels in the sequence');
-netcdf.putAtt(ncid,id_bw,'units','Hz');
-netcdf.putAtt(ncid,id_bw,'_FillValue',NaN('single'));
-netcdf.putAtt(ncid,id_bw,'rpg_name','ChanBW');
+if isfield(data, 'ChanBW')
+    id_bw = netcdf.defVar(ncid,'channel_bandwidth','nc_float',did_no_seq);
+    netcdf.putAtt(ncid,id_bw,'long_name','bandwidth of individual radar channels in the sequence');
+    netcdf.putAtt(ncid,id_bw,'units','Hz');
+    netcdf.putAtt(ncid,id_bw,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_bw,'rpg_name','ChanBW');
+end
 
-id_lowIF = netcdf.defVar(ncid,'chirp_low_if','nc_float',did_no_seq);
-netcdf.putAtt(ncid,id_lowIF,'long_name','lowest IF frequency in the sequence');
-netcdf.putAtt(ncid,id_lowIF,'units','Hz');
-netcdf.putAtt(ncid,id_lowIF,'_FillValue',NaN('single'));
-netcdf.putAtt(ncid,id_lowIF,'rpg_name','ChirpLowIF');
+if isfield(data, 'ChirpLowIF')
+    id_lowIF = netcdf.defVar(ncid,'chirp_low_if','nc_float',did_no_seq);
+    netcdf.putAtt(ncid,id_lowIF,'long_name','lowest IF frequency in the sequence');
+    netcdf.putAtt(ncid,id_lowIF,'units','Hz');
+    netcdf.putAtt(ncid,id_lowIF,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_lowIF,'rpg_name','ChirpLowIF');
+end
 
-id_highIF = netcdf.defVar(ncid,'chirp_high_if','nc_float',did_no_seq);
-netcdf.putAtt(ncid,id_highIF,'long_name','highest IF frequency in the sequence');
-netcdf.putAtt(ncid,id_highIF,'units','Hz');
-netcdf.putAtt(ncid,id_highIF,'_FillValue',NaN('single'));
-netcdf.putAtt(ncid,id_highIF,'rpg_name','ChirpHighIF');
+if isfield(data, 'ChirpHighIF')
+    id_highIF = netcdf.defVar(ncid,'chirp_high_if','nc_float',did_no_seq);
+    netcdf.putAtt(ncid,id_highIF,'long_name','highest IF frequency in the sequence');
+    netcdf.putAtt(ncid,id_highIF,'units','Hz');
+    netcdf.putAtt(ncid,id_highIF,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_highIF,'rpg_name','ChirpHighIF');
+end
 
-id_crmin = netcdf.defVar(ncid,'chirp_minrange','nc_float',did_no_seq);
-netcdf.putAtt(ncid,id_crmin,'long_name','minimum range in the sequence');
-netcdf.putAtt(ncid,id_crmin,'units','m');
-netcdf.putAtt(ncid,id_crmin,'_FillValue',NaN('single'));
-netcdf.putAtt(ncid,id_crmin,'rpg_name','RangeMin');
+if isfield(data, 'RangeMin')
+    id_crmin = netcdf.defVar(ncid,'chirp_minrange','nc_float',did_no_seq);
+    netcdf.putAtt(ncid,id_crmin,'long_name','minimum range in the sequence');
+    netcdf.putAtt(ncid,id_crmin,'units','m');
+    netcdf.putAtt(ncid,id_crmin,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_crmin,'rpg_name','RangeMin');
+end
 
-id_crmax = netcdf.defVar(ncid,'chirp_maxrange','nc_float',did_no_seq);
-netcdf.putAtt(ncid,id_crmax,'long_name','maximum range in the sequence');
-netcdf.putAtt(ncid,id_crmax,'units','m');
-netcdf.putAtt(ncid,id_crmax,'_FillValue',NaN('single'));
-netcdf.putAtt(ncid,id_crmax,'rpg_name','RangeMax');
+if isfield(data, 'RangeMax')
+    id_crmax = netcdf.defVar(ncid,'chirp_maxrange','nc_float',did_no_seq);
+    netcdf.putAtt(ncid,id_crmax,'long_name','maximum range in the sequence');
+    netcdf.putAtt(ncid,id_crmax,'units','m');
+    netcdf.putAtt(ncid,id_crmax,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_crmax,'rpg_name','RangeMax');
+end
 
-id_rfft = netcdf.defVar(ncid,'ranging_fft','nc_float',did_no_seq);
-netcdf.putAtt(ncid,id_rfft,'long_name','Ranging FFT');
-netcdf.putAtt(ncid,id_rfft,'_FillValue',NaN('single'));
-netcdf.putAtt(ncid,id_rfft,'rpg_name','ChirpFFTSize'); % data.ChirpFFTSize
+if isfield(data, 'ChirpFFTSize')
+    id_rfft = netcdf.defVar(ncid,'ranging_fft','nc_float',did_no_seq);
+    netcdf.putAtt(ncid,id_rfft,'long_name','Ranging FFT');
+    netcdf.putAtt(ncid,id_rfft,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_rfft,'rpg_name','ChirpFFTSize'); % data.ChirpFFTSize
+end
 
-id_invsmp = netcdf.defVar(ncid,'chirp_invalid_samples','nc_float',did_no_seq);
-netcdf.putAtt(ncid,id_invsmp,'long_name','number of invalid samples at beginning of chirp');
-netcdf.putAtt(ncid,id_invsmp,'_FillValue',NaN('single'));
-netcdf.putAtt(ncid,id_invsmp,'rpg_name','ChirpInvSamples'); % data.ChirpInvSamples
+if isfield(data, 'ChirpInvSamples')
+    id_invsmp = netcdf.defVar(ncid,'chirp_invalid_samples','nc_float',did_no_seq);
+    netcdf.putAtt(ncid,id_invsmp,'long_name','number of invalid samples at beginning of chirp');
+    netcdf.putAtt(ncid,id_invsmp,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_invsmp,'rpg_name','ChirpInvSamples'); % data.ChirpInvSamples
+end
 
-id_ccf = netcdf.defVar(ncid,'chirp_center_freq','nc_float',did_no_seq);
-netcdf.putAtt(ncid,id_ccf,'long_name','chirp centre frequency at radar transmitter output');
-netcdf.putAtt(ncid,id_ccf,'units','MHz');
-netcdf.putAtt(ncid,id_ccf,'_FillValue',NaN('single'));
-netcdf.putAtt(ncid,id_ccf,'rpg_name','ChirpCenterFr'); % data.ChirpCenterFr
+if isfield(data, 'ChirpCenterFr')
+    id_ccf = netcdf.defVar(ncid,'chirp_center_freq','nc_float',did_no_seq);
+    netcdf.putAtt(ncid,id_ccf,'long_name','chirp centre frequency at radar transmitter output');
+    netcdf.putAtt(ncid,id_ccf,'units','MHz');
+    netcdf.putAtt(ncid,id_ccf,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_ccf,'rpg_name','ChirpCenterFr'); % data.ChirpCenterFr
+end
 
-id_cbw = netcdf.defVar(ncid,'chirp_bandwidth','nc_float',did_no_seq);
-netcdf.putAtt(ncid,id_cbw,'long_name','chirp bandwidth at radar transmitter output');
-netcdf.putAtt(ncid,id_cbw,'units','MHz');
-netcdf.putAtt(ncid,id_cbw,'_FillValue',NaN('single'));
-netcdf.putAtt(ncid,id_cbw,'rpg_name','ChirpBWFr'); % data.ChirpBWFr
+if isfield(data, 'ChirpBWFr')
+    id_cbw = netcdf.defVar(ncid,'chirp_bandwidth','nc_float',did_no_seq);
+    netcdf.putAtt(ncid,id_cbw,'long_name','chirp bandwidth at radar transmitter output');
+    netcdf.putAtt(ncid,id_cbw,'units','MHz');
+    netcdf.putAtt(ncid,id_cbw,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_cbw,'rpg_name','ChirpBWFr'); % data.ChirpBWFr
+end
 
-id_ffts = netcdf.defVar(ncid,'fft_start_index','nc_float',did_no_seq);
-netcdf.putAtt(ncid,id_ffts,'long_name','start index of sequence in FFT array');
-netcdf.putAtt(ncid,id_ffts,'_FillValue',NaN('single'));
-netcdf.putAtt(ncid,id_ffts,'rpg_name','FFTStartInd'); % data.FFTStartInd
+if isfield(data, 'FFTStartInd')
+    id_ffts = netcdf.defVar(ncid,'fft_start_index','nc_float',did_no_seq);
+    netcdf.putAtt(ncid,id_ffts,'long_name','start index of sequence in FFT array');
+    netcdf.putAtt(ncid,id_ffts,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_ffts,'rpg_name','FFTStartInd'); % data.FFTStartInd
+end
 
-id_ffte = netcdf.defVar(ncid,'fft_stop_index','nc_float',did_no_seq);
-netcdf.putAtt(ncid,id_ffte,'long_name','stop index of sequence in FFT array');
-netcdf.putAtt(ncid,id_ffte,'_FillValue',NaN('single'));
-netcdf.putAtt(ncid,id_ffte,'rpg_name','FFTStopInd'); % data.FFTStopInd
+if isfield(data, 'FFTStopInd')
+    id_ffte = netcdf.defVar(ncid,'fft_stop_index','nc_float',did_no_seq);
+    netcdf.putAtt(ncid,id_ffte,'long_name','stop index of sequence in FFT array');
+    netcdf.putAtt(ncid,id_ffte,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_ffte,'rpg_name','FFTStopInd'); % data.FFTStopInd
+end
 
-id_fftno = netcdf.defVar(ncid,'chirp_num_fft','nc_float',did_no_seq);
-netcdf.putAtt(ncid,id_fftno,'long_name','number of FFT range layers in one chirp');
-netcdf.putAtt(ncid,id_fftno,'_FillValue',NaN('single'));
-netcdf.putAtt(ncid,id_fftno,'rpg_name','ChirpFFTNo'); % data.ChirpFFTNo
-netcdf.putAtt(ncid,id_fftno,'comment','usually 1, according to the manual');
+if isfield(data, 'ChirpFFTNo')
+    id_fftno = netcdf.defVar(ncid,'chirp_num_fft','nc_float',did_no_seq);
+    netcdf.putAtt(ncid,id_fftno,'long_name','number of FFT range layers in one chirp');
+    netcdf.putAtt(ncid,id_fftno,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_fftno,'rpg_name','ChirpFFTNo'); % data.ChirpFFTNo
+    netcdf.putAtt(ncid,id_fftno,'comment','usually 1, according to the manual');
+end
 
 id_ChrpIntTime = netcdf.defVar(ncid,'chirp_seq_int_time','nc_float',did_no_seq); % added by RG 4.12.2020
 netcdf.putAtt(ncid,id_ChrpIntTime,'long_name','Integration time of each chirp sequence');
@@ -448,27 +501,27 @@ netcdf.putAtt(ncid,id_T_pc,'_FillValue',NaN('single'));
 netcdf.putAtt(ncid,id_T_pc,'comment',['For a stable performance t_pc < 323K.']);
 netcdf.putAtt(ncid,id_T_pc,'rpg_name','T_pc');
 
+if isfield(data, 'reserved')
+    id_incel = netcdf.defVar(ncid,'instrument_elevation','nc_float',did_time); 
+    netcdf.putAtt(ncid,id_incel,'long_name','instrument elevation angle');
+    netcdf.putAtt(ncid,id_incel,'units','degrees');
+    netcdf.putAtt(ncid,id_incel,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_incel,'comment','recorded by an internal inclination sensor, if included in the instrument');
 
-id_incel = netcdf.defVar(ncid,'instrument_elevation','nc_float',did_time); 
-netcdf.putAtt(ncid,id_incel,'long_name','instrument elevation angle');
-netcdf.putAtt(ncid,id_incel,'units','degrees');
-netcdf.putAtt(ncid,id_incel,'_FillValue',NaN('single'));
-netcdf.putAtt(ncid,id_incel,'comment','recorded by an internal inclination sensor, if included in the instrument');
+    id_incea = netcdf.defVar(ncid,'instrument_azimuth','nc_float',did_time);
+    netcdf.putAtt(ncid,id_incea,'long_name','instrument azimuth angle');
+    netcdf.putAtt(ncid,id_incea,'units','degrees');
+    netcdf.putAtt(ncid,id_incea,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_incea,'comment','recorded by an internal inclination sensor, if included in the instrument');
+end
 
 
-id_incea = netcdf.defVar(ncid,'instrument_azimuth','nc_float',did_time);
-netcdf.putAtt(ncid,id_incea,'long_name','instrument azimuth angle');
-netcdf.putAtt(ncid,id_incea,'units','degrees');
-netcdf.putAtt(ncid,id_incea,'_FillValue',NaN('single'));
-netcdf.putAtt(ncid,id_incea,'comment','recorded by an internal inclination sensor, if included in the instrument');
-
-
-
-id_QF = netcdf.defVar(ncid,'rpg_quality_flag','nc_byte',did_time); 
-netcdf.putAtt(ncid,id_QF,'long_name','quality flag from RPG software');
-netcdf.putAtt(ncid,id_QF,'comment','Bit 1: ADC saturation, Bit 2: spectral width too high, Bit 3: no transm. power leveling');
-netcdf.putAtt(ncid,id_QF,'rpg_name','QF');
-
+if isfield(data, 'QF')
+    id_QF = netcdf.defVar(ncid,'rpg_quality_flag','nc_byte',did_time); 
+    netcdf.putAtt(ncid,id_QF,'long_name','quality flag from RPG software');
+    netcdf.putAtt(ncid,id_QF,'comment','Bit 1: ADC saturation, Bit 2: spectral width too high, Bit 3: no transm. power leveling');
+    netcdf.putAtt(ncid,id_QF,'rpg_name','QF');
+end
                                          
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -518,29 +571,34 @@ netcdf.putAtt(ncid,id_MinVel_Correction,'comment',['If dealising was applied the
     'was corrected by the final quality check (output from dealias_spectra_vm_column_quality_check.m). '...
     'Subtracting this value from MinVel provides the offset before the final quality check (output from dealias_spectra.m).']);
 
+if isfield(data, 'PNv')
+    id_PNv = netcdf.defVar(ncid,'PNv','nc_float',[did_range,did_time]);
+    netcdf.putAtt(ncid,id_PNv,'long_name','Total IF power in vertical polarization measured at ADC input');
+    netcdf.putAtt(ncid,id_PNv,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_PNv,'rpg_name','PNv');
+end
 
-id_PNv = netcdf.defVar(ncid,'PNv','nc_float',[did_range,did_time]);
-netcdf.putAtt(ncid,id_PNv,'long_name','Total IF power in vertical polarization measured at ADC input');
-netcdf.putAtt(ncid,id_PNv,'_FillValue',NaN('single'));
-netcdf.putAtt(ncid,id_PNv,'rpg_name','PNv');
+if Temp_ret_flag
+    id_tprof = netcdf.defVar(ncid,'temperature_profile','nc_float',[did_T_range,did_time]);
+    netcdf.putAtt(ncid,id_tprof,'long_name','temperature profile');
+    netcdf.putAtt(ncid,id_tprof,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_tprof,'comment','retrieved by RPG software');
+    netcdf.putAtt(ncid,id_tprof,'rpg_name','TPr');
+end
 
-id_tprof = netcdf.defVar(ncid,'temperature_profile','nc_float',[did_T_range,did_time]);
-netcdf.putAtt(ncid,id_tprof,'long_name','temperature profile');
-netcdf.putAtt(ncid,id_tprof,'_FillValue',NaN('single'));
-netcdf.putAtt(ncid,id_tprof,'comment','retrieved by RPG software');
-netcdf.putAtt(ncid,id_tprof,'rpg_name','TPr');
+if Hum_ret_flag
+    id_hprof = netcdf.defVar(ncid,'abshum_profile','nc_float',[did_H_range,did_time]);
+    netcdf.putAtt(ncid,id_hprof,'long_name','absolute humidity profile');
+    netcdf.putAtt(ncid,id_hprof,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_hprof,'comment','retrieved by RPG software');
+    netcdf.putAtt(ncid,id_hprof,'rpg_name','AHPr');
 
-id_hprof = netcdf.defVar(ncid,'abshum_profile','nc_float',[did_H_range,did_time]);
-netcdf.putAtt(ncid,id_hprof,'long_name','absolute humidity profile');
-netcdf.putAtt(ncid,id_hprof,'_FillValue',NaN('single'));
-netcdf.putAtt(ncid,id_hprof,'comment','retrieved by RPG software');
-netcdf.putAtt(ncid,id_hprof,'rpg_name','AHPr');
-
-id_rhprof = netcdf.defVar(ncid,'RH_profile','nc_float',[did_H_range,did_time]);
-netcdf.putAtt(ncid,id_rhprof,'long_name','relative humidity profile');
-netcdf.putAtt(ncid,id_rhprof,'_FillValue',NaN('single'));
-netcdf.putAtt(ncid,id_rhprof,'comment','retrieved by RPG software');
-netcdf.putAtt(ncid,id_rhprof,'rpg_name','RHPr');
+    id_rhprof = netcdf.defVar(ncid,'RH_profile','nc_float',[did_H_range,did_time]);
+    netcdf.putAtt(ncid,id_rhprof,'long_name','relative humidity profile');
+    netcdf.putAtt(ncid,id_rhprof,'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_rhprof,'comment','retrieved by RPG software');
+    netcdf.putAtt(ncid,id_rhprof,'rpg_name','RHPr');
+end
 
 if data.DualPol > 0
     disp('WARMING!!! No polarimetric variables included in the output files')
@@ -551,23 +609,50 @@ end
 
 % range dependent variables
 netcdf.defVarDeflate(ncid,id_height,true,true,9);
-netcdf.defVarDeflate(ncid,id_Fr,true,true,9);
+
+if isfield(data, 'Fr')
+    netcdf.defVarDeflate(ncid,id_Fr,true,true,9);
+end
 
 % chirp_seq dependent variables
 netcdf.defVarDeflate(ncid,id_range_offsets,true,true,9);
 netcdf.defVarDeflate(ncid,id_SeqAvg,true,true,9);
-netcdf.defVarDeflate(ncid,id_bw,true,true,9);
-netcdf.defVarDeflate(ncid,id_lowIF,true,true,9);
-netcdf.defVarDeflate(ncid,id_highIF,true,true,9);
-netcdf.defVarDeflate(ncid,id_crmin,true,true,9);
-netcdf.defVarDeflate(ncid,id_crmax,true,true,9);
-netcdf.defVarDeflate(ncid,id_rfft,true,true,9);
-netcdf.defVarDeflate(ncid,id_invsmp,true,true,9);
-netcdf.defVarDeflate(ncid,id_ccf,true,true,9);
-netcdf.defVarDeflate(ncid,id_cbw,true,true,9);
-netcdf.defVarDeflate(ncid,id_ffts,true,true,9);
-netcdf.defVarDeflate(ncid,id_ffte,true,true,9);
-netcdf.defVarDeflate(ncid,id_fftno,true,true,9);
+if isfield(data, 'ChanBW')
+    netcdf.defVarDeflate(ncid,id_bw,true,true,9);
+end
+if isfield(data, 'ChirpLowIF')
+    netcdf.defVarDeflate(ncid,id_lowIF,true,true,9);
+end
+if isfield(data, 'ChirpHighIF')
+    netcdf.defVarDeflate(ncid,id_highIF,true,true,9);
+end
+if isfield(data, 'RangeMin')
+    netcdf.defVarDeflate(ncid,id_crmin,true,true,9);
+end
+if isfield(data, 'RangeMax')
+    netcdf.defVarDeflate(ncid,id_crmax,true,true,9);
+end
+if isfield(data, 'ChirpFFTSize')
+    netcdf.defVarDeflate(ncid,id_rfft,true,true,9);
+end
+if isfield(data, 'ChirpInvSamples')
+    netcdf.defVarDeflate(ncid,id_invsmp,true,true,9);
+end
+if isfield(data, 'ChirpCenterFr')
+    netcdf.defVarDeflate(ncid,id_ccf,true,true,9);
+end
+if isfield(data, 'ChirpBWFr')
+    netcdf.defVarDeflate(ncid,id_cbw,true,true,9);
+end
+if isfield(data, 'FFTStartInd')
+    netcdf.defVarDeflate(ncid,id_ffts,true,true,9);
+end
+if isfield(data, 'FFTStopInd')
+    netcdf.defVarDeflate(ncid,id_ffte,true,true,9);
+end
+if isfield(data, 'ChirpFFTNo')
+    netcdf.defVarDeflate(ncid,id_fftno,true,true,9);
+end
 netcdf.defVarDeflate(ncid,id_ChrpIntTime,true,true,9);
 netcdf.defVarDeflate(ncid,id_dr,true,true,9);
 
@@ -588,20 +673,30 @@ netcdf.defVarDeflate(ncid,id_az,true,true,9);
 netcdf.defVarDeflate(ncid,id_T_trans,true,true,9);
 netcdf.defVarDeflate(ncid,id_T_rec,true,true,9);
 netcdf.defVarDeflate(ncid,id_T_pc,true,true,9);
-netcdf.defVarDeflate(ncid,id_incel,true,true,9);
-netcdf.defVarDeflate(ncid,id_incea,true,true,9);
-netcdf.defVarDeflate(ncid,id_QF,true,true,9);
+if isfield(data, 'reserved')
+    netcdf.defVarDeflate(ncid,id_incel,true,true,9);
+    netcdf.defVarDeflate(ncid,id_incea,true,true,9);
+end
+if isfield(data, 'QF')
+    netcdf.defVarDeflate(ncid,id_QF,true,true,9);
+end
 
 % multidimensional variables
 netcdf.defVarDeflate(ncid,id_QualFlag,true,true,9);
 netcdf.defVarDeflate(ncid,id_Aliasmask,true,true,9);
 netcdf.defVarDeflate(ncid,id_AliasStatus,true,true,9);
 netcdf.defVarDeflate(ncid,id_MinVel_Correction,true,true,9);
-netcdf.defVarDeflate(ncid,id_PNv,true,true,9);
-netcdf.defVarDeflate(ncid,id_tprof,true,true,9);
-netcdf.defVarDeflate(ncid,id_hprof,true,true,9);
-netcdf.defVarDeflate(ncid,id_rhprof,true,true,9);
+if isfield(data, 'PNv')
+    netcdf.defVarDeflate(ncid,id_PNv,true,true,9);
+end
 
+if Temp_ret_flag
+    netcdf.defVarDeflate(ncid,id_tprof,true,true,9);
+end
+if Hum_ret_flag
+    netcdf.defVarDeflate(ncid,id_hprof,true,true,9);
+    netcdf.defVarDeflate(ncid,id_rhprof,true,true,9);
+end
 
 netcdf.endDef(ncid);
 
@@ -611,68 +706,115 @@ netcdf.endDef(ncid);
 netcdf.putVar(ncid,id_time,0,data.totsamp,data.time);
 netcdf.putVar(ncid,id_range,0,data.n_levels,data.range);
 netcdf.putVar(ncid,id_no_seq,0,data.no_chirp_seq,1:data.no_chirp_seq);
-if ne(data.T_altcount,0)
+
+if Temp_ret_flag
     netcdf.putVar(ncid,id_coord_Tlevels,0,data.T_altcount,data.T_alt);
 end
-if ne(data.H_altcount,0)
+if Hum_ret_flag
     netcdf.putVar(ncid,id_coord_Hlevels,0,data.H_altcount,data.H_alt);
 end
 
 % scalars
 netcdf.putVar(ncid,id_filecode,data.filecode);
 netcdf.putVar(ncid,id_progno,data.progno);
-netcdf.putVar(ncid,id_custname,0,length(data.custname), data.custname);
+if isfield(data, 'custname')
+    netcdf.putVar(ncid,id_custname,0,length(data.custname), data.custname);
+end
 % netcdf.putVar(ncid,id_samples,data.totsamp);
 % netcdf.putVar(ncid,id_levels,data.n_levels);
 % netcdf.putVar(ncid,id_no_chirp_seq,data.no_chirp_seq);
 netcdf.putVar(ncid,id_AntiAlias,data.AntiAlias);
 netcdf.putVar(ncid,id_pol,data.DualPol);
-netcdf.putVar(ncid,id_T_levels,data.T_altcount);
-netcdf.putVar(ncid,id_H_levels,data.H_altcount);
+
+if Temp_ret_flag
+    netcdf.putVar(ncid,id_T_levels,data.T_altcount);
+end
+if Hum_ret_flag
+    netcdf.putVar(ncid,id_H_levels,data.H_altcount);
+end
 netcdf.putVar(ncid,id_compress,data.CompEna);
 % netcdf.putVar(ncid,id_cal_mom,data.cal_mom);
 netcdf.putVar(ncid,id_swv,0,length(data.radarsw), data.radarsw);
 netcdf.putVar(ncid,id_AntSep,data.AntSep);
 netcdf.putVar(ncid,id_AntDia,data.AntDia);
+
 netcdf.putVar(ncid,id_C,data.C);
-netcdf.putVar(ncid,id_smprt,data.SampRate);
-netcdf.putVar(ncid,id_maxr,data.MaxRange);
-netcdf.putVar(ncid,id_powesup,data.SupPowLev);
-netcdf.putVar(ncid,id_sfil,data.SpkFilEna);
-
-FFTWindows = {'SQUARE', 'PARZEN', 'BLACKMAN', 'WELCH', 'SLEPIAN2', 'SLEPIAN3'};
-netcdf.putVar(ncid,id_fftwin,0,length(FFTWindows{data.FFTWindow+1}),FFTWindows{data.FFTWindow+1});
-% 0 = SQUARE
-% 1 = PARZEN
-% 2 = BLACKMAN
-% 3 = WELCH
-% 4 = SLEPIAN2
-% 5 = SLEPIAN3
-
-netcdf.putVar(ncid,id_finrn,data.FFTInputRng);
-netcdf.putVar(ncid,id_noisfil,data.NoiseFilt);
+if isfield(data, 'SampRate')
+    netcdf.putVar(ncid,id_smprt,data.SampRate);
+end
+if isfield(data, 'MaxRange')
+    netcdf.putVar(ncid,id_maxr,data.MaxRange);
+end
+if isfield(data, 'SupPowLev')
+    netcdf.putVar(ncid,id_powesup,data.SupPowLev);
+end
+if isfield(data, 'SpkFilEna')
+    netcdf.putVar(ncid,id_sfil,data.SpkFilEna);
+end
+if isfield(data, 'FFTWindow')
+    FFTWindows = {'SQUARE', 'PARZEN', 'BLACKMAN', 'WELCH', 'SLEPIAN2', 'SLEPIAN3'};
+    netcdf.putVar(ncid,id_fftwin,0,length(FFTWindows{data.FFTWindow+1}),FFTWindows{data.FFTWindow+1});
+    % 0 = SQUARE
+    % 1 = PARZEN
+    % 2 = BLACKMAN
+    % 3 = WELCH
+    % 4 = SLEPIAN2
+    % 5 = SLEPIAN3
+end
+if isfield(data, 'FFTInputRng')
+    netcdf.putVar(ncid,id_finrn,data.FFTInputRng);
+end
+if isfield(data, 'NoiseFilt')
+    netcdf.putVar(ncid,id_noisfil,data.NoiseFilt);
+end
 netcdf.putVar(ncid,id_SampDur,data.SampDur);
 
 % range dependent
 netcdf.putVar(ncid,id_height,0,data.n_levels,data.range+config.MSL);
-netcdf.putVar(ncid,id_Fr,0,data.n_levels,data.Fr);
-
+if isfield(data, 'Fr')
+    netcdf.putVar(ncid,id_Fr,0,data.n_levels,data.Fr);
+end
 
 % chrip seq dependent variables
 netcdf.putVar(ncid,id_range_offsets,0,data.no_chirp_seq,data.range_offsets-1);
 netcdf.putVar(ncid,id_SeqAvg,0,data.no_chirp_seq,data.SeqAvg);
-netcdf.putVar(ncid,id_bw,0,data.no_chirp_seq,data.ChanBW);
-netcdf.putVar(ncid,id_lowIF,0,data.no_chirp_seq,data.ChirpLowIF);
-netcdf.putVar(ncid,id_highIF,0,data.no_chirp_seq,data.ChirpHighIF);
-netcdf.putVar(ncid,id_crmin,0,data.no_chirp_seq,data.RangeMin);
-netcdf.putVar(ncid,id_crmax,0,data.no_chirp_seq,data.RangeMax);
-netcdf.putVar(ncid,id_rfft,0,data.no_chirp_seq,data.ChirpFFTSize);
-netcdf.putVar(ncid,id_invsmp,0,data.no_chirp_seq,data.ChirpInvSamples);
-netcdf.putVar(ncid,id_ccf,0,data.no_chirp_seq,data.ChirpCenterFr);
-netcdf.putVar(ncid,id_cbw,0,data.no_chirp_seq,data.ChirpBWFr);
-netcdf.putVar(ncid,id_ffts,0,data.no_chirp_seq,data.FFTStartInd);
-netcdf.putVar(ncid,id_ffte,0,data.no_chirp_seq,data.FFTStopInd)
-netcdf.putVar(ncid,id_fftno,0,data.no_chirp_seq,data.ChirpFFTNo)
+if isfield(data, 'ChanBW')
+    netcdf.putVar(ncid,id_bw,0,data.no_chirp_seq,data.ChanBW);
+end
+if isfield(data, 'ChirpLowIF')
+    netcdf.putVar(ncid,id_lowIF,0,data.no_chirp_seq,data.ChirpLowIF);
+end
+if isfield(data, 'ChirpHighIF')
+    netcdf.putVar(ncid,id_highIF,0,data.no_chirp_seq,data.ChirpHighIF);
+end
+if isfield(data, 'RangeMin')
+    netcdf.putVar(ncid,id_crmin,0,data.no_chirp_seq,data.RangeMin);
+end
+if isfield(data, 'RangeMax')
+    netcdf.putVar(ncid,id_crmax,0,data.no_chirp_seq,data.RangeMax);
+end
+if isfield(data, 'ChirpFFTSize')
+    netcdf.putVar(ncid,id_rfft,0,data.no_chirp_seq,data.ChirpFFTSize);
+end
+if isfield(data, 'ChirpInvSamples')
+    netcdf.putVar(ncid,id_invsmp,0,data.no_chirp_seq,data.ChirpInvSamples);
+end
+if isfield(data, 'ChirpCenterFr')
+    netcdf.putVar(ncid,id_ccf,0,data.no_chirp_seq,data.ChirpCenterFr);
+end
+if isfield(data, 'ChirpBWFr')
+    netcdf.putVar(ncid,id_cbw,0,data.no_chirp_seq,data.ChirpBWFr);
+end
+if isfield(data, 'FFTStartInd')
+    netcdf.putVar(ncid,id_ffts,0,data.no_chirp_seq,data.FFTStartInd);
+end
+if isfield(data, 'FFTStopInd')
+    netcdf.putVar(ncid,id_ffte,0,data.no_chirp_seq,data.FFTStopInd)
+end
+if isfield(data, 'ChirpFFTNo')
+    netcdf.putVar(ncid,id_fftno,0,data.no_chirp_seq,data.ChirpFFTNo)
+end
+
 netcdf.putVar(ncid,id_ChrpIntTime,0,data.no_chirp_seq,data.ChirpIntTime); % added by RG 4.12.2020
 netcdf.putVar(ncid,id_dr,0,data.no_chirp_seq,data.dr);
 
@@ -694,20 +836,30 @@ netcdf.putVar(ncid,id_az,0,data.totsamp,data.az);
 netcdf.putVar(ncid,id_T_trans,0,data.totsamp,data.T_trans);
 netcdf.putVar(ncid,id_T_rec,0,data.totsamp,data.T_rec);
 netcdf.putVar(ncid,id_T_pc,0,data.totsamp,data.T_pc);
-netcdf.putVar(ncid,id_incel,0,data.totsamp,data.reserved(:,2));
-netcdf.putVar(ncid,id_incea,0,data.totsamp,data.reserved(:,3));
-netcdf.putVar(ncid,id_QF,0,data.totsamp,data.QF);
+if isfield(data, 'reserved')
+    netcdf.putVar(ncid,id_incel,0,data.totsamp,data.reserved(:,2));
+    netcdf.putVar(ncid,id_incea,0,data.totsamp,data.reserved(:,3));
+end
+if isfield(data, 'QF')
+    netcdf.putVar(ncid,id_QF,0,data.totsamp,data.QF);
+end
 
 % multidimensional variables
 netcdf.putVar(ncid,id_QualFlag,[0,0],[data.n_levels,data.totsamp],data.QualFlag');
 netcdf.putVar(ncid,id_Aliasmask,[0,0],[data.n_levels,data.totsamp],data.Aliasmask');
 netcdf.putVar(ncid,id_AliasStatus,[0,0],[data.n_levels,data.totsamp],data.AliasStatus');
 netcdf.putVar(ncid,id_MinVel_Correction,[0,0],[data.n_levels,data.totsamp],data.MinVel_Correction');
-netcdf.putVar(ncid,id_PNv,[0,0],[data.n_levels,data.totsamp],data.PNv');
-netcdf.putVar(ncid,id_tprof,[0,0],[data.T_altcount, data.totsamp],data.Tprof');
-netcdf.putVar(ncid,id_hprof,[0,0],[data.H_altcount,data.totsamp],data.Qprof');
-netcdf.putVar(ncid,id_rhprof,[0,0],[data.H_altcount,data.totsamp],data.RHprof');
+if isfield(data, 'PNv')
+    netcdf.putVar(ncid,id_PNv,[0,0],[data.n_levels,data.totsamp],data.PNv');
+end
 
+if Temp_ret_flag
+    netcdf.putVar(ncid,id_tprof,[0,0],[data.T_altcount, data.totsamp],data.Tprof');
+end
+if Hum_ret_flag
+    netcdf.putVar(ncid,id_hprof,[0,0],[data.H_altcount,data.totsamp],data.Qprof');
+    netcdf.putVar(ncid,id_rhprof,[0,0],[data.H_altcount,data.totsamp],data.RHprof');
+end
 
 netcdf.close(ncid);
 

@@ -16,6 +16,7 @@ function fh = outvarmeta
     fh.SeqIntTime = @SeqIntTime;
     fh.range_offsets = @range_offsets;
     fh.SLv = @SLv;
+    fh.noisestd = @noisestd; 
     
 end % fh
 
@@ -126,4 +127,11 @@ function id_SLv = SLv(fileid, did_height, did_time)
     netcdf.putAtt(fileid,id_SLv,'units','dBz');
     netcdf.putAtt(fileid,id_SLv,'_FillValue',NaN('single'));
     netcdf.putAtt(fileid,id_SLv,'comment','provided by radar software, data only logged for bins where signal exceeds this threshold');
+end
+
+function id_NStd = noisestd(fileid, did_no_seq, did_time)
+    id_NStd = netcdf.defVar(fileid,'noise_std','nc_float',[did_no_seq,did_time]);
+    netcdf.putAtt(fileid,id_NStd,'long_name','standard deviation of noise power level');
+    netcdf.putAtt(fileid,id_NStd,'_FillValue',NaN('single'));
+    netcdf.putAtt(fileid,id_NStd,'comment','provided by radar software, data only logged for bins where signal exceeds this threshold');
 end

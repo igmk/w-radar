@@ -21,7 +21,12 @@ end
 %%%%%%%%%% create group for technical variables
 
 ncid_tech = netcdf.defGrp(ncid,'Technical_parameters');
-did_no_seq = netcdf.defDim(ncid_tech,'chirp_sequence',data.no_chirp_seq);
+
+if isfield(data, 'std_noise') % this variable included in the global group, from RPG software version 1
+    did_no_seq = netcdf.defDim(ncid,'chirp_sequence',data.no_chirp_seq);
+else % standard set-up
+    did_no_seq = netcdf.defDim(ncid_tech,'chirp_sequence',data.no_chirp_seq);
+end
 
 %% ################ get variable ids and add attributes
 
@@ -88,11 +93,22 @@ if data.DualPol > 0
     disp('WARMING!!! No polarimetric variables included in the output files')
 end
 
-id_SLv = defh.SLv(ncid, did_height, did_time);
+if isfield(data, 'SLv')
+    id_SLv = defh.SLv(ncid, did_height, did_time);
+end
+
+if isfield(data, 'std_noise') % from RPG software version 1
+    id_NStd = defh.noisestd(ncid, did_no_seq, did_time);
+end
+
+
+if isfield(data, 'std_noise') % from RPG software version 1
+    id_no_seq = defh.chirp_sequence(ncid, did_no_seq);    
+else
+    id_no_seq = defh.chirp_sequence(ncid_tech, did_no_seq);
+end
 
 % technical parameters for "expert use"
-id_no_seq = defh.chirp_sequence(ncid_tech, did_no_seq);
-
 
 id_MSL = netcdf.defVar(ncid_tech,'instrument_altitude','nc_float',[]);
 netcdf.putAtt(ncid_tech,id_MSL,'long_name','instrument altitude above mean sea level');
@@ -188,16 +204,25 @@ netcdf.defVarDeflate(ncid,id_vm,true,true,9);
 netcdf.defVarDeflate(ncid,id_sigma,true,true,9);
 netcdf.defVarDeflate(ncid,id_skew,true,true,9);
 netcdf.defVarDeflate(ncid,id_kurt,true,true,9);
-netcdf.defVarDeflate(ncid,id_SLv,true,true,9);
 
+if isfield(data, 'SLv')
+    netcdf.defVarDeflate(ncid,id_SLv,true,true,9);
+end
+if isfield(data, 'std_noise') % from RPG software version 1
+    netcdf.defVarDeflate(ncid,id_NStd,true,true,9);
+end 
 
 netcdf.endDef(ncid);
 
 %% ####################### put variables into file
 
 % variables for dimensions
-netcdf.putVar(ncid_tech,id_no_seq,0,data.no_chirp_seq,1:data.no_chirp_seq);
 
+if isfield(data, 'std_noise') % this variable included in the global group, from RPG software version 1
+    netcdf.putVar(ncid,id_no_seq,0,data.no_chirp_seq,1:data.no_chirp_seq);
+else
+    netcdf.putVar(ncid_tech,id_no_seq,0,data.no_chirp_seq,1:data.no_chirp_seq);
+end
 
 % scalars
 netcdf.putVar(ncid,id_lat,data.Lat);
@@ -243,7 +268,14 @@ netcdf.putVar(ncid,id_vm,[0,0],[data.n_levels,data.totsamp],data.vm');
 netcdf.putVar(ncid,id_sigma,[0,0],[data.n_levels,data.totsamp],data.sigma');
 netcdf.putVar(ncid,id_skew,[0,0],[data.n_levels,data.totsamp],data.skew');
 netcdf.putVar(ncid,id_kurt,[0,0],[data.n_levels,data.totsamp],data.kurt');
-netcdf.putVar(ncid,id_SLv,[0,0],[data.n_levels,data.totsamp],10.*log10(data.SLv'));
+
+if isfield(data, 'SLv')
+    netcdf.putVar(ncid,id_SLv,[0,0],[data.n_levels,data.totsamp],10.*log10(data.SLv'));
+end
+
+if isfield(data, 'std_noise') % from RPG software version 1
+    netcdf.putVar(ncid,id_NStd,[0,0],[data.no_chirp_seq,data.totsamp],(data.std_noise'));
+end
 
 netcdf.close(ncid);
 
