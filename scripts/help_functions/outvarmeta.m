@@ -52,7 +52,7 @@ function id_time = time(ncid, did_time, totsamp_flag)
     netcdf.putAtt(ncid,id_time,'comment','timestamp given at the end of the sample');
     netcdf.putAtt(ncid,id_time,'ancillary_variables','sample_tms')
     if totsamp_flag
-        netcdf.putAtt(ncid,id_time, 'note', 'dublicate time stamps found in the lv0-file, the first occurrence of the dublicate time is removed')
+        netcdf.putAtt(ncid,id_time, 'note', 'unreasonable or dublicate time stamps found in the lv0-file, time stamps edited or the first occurrence of the dublicate time is removed')
     end
     
 end
