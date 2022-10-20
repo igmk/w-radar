@@ -34,7 +34,7 @@ end
 glob = netcdf.getConstant('NC_GLOBAL');
 netcdf.putAtt(ncid,glob,'FillValue',str_fill_value);
 netcdf.putAtt(ncid,glob,'program_name',data.progname);
-if data.modelno == 0
+if data.DualPol == 0
     model = '94 GHz single pol.';
 else
     model = '94 GHz dual pol.';
