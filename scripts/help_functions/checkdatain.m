@@ -9,10 +9,9 @@ data = checkdata1(data);
 
 
 % Sometimes issues with time stamp due to GPS failures. Checking if time
-% goes "backwards" and correcting these time stamps by linearly
-% interpolating between neighbouring times.
+% goes "backwards" or duplicate time stamps presents
 % RG & LP 16.8.2019        
-data = checkdata2(data);
+data = checkdata2_v2(data);
 
 
 % Sometimes when measurements are interrupted, the last profile of the 
