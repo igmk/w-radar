@@ -13,7 +13,7 @@ timestamp = double(data.time) + double(data.sampleTms).*1e-3;
 % remove this
 ind = find(diff(timestamp) < 0 );
 
-for tt = fliplr(ind)
+for tt = fliplr(ind) % loop from end to the beginning
     
     % check if next time stamp smaller AND if next time stamp larger than previous one 
     if timestamp(tt+1) < timestamp(tt) && timestamp(tt+1) > timestamp(tt-1)
@@ -38,6 +38,7 @@ end
 
 %% 2nd check: remove duplicate time stamps
 
+timestamp = double(data.time) + double(data.sampleTms).*1e-3; % update time stamp
 ind = find(diff(timestamp) == 0 );
 
 % remove second instance of the duplicate time stamp
@@ -58,8 +59,33 @@ end
 
 
 %% 3rd check: time jumps backwards
-disp('WARNING ! This not programmed yet')
 
+timestamp = double(data.time) + double(data.sampleTms).*1e-3;
+ind = find(diff(timestamp) < 0 );
+
+for tt = fliplr(ind)
+
+    % find next time stamp that is after the "last okay time stamp"
+    ixnxt = find(timestamp(tt) < timestamp(tt+1:end),1);
+
+    data = remove_data(data, (tt+1):(tt+ixnxt-1) );
+   
+end % tt 
+
+if length(data.time) ~= data.totsamp % change in time dimension 
+    data.totsamp = length(data.time);
+    data.totsampchangelabel = 1;
+
+end
+
+% if problem solved, return
+if ~any(diff(double(data.time) + double(data.sampleTms).*1e-3) <= 0 ) 
+    return
+end
+
+%% still a problem with time? 
+
+disp('WARNING ! This not programmed yet')
 
 end % function
 
