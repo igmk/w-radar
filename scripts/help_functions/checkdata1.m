@@ -16,36 +16,35 @@ end
 
 iout = find(ind);
 
-for ix = iout
-    dim_t = length(data.time);
+dim_t = length(data.time);
 
-    % loop for all variables
-    fields = fieldnames(data);
+% loop for all variables
+fields = fieldnames(data);
 
-    for ff = 1:length(fields)
+for ff = 1:length(fields)
 
-        vardim = size(data.(fields{ff}));
+    vardim = size(data.(fields{ff}));
 
-        if ~any(vardim == dim_t)
-            continue
-        end
-
-
-        if strcmp(fields{ff}, 'QualFlag')
-            data.(fields{ff})(ix,:,:) = [];
-
-        elseif prod(vardim) == dim_t % 1 dim variables
-            data.(fields{ff})(ix) = [];
-
-        elseif length(vardim) == 2 % 2 dim variables
-            data.(fields{ff})(ix,:) = [];
-
-        elseif length(vardim) == 3 % 3 dim variables
-            data.(fields{ff})(ix,:,:) = [];
-
-        end
+    if ~any(vardim == dim_t)
+        continue
     end
 
-    data.totsamp = dim_t-1;
-    data.totsampchangelabel = 1;
+
+    if strcmp(fields{ff}, 'QualFlag')
+        data.(fields{ff})(iout,:,:) = [];
+
+    elseif prod(vardim) == dim_t % 1 dim variables
+        data.(fields{ff})(iout) = [];
+
+    elseif length(vardim) == 2 % 2 dim variables
+        data.(fields{ff})(iout,:) = [];
+
+    elseif length(vardim) == 3 % 3 dim variables
+        data.(fields{ff})(iout,:,:) = [];
+
+    end
 end
+
+
+data.totsamp = length(data.time); 
+data.totsampchangelabel = 1; % note for later that issues with time found
