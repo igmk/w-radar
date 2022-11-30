@@ -63,6 +63,14 @@ end
 timestamp = double(data.time) + double(data.sampleTms).*1e-3;
 ind = find(diff(timestamp) < 0 );
 
+% in case last data point is affected
+if any(ind ==  length(timestamp)-1) % ind indicates last "okay" time stamp
+    data = remove_data(data, length(timestamp) );
+    ind( ind == length(timestamp)-1) = []; % remove from ind list
+    timestamp(end) = [];
+end % ind
+
+
 for tt = fliplr(ind)
 
     % find next time stamp that is after the "last okay time stamp"
