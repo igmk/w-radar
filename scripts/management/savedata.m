@@ -4,17 +4,7 @@ function [] = savedata(data, config)
 
 % finding output filename moved to it's own function findoutfilename - RG
 
-% quality flag converted to float
-specsize = size(data.spec);
-tempvar = data.QualFlag;
-data.QualFlag = zeros(specsize(1),specsize(2));
-for ii = 1:specsize(1)
-    for jj = 1:specsize(2)
-        if sum(tempvar(ii,jj,:)) == 0; continue; end
-        data.QualFlag(ii,jj) = bin2dec(num2str(tempvar(ii,jj,:)));
-    end
-end
-   
+
 % if output file already exists (could happen when overwrite requested, or 
 % when only some of the requested output files exist), delete the existing
 % files

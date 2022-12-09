@@ -868,34 +868,6 @@ if data.DualPol == 2
     netcdf.putAtt(ncid,id_difphase,'fill_value',str_fill_value); 
 end
 
-id_QualFlag = netcdf.defVar(ncid,'FLAG.PROCESSING.QUALITY','nc_byte',[did_range,did_time]);
-netcdf.putAtt(ncid,id_QualFlag,'VAR_NAME','FLAG.PROCESSING.QUALITY');
-netcdf.putAtt(ncid,id_QualFlag,'VAR_DESCRIPTION',['If 2^0 bit is 1: this range gate ' ...
-                                            'is known to have aritifical spikes ', ...
-                                            'occurring. If 2^1 bit is 1: ' ...
-                                            'aircraft or other known flying ' ...
-                                            'non-meteorological object ', ...
-                                            'If 2^2 bit is 1: wet-radome']);
-netcdf.putAtt(ncid,id_QualFlag,'VAR_NOTES',['This variable contains information '...
-                                            'on anything that might impact ' ...
-                                            'the quality of the data at each ' ...
-                                            'pixel. Must be converted into ' ...
-                                            'three bit binary string. ', ...
-                                            'If 0, i.e. dec2bin(QualityFlag,3) ' ...
-                                            '= 000, none of the included issues ', ...
-                                            'were found. The definitions of ' ...
-                                            'each bit are given in the definition ' ... 
-                                            'attribute.']);
-netcdf.putAtt(ncid,id_QualFlag,'VAR_SIZE','2;RANGE');
-netcdf.putAtt(ncid,id_QualFlag,'VAR_DEPEND',['DATETIME;',len_range]);
-netcdf.putAtt(ncid,id_QualFlag,'VAR_DATA_TYPE','REAL');
-netcdf.putAtt(ncid,id_QualFlag,'VAR_UNITS','1');
-netcdf.putAtt(ncid,id_QualFlag,'VAR_SI_CONVERSION','0.0;1.0;1');
-netcdf.putAtt(ncid,id_QualFlag,'VAR_VALIS_MIN','0.0');
-netcdf.putAtt(ncid,id_QualFlag,'VAR_VALIS_MAX','10.0');
-netcdf.putAtt(ncid,id_QualFlag,'VAR_FILL_VALUE',fill_value);
-netcdf.putAtt(ncid,id_QualFlag,'long_name','quality_flag_data_processing');
-netcdf.putAtt(ncid,id_QualFlag,'short_name','pro_qf');
 
 id_Aliasmask = netcdf.defVar(ncid,'ALIAS_MASK','nc_byte',[did_range,did_time]);
 netcdf.putAtt(ncid,id_Aliasmask,'VAR_NAME','ALIAS_MASK');
@@ -1054,7 +1026,6 @@ if data.DualPol == 2
     netcdf.defVarDeflate(ncid,id_xcorr,true,true,9); %JABA  
 end
 %processing related variables 
-netcdf.defVarDeflate(ncid,id_QualFlag,true,true,9);
 netcdf.defVarDeflate(ncid,id_Aliasmask,true,true,9);
 
 netcdf.endDef(ncid);
@@ -1175,7 +1146,6 @@ clear temporary_data ;
 temporary_data = data.skew ;
 temporary_data(isnan(temporary_data))=fill_value ;
 netcdf.putVar(ncid,id_skew,[0,0],[data.n_levels,data.totsamp],temporary_data');
-netcdf.putVar(ncid,id_QualFlag,[0,0],[data.n_levels,data.totsamp],data.QualFlag');
 netcdf.putVar(ncid,id_Aliasmask,[0,0],[data.n_levels,data.totsamp],data.Aliasmask');
 netcdf.putVar(ncid,id_incel,0,data.totsamp,data.reserved(:,2));
 netcdf.putVar(ncid,id_incea,0,data.totsamp,data.reserved(:,3));

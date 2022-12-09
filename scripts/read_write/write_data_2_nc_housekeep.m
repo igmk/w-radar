@@ -571,16 +571,14 @@ if isfield(data, 'PNv')
     netcdf.putAtt(ncid,id_PNv,'rpg_name','PNv');
 end
 
-id_QualFlag = netcdf.defVar(ncid,'pro_qf','nc_float',[did_range,did_time]);
-netcdf.putAtt(ncid,id_QualFlag,'long_name','quality_flag_data_processing');
-netcdf.putAtt(ncid,id_QualFlag,'comment', ...
-    ['This variable contains information on anything that might impact the quality ', ...
-    'of the data at each pixel.']);
-netcdf.putAtt(ncid,id_QualFlag,'definition', ...
-    ['If 2^0 bit is 1: this range gate is known to have aritifical spikes occurring ', ...
-     'If 2^1 bit is 1: aircraft or other known flying non-meteorological object ', ...
-     'If 2^2 bit is 1: wet-radome (was a problem for mirac-a for a time period '...
-     'when coating missing)']);
+if isfield(data, 'lineart_flag')
+    id_lineartf = netcdf.defVar(ncid,'flag_artifact','nc_byte',did_range);
+    netcdf.putAtt(ncid,id_lineartf,'long_name','flag for so-called line artifact');
+    netcdf.putAtt(ncid,id_lineartf,'flag_values', [0b0, 0b1]);
+    netcdf.putAtt(ncid,id_lineartf,'flag_meanings','data_intact data_affected');
+    netcdf.putAtt(ncid,id_lineartf,'comment','variable indicates the range gates where data is affected, and partially corrected');
+    netcdf.defVarFill(ncid,id_lineartf,false,0b10)
+end
 
 if Temp_ret_flag
     id_tprof = netcdf.defVar(ncid,'temperature_profile','nc_float',[did_T_range,did_time]);
@@ -695,8 +693,9 @@ netcdf.defVarDeflate(ncid,id_MinVel_Correction,true,true,9);
 if isfield(data, 'PNv')
     netcdf.defVarDeflate(ncid,id_PNv,true,true,9);
 end
-
-netcdf.defVarDeflate(ncid,id_QualFlag,true,true,9);
+if isfield(data, 'lineart_flag')
+    netcdf.defVarDeflate(ncid,id_lineartf,true,true,9);
+end
 
 if Temp_ret_flag
     netcdf.defVarDeflate(ncid,id_tprof,true,true,9);
@@ -861,8 +860,9 @@ netcdf.putVar(ncid,id_MinVel_Correction,[0,0],[data.n_levels,data.totsamp],data.
 if isfield(data, 'PNv')
     netcdf.putVar(ncid,id_PNv,[0,0],[data.n_levels,data.totsamp],data.PNv');
 end
-netcdf.putVar(ncid,id_QualFlag,[0,0],[data.n_levels,data.totsamp],data.QualFlag');
-
+if isfield(data, 'lineart_flag')
+    netcdf.putVar(ncid,id_lineartf,[0,0],[data.n_levels],data.lineart_flag);
+end
 if Temp_ret_flag
     netcdf.putVar(ncid,id_tprof,[0,0],[data.T_altcount, data.totsamp],data.Tprof');
 end

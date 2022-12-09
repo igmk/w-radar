@@ -85,8 +85,6 @@ end
 % will only be modified if dealiasing is performed
 data.MinVel_Correction = zeros(specsize(1),specsize(2));    
 
-% variable to collect information on quality issues in data
-data.QualFlag = false(specsize(1),specsize(2),3);
 
 % flag for compressed spectra
 if (isfield(data, 'CompEna') && ne(data.CompEna,0))
