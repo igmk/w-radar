@@ -63,14 +63,14 @@ defh = outvarmeta;
 
 %%%%%%%%%% coordinate variables
 
-id_time = defh.time(ncid, did_time, isfield(data, 'totsampchangelabel' ));
+id_time = defh.time(ncid, did_time, 'NC_DOUBLE', isfield(data, 'totsampchangelabel' ));
 
 id_height = defh.height(ncid, did_height);
 
 % not coordinate variables, but following the same order as in moments file
 id_lat = defh.lat(ncid);
 id_lon = defh.lon(ncid);
-id_sampleTms = defh.sampleTms(ncid, did_time); 
+
 % % % 
 
 id_no_seq = defh.chirp_sequence(ncid, did_no_seq);
@@ -107,12 +107,14 @@ for ch = 1:data.no_chirp_seq
     
     id_spec(ch) = netcdf.defVar(ncid,['spec_ch' num2str(ch)],'nc_float',[did_vel(ch),did_hght(ch),did_time]);
     netcdf.putAtt(ncid,id_spec(ch),'long_name',['Doppler spectra for chirp ' num2str(ch)]);
-    netcdf.putAtt(ncid,id_spec(ch),'units','dBz');  
-    netcdf.putAtt(ncid,id_spec(ch),'ancillary_variables','quality_flag');
-    netcdf.putAtt(ncid,id_spec(ch),'_FillValue',NaN('single'));
+    netcdf.putAtt(ncid,id_spec(ch),'units','dB');  
+    netcdf.putAtt(ncid,id_spec(ch),'ancillary_variables','quality_flag, ze_calibration');
+    netcdf.defVarFill(ncid,id_spec(ch),false,NaN('single'))
     if isfield(data, 'Ze_label') % Ze corrected, adding note
-        netcdf.putAtt(ncid,id_spec(ch),'comment',data.Ze_label);
+        netcdf.putAtt(ncid,id_spec(ch),'comment', [data.Ze_label ' For absolute calibration correction, see variable ze_calibration.']);
         netcdf.putAtt(ncid,id_spec(ch),'corretion_dB',data.Ze_corr);
+    else
+        netcdf.putAtt(ncid,id_spec(ch),'comment', 'For absolute calibration correction, see variable ze_calibration.');
     end       
 end
 
@@ -125,14 +127,14 @@ id_DoppMax = defh.DoppMax(ncid, did_no_seq);
 
 id_DoppLen = netcdf.defVar(ncid,'spec_length','nc_int',did_no_seq);
 netcdf.putAtt(ncid,id_DoppLen,'long_name','number of bins in Doppler spectra of each chirp sequence');
-netcdf.putAtt(ncid,id_DoppLen,'_FillValue',int32(-999));
+netcdf.defVarFill(ncid,id_DoppLen,false,int32(-999))
 netcdf.putAtt(ncid,id_DoppLen,'comment','same as the Doppler FFT; the dimension of the corresponding velocity array might differ from spec_length due to the dealiasing algorithm');
 
 
 id_nAvg = netcdf.defVar(ncid,'num_avg_spec','nc_int',did_no_seq);
 netcdf.putAtt(ncid,id_nAvg,'long_name','number of spectra averaged for each chirp');
-netcdf.putAtt(ncid,id_nAvg,'_FillValue',int32(-999));
-netcdf.putAtt(ncid,id_nAvg,'comment','calculated as Number of averaged chirps within a chirp sequence/spec_N')
+netcdf.defVarFill(ncid,id_nAvg,false,int32(-999))
+netcdf.putAtt(ncid,id_nAvg,'comment','calculated as Number of averaged chirps within a chirp sequence/spec_length')
 
 
 id_SeqIntTime = defh.SeqIntTime(ncid, did_no_seq);
@@ -146,14 +148,14 @@ id_SeqIntTime = defh.SeqIntTime(ncid, did_no_seq);
 
 id_VNoisePow_mean = netcdf.defVar(ncid,'mean_noise','nc_float',[did_height,did_time]);
 netcdf.putAtt(ncid,id_VNoisePow_mean,'long_name','Doppler spectrum mean noise');
-netcdf.putAtt(ncid,id_VNoisePow_mean,'units','dBz');
-netcdf.putAtt(ncid,id_VNoisePow_mean,'_FillValue',NaN('single'));
+netcdf.putAtt(ncid,id_VNoisePow_mean,'units','dB');
+netcdf.defVarFill(ncid,id_VNoisePow_mean,false,NaN('single'))
 netcdf.putAtt(ncid,id_VNoisePow_mean,'comment','calculated from the Doppler spectra following Hildebrand and Sekhon, 1974');
 
 id_VNoisePow_peak = netcdf.defVar(ncid,'peak_noise_pow','nc_float',[did_height,did_time]);
 netcdf.putAtt(ncid,id_VNoisePow_peak,'long_name','Doppler spectrum peak noise');
-netcdf.putAtt(ncid,id_VNoisePow_peak,'units','dBz');
-netcdf.putAtt(ncid,id_VNoisePow_peak,'_FillValue',NaN('single'));
+netcdf.putAtt(ncid,id_VNoisePow_peak,'units','dB');
+netcdf.defVarFill(ncid,id_VNoisePow_peak,false,NaN('single'))
 netcdf.putAtt(ncid,id_VNoisePow_peak,'comment','calculated from the Doppler spectra following Hildebrand and Sekhon, 1974');
 
 if isfield(data, 'SLv')
@@ -164,6 +166,12 @@ if isfield(data, 'std_noise') % from RPG software version 1
 end
 
 %%%%%%%%%% other variables
+
+id_QF = defh.aggregFlag(ncid, did_time); % quality flags - using same as in moment file
+
+% create here as empty variable for later use
+id_ZeCalib = defh.zecalib(ncid);
+
 id_swv = defh.radar_software(ncid);
 
 
@@ -177,7 +185,7 @@ netcdf.defVarDeflate(ncid,id_SeqIntTime,true,true,9);
 netcdf.defVarDeflate(ncid,id_range_offsets,true,true,9);
 
 % time dependend variables
-netcdf.defVarDeflate(ncid,id_sampleTms,true,true,9);
+netcdf.defVarDeflate(ncid,id_QF,true,true,9);
 
 % multi-D variables
 netcdf.defVarDeflate(ncid,id_VNoisePow_mean,true,true,9);
@@ -224,9 +232,10 @@ netcdf.putVar(ncid,id_SeqIntTime,0,data.no_chirp_seq,data.SeqIntTime);
 netcdf.putVar(ncid,id_range_offsets,0,data.no_chirp_seq,data.range_offsets-1);
 
 % time dependent variables
-netcdf.putVar(ncid,id_time,0,data.totsamp,data.time);
-netcdf.putVar(ncid,id_sampleTms,0,data.totsamp,data.sampleTms);
+netcdf.putVar(ncid,id_time,0,data.totsamp, double(data.time) + double(data.sampleTms).*1e-3);
 
+flag_aggregate = ac3_aggregate_flag(data);
+netcdf.putVar(ncid,id_QF,0,data.totsamp,flag_aggregate);
 
 % % multidimensional variables
 

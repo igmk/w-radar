@@ -29,3 +29,11 @@ netcdf.putAtt(ncid,glob,'license'           ,config.license );
 netcdf.putAtt(ncid,glob,'PI'                ,config.pi);
 netcdf.putAtt(ncid,glob,'author'            ,config.author);
 netcdf.putAtt(ncid,glob,'project'           ,config.project);
+
+
+% optional notes, if necessary
+if data.AntiAlias == 0 % if moments not calculated by our script, add note
+    netcdf.putAtt(ncid,glob,'note_dealiasing', 'No dealiasing applied');
+elseif data.AntiAlias == 1 % if moments not calculated by our script, add note
+    netcdf.putAtt(ncid,glob,'note_dealiasing', 'Dealising by radar software');
+end

@@ -42,7 +42,7 @@ defh = outvarmeta;
 % netcdf.putAtt(ncid,id_range,'positive','up'); % recommended by CF convention
 
 
-id_time = defh.time(ncid, did_time, isfield(data, 'totsampchangelabel' ));
+id_time = defh.time(ncid, did_time, 'NC_DOUBLE', isfield(data, 'totsampchangelabel' ));
 
 id_height = defh.height(ncid, did_height);
 
@@ -51,43 +51,48 @@ id_lon = defh.lon(ncid);
 
 
 %%%%%%%%%% other variables in a convenient order for reading file headers
-id_sampleTms = defh.sampleTms(ncid, did_time);
 
 %--- radar moments ---
 
 id_Ze = netcdf.defVar(ncid,'ze','nc_float',[did_height,did_time]);
 netcdf.putAtt(ncid,id_Ze,'long_name','equivalent radar reflectivity factor');
 netcdf.putAtt(ncid,id_Ze,'standard_name','equivalent_reflectivity_factor');
-netcdf.putAtt(ncid,id_Ze,'units','dBz');
-netcdf.putAtt(ncid,id_Ze,'ancillary_variables','quality_flag');
-netcdf.putAtt(ncid,id_Ze,'_FillValue',NaN('single'));
+netcdf.putAtt(ncid,id_Ze,'units','dB');
+netcdf.putAtt(ncid,id_Ze,'ancillary_variables','quality_flag, ze_calibration');
+netcdf.defVarFill(ncid,id_Ze,false,NaN('single'))
+
+
 if isfield(data, 'Ze_label') % Ze corrected, adding note
-    netcdf.putAtt(ncid,id_Ze,'comment',data.Ze_label);
+    netcdf.putAtt(ncid,id_Ze,'comment', [data.Ze_label ' For absolute calibration correction, see variable ze_calibration.']);
     netcdf.putAtt(ncid,id_Ze,'corretion_dB',data.Ze_corr);
+else
+    netcdf.putAtt(ncid,id_Ze,'comment', 'For absolute calibration correction, see variable ze_calibration.');
 end
 
 id_vm = netcdf.defVar(ncid,'vm','nc_float',[did_height,did_time]);
 netcdf.putAtt(ncid,id_vm,'long_name','mean Doppler velocity');
 netcdf.putAtt(ncid,id_vm,'units','m s-1');
 netcdf.putAtt(ncid,id_vm,'ancillary_variables','quality_flag');    
-netcdf.putAtt(ncid,id_vm,'_FillValue',NaN('single'));
+netcdf.defVarFill(ncid,id_vm,false,NaN('single'))
 netcdf.putAtt(ncid,id_vm,'comment',['negative velocities indicate particles moving downwards'])
 
 id_sigma = netcdf.defVar(ncid,'sw','nc_float',[did_height,did_time]);
 netcdf.putAtt(ncid,id_sigma,'long_name','Doppler spectrum width');
 netcdf.putAtt(ncid,id_sigma,'units','m s-1');
 netcdf.putAtt(ncid,id_sigma,'ancillary_variables','quality_flag');    
-netcdf.putAtt(ncid,id_sigma,'_FillValue',NaN('single'));
+netcdf.defVarFill(ncid,id_sigma,false,NaN('single'))
 
 id_skew = netcdf.defVar(ncid,'skew','nc_float',[did_height,did_time]);
 netcdf.putAtt(ncid,id_skew,'long_name','Doppler spectrum skewness');
+netcdf.putAtt(ncid,id_skew,'units','unitless');
 netcdf.putAtt(ncid,id_skew,'ancillary_variables','quality_flag');
-netcdf.putAtt(ncid,id_skew,'_FillValue',NaN('single'));
+netcdf.defVarFill(ncid,id_skew,false,NaN('single'))
 
 id_kurt = netcdf.defVar(ncid,'kurt','nc_float',[did_height,did_time]);
 netcdf.putAtt(ncid,id_kurt,'long_name','Doppler spectrum kurtosis');
+netcdf.putAtt(ncid,id_kurt,'units','unitless');
 netcdf.putAtt(ncid,id_kurt,'ancillary_variables','quality_flag');
-netcdf.putAtt(ncid,id_kurt,'_FillValue',NaN('single'));
+netcdf.defVarFill(ncid,id_kurt,false,NaN('single'))
 
 if data.DualPol > 0
     disp('WARMING!!! No polarimetric variables included in the output files')
@@ -113,27 +118,28 @@ end
 id_MSL = netcdf.defVar(ncid_tech,'instrument_altitude','nc_float',[]);
 netcdf.putAtt(ncid_tech,id_MSL,'long_name','instrument altitude above mean sea level');
 netcdf.putAtt(ncid_tech,id_MSL,'units','m');
-netcdf.putAtt(ncid_tech,id_MSL,'_FillValue',NaN('single'));
+netcdf.defVarFill(ncid_tech,id_MSL,false,NaN('single'))
 
 id_freq = netcdf.defVar(ncid_tech,'frequency','nc_float',[]);
 netcdf.putAtt(ncid_tech,id_freq,'long_name','central transmission frequency');
 netcdf.putAtt(ncid_tech,id_freq,'standard_name','radiation_frequency');
 netcdf.putAtt(ncid_tech,id_freq,'units','GHz');
-netcdf.putAtt(ncid_tech,id_freq,'_FillValue',NaN('single'));
+netcdf.defVarFill(ncid_tech,id_freq,false,NaN('single'))
 
 id_HPBW = netcdf.defVar(ncid_tech,'beam_width','nc_float',[]);
 netcdf.putAtt(ncid_tech,id_HPBW,'long_name','antenna half power beam width');
 netcdf.putAtt(ncid_tech,id_HPBW,'units','degrees');
-netcdf.putAtt(ncid_tech,id_HPBW,'_FillValue',NaN('single'));
-                                  
+netcdf.defVarFill(ncid_tech,id_HPBW,false,NaN('single'))
+
 id_CalInt = netcdf.defVar(ncid_tech,'zerocal_interval','nc_int',[]);
 netcdf.putAtt(ncid_tech,id_CalInt,'long_name','sample interval (number of samples) between automated zero calibrations');
 netcdf.putAtt(ncid_tech,id_CalInt,'units','count');
-netcdf.putAtt(ncid_tech,id_CalInt,'_FillValue',int32(-999));
+netcdf.defVarFill(ncid_tech,id_CalInt,false,int32(-999))
 
 id_AntG = netcdf.defVar(ncid_tech,'antenna_gain','nc_float',[]);
 netcdf.putAtt(ncid_tech,id_AntG,'long_name','linear antenna gain');
-netcdf.putAtt(ncid_tech,id_AntG,'_FillValue',NaN('single'));
+netcdf.putAtt(ncid_tech,id_AntG,'units','unitless');
+netcdf.defVarFill(ncid_tech,id_AntG,false,NaN('single'))
 
 id_swv = defh.radar_software(ncid_tech);
 
@@ -146,42 +152,31 @@ id_SeqIntTime = defh.SeqIntTime(ncid_tech, did_no_seq);
 
 id_blowstatus = netcdf.defVar(ncid_tech,'blower_status','nc_byte',did_time);
 netcdf.putAtt(ncid_tech,id_blowstatus,'long_name','blower_status');
-netcdf.putAtt(ncid_tech,id_blowstatus,'flag_values', [0b0, 0b1, 0b10]);
-netcdf.putAtt(ncid_tech,id_blowstatus,'flag_meanings','missing_data blower_off blower_on');
 netcdf.putAtt(ncid_tech,id_blowstatus,'standard_name','status_flag');
+netcdf.putAtt(ncid_tech,id_blowstatus,'flag_values', [0b0, 0b1]);
+netcdf.putAtt(ncid_tech,id_blowstatus,'flag_meanings','blower_off blower_on');
+netcdf.defVarFill(ncid_tech,id_blowstatus,false,0b10)
 
 
 id_heatstatus = netcdf.defVar(ncid_tech,'heater_status','nc_byte',did_time);
 netcdf.putAtt(ncid_tech,id_heatstatus,'long_name','heater_status');
-netcdf.putAtt(ncid_tech,id_heatstatus,'flag_values', [0b0, 0b1, 0b10]);
-netcdf.putAtt(ncid_tech,id_heatstatus,'flag_meanings','missing_data heater_off heater_on');
 netcdf.putAtt(ncid_tech,id_heatstatus,'standard_name','status_flag');
-
+netcdf.putAtt(ncid_tech,id_heatstatus,'flag_values', [0b0, 0b1]);
+netcdf.putAtt(ncid_tech,id_heatstatus,'flag_meanings','heater_off heater_on');
+netcdf.defVarFill(ncid_tech,id_heatstatus,false,0b10)
 
 
 id_TransPow = netcdf.defVar(ncid_tech,'transmitter_power','nc_float',did_time);
 netcdf.putAtt(ncid_tech,id_TransPow,'long_name','transmitter_power');
 netcdf.putAtt(ncid_tech,id_TransPow,'units','W');
-netcdf.putAtt(ncid_tech,id_TransPow,'_FillValue',NaN('single'));
+netcdf.defVarFill(ncid_tech,id_TransPow,false,NaN('single'))
 
 
-% TODO: better flaggin system - this is a placeholder flag                                       
-id_QF = netcdf.defVar(ncid,'quality_flag','nc_byte',did_time);
-netcdf.putAtt(ncid,id_QF,'standard_name','aggregate_quality_flag');
-netcdf.putAtt(ncid,id_QF,'comment','place holder until quality flag redesigned');
-
-% netcdf.putAtt(ncid,id_QF,'long_name',['Quality flag related to the radar operation '... 
-%                                       'given by radar software from RPG']);                              
-% netcdf.putAtt(ncid,id_QF,'comment', ['To get the bit entries, one has to'...
-%                                      'convert the integer into a 4 bit binary. '...
-%                                      'bit4 = ADC saturation, bit3 = spectral '...
-%                                      'width too high, bit2 = no transmitter '...
-%                                      'power leveling. Note that in the above '...
-%                                      'convention holds: bit1 = 2^3, '...
-%                                      'bit2 = 2^2, bit3 = 2^1, bit4 = 2^0'])
+% create here as empty variable for later use
+id_ZeCalib = defh.zecalib(ncid_tech);
 
 
-
+id_QF = defh.aggregFlag(ncid, did_time);
 
 %% ###################### compression
 
@@ -191,14 +186,12 @@ netcdf.defVarDeflate(ncid_tech,id_range_offsets,true,true,9);
 netcdf.defVarDeflate(ncid,id_SeqIntTime,true,true,9);
 
 % time dependent variables
-netcdf.defVarDeflate(ncid,id_sampleTms,true,true,9);
 netcdf.defVarDeflate(ncid_tech,id_blowstatus,true,true,9);
 netcdf.defVarDeflate(ncid_tech,id_heatstatus,true,true,9);
 netcdf.defVarDeflate(ncid_tech,id_TransPow,true,true,9);
 netcdf.defVarDeflate(ncid,id_QF,true,true,9);
 
 % multi-D variables
-% netcdf.defVarDeflate(ncid,id_mask,true,true,9);
 netcdf.defVarDeflate(ncid,id_Ze,true,true,9);
 netcdf.defVarDeflate(ncid,id_vm,true,true,9);
 netcdf.defVarDeflate(ncid,id_sigma,true,true,9);
@@ -245,24 +238,21 @@ netcdf.putVar(ncid_tech,id_range_offsets,0,data.no_chirp_seq,data.range_offsets-
 netcdf.putVar(ncid_tech,id_SeqIntTime,0,data.no_chirp_seq,data.SeqIntTime);
 
 % time dependent variables
-netcdf.putVar(ncid,id_time,0,data.totsamp,data.time);
-netcdf.putVar(ncid,id_sampleTms,0,data.totsamp,data.sampleTms);
+netcdf.putVar(ncid,id_time,0,data.totsamp,  double(data.time) + double(data.sampleTms).*1e-3);
 netcdf.putVar(ncid_tech,id_TransPow,0,data.totsamp,data.TransPow);
 
-% convert to have 0 for missing value
-data.blower = data.blower + 1;
-data.blower(isnan(data.blower)) = 0;
+% convert to have 2 for missing value
+data.blower(isnan(data.blower)) = 2;
 netcdf.putVar(ncid_tech,id_blowstatus,0,data.totsamp,data.blower);
 
-% convert to have 0 for missing value
-data.heater = data.heater + 1; 
-data.heater(isnan(data.heater)) = 0;
+% convert to have 2 for missing value
+data.heater(isnan(data.heater)) = 2;
 netcdf.putVar(ncid_tech,id_heatstatus,0,data.totsamp,data.heater);
 
-% netcdf.putVar(ncid,id_QF,0,data.totsamp,data.QF);
+flag_aggregate = ac3_aggregate_flag(data);
+netcdf.putVar(ncid,id_QF,0,data.totsamp,flag_aggregate);
 
 % multidimensional variables
-% netcdf.putVar(ncid,id_mask,[0,0],[data.n_levels,data.totsamp],data.mask');
 netcdf.putVar(ncid,id_Ze,[0,0],[data.n_levels,data.totsamp],10.*log10(data.Ze'));
 netcdf.putVar(ncid,id_vm,[0,0],[data.n_levels,data.totsamp],data.vm');
 netcdf.putVar(ncid,id_sigma,[0,0],[data.n_levels,data.totsamp],data.sigma');

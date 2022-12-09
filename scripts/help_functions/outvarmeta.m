@@ -17,6 +17,8 @@ function fh = outvarmeta
     fh.range_offsets = @range_offsets;
     fh.SLv = @SLv;
     fh.noisestd = @noisestd; 
+    fh.zecalib = @zecalib; 
+    fh.aggregFlag = @aggregFlag; 
     
 end % fh
 
@@ -43,16 +45,21 @@ function id_range = range(ncid, did_range)
 end
                                    
 
-function id_time = time(ncid, did_time, totsamp_flag)
+function id_time = time(ncid, did_time, timetype, totsamp_flag)
 
-    id_time = netcdf.defVar(ncid,'time','nc_int',did_time);
+    id_time = netcdf.defVar(ncid,'time',timetype,did_time);
     netcdf.putAtt(ncid,id_time,'standard_name','time');
     netcdf.putAtt(ncid,id_time,'units','seconds since 2001-01-01');
     netcdf.putAtt(ncid,id_time,'calendar','standard');
     netcdf.putAtt(ncid,id_time,'comment','timestamp given at the end of the sample');
-    netcdf.putAtt(ncid,id_time,'ancillary_variables','sample_tms')
+    
+    if strcmp(timetype, 'nc_int') || strcmp(timetype, 'NC_INT')
+        netcdf.putAtt(ncid,id_time,'ancillary_variables','sample_tms')
+    end
     if totsamp_flag
-        netcdf.putAtt(ncid,id_time, 'note', 'unreasonable or dublicate time stamps found in the lv0-file, time stamps edited or the first occurrence of the dublicate time is removed')
+        netcdf.putAtt(ncid,id_time, 'note', ['Issues with timestamps occurred (value outside the expected range, '...
+                                             'time moving backwards, and/or dublicate timestamps found in the lv0-file). ' ...
+                                             'Depending on issue, profiles removed or timestamp edited.'])
     end
     
 end
@@ -63,7 +70,7 @@ function id_lat = lat(ncid)
     netcdf.putAtt(ncid,id_lat,'long_name','latitude');
     netcdf.putAtt(ncid,id_lat,'standard_name','latitude');
     netcdf.putAtt(ncid,id_lat,'units','degrees_north');
-    netcdf.putAtt(ncid,id_lat,'_FillValue',NaN('single'));
+    netcdf.defVarFill(ncid,id_lat,false,NaN('single'))
 end
 
 
@@ -72,14 +79,14 @@ function id_lon = lon(ncid)
     netcdf.putAtt(ncid,id_lon,'long_name','longitude');
     netcdf.putAtt(ncid,id_lon,'standard_name','longitude');
     netcdf.putAtt(ncid,id_lon,'units','degrees_east');
-    netcdf.putAtt(ncid,id_lon,'_FillValue',NaN('single'));
+    netcdf.defVarFill(ncid,id_lon,false,NaN('single'))
 end
 
 function id_sampleTms = sampleTms(ncid, did_time)
     id_sampleTms = netcdf.defVar(ncid,'sample_tms','nc_int',did_time);
     netcdf.putAtt(ncid,id_sampleTms,'long_name','milliseconds of sample');
     netcdf.putAtt(ncid,id_sampleTms,'units','millisec');
-    netcdf.putAtt(ncid,id_sampleTms,'_FillValue',int32(-999));
+    netcdf.defVarFill(ncid,id_sampleTms,false,int32(-999))
     netcdf.putAtt(ncid,id_sampleTms,'comment','add to time to get the precise sample time');  
 
 end
@@ -88,21 +95,22 @@ function id_no_seq = chirp_sequence(fileid, did_no_seq)
     id_no_seq = netcdf.defVar(fileid,'chirp_sequence','nc_int',did_no_seq);
     netcdf.putAtt(fileid,id_no_seq,'long_name','chirp sequences');
     netcdf.putAtt(fileid,id_no_seq,'units','count');
-    netcdf.putAtt(fileid,id_no_seq,'_FillValue',int32(-999));
+%     netcdf.defVarFill(fileid,id_no_seq,false,int32(-999)) % coordinate
+%     variables are not supposed to have missing values
 end
 
 
 function id_swv = radar_software(fileid)
     id_swv = netcdf.defVar(fileid,'radar_software','nc_float',[]);
     netcdf.putAtt(fileid,id_swv,'long_name','radar software version');
-    netcdf.putAtt(fileid,id_swv,'_FillValue',NaN('single'));
+    netcdf.defVarFill(fileid,id_swv,false,NaN('single'))
 end
 
 function id_DoppMax = DoppMax(fileid, did_no_seq)
     id_DoppMax = netcdf.defVar(fileid,'nyquist_velocity','nc_float',did_no_seq);
     netcdf.putAtt(fileid,id_DoppMax,'long_name',['Nyquist velocity']);
     netcdf.putAtt(fileid,id_DoppMax,'units','m s-1');
-    netcdf.putAtt(fileid,id_DoppMax,'_FillValue',NaN('single'));
+    netcdf.defVarFill(fileid,id_DoppMax,false,NaN('single'))
     netcdf.putAtt(fileid,id_DoppMax,'comment','max. unambigious Doppler velocity; due to dealiasing values outside of the +-Nyquist velocity range are possible');
 end
 
@@ -110,13 +118,13 @@ function id_SeqIntTime = SeqIntTime(fileid, did_no_seq)
     id_SeqIntTime = netcdf.defVar(fileid,'chirpseq_int_time','nc_float',did_no_seq);
     netcdf.putAtt(fileid,id_SeqIntTime,'long_name','integration time of each chirp sequence');
     netcdf.putAtt(fileid,id_SeqIntTime,'units','sec');
-    netcdf.putAtt(fileid,id_SeqIntTime,'_FillValue',NaN('single'));
+    netcdf.defVarFill(fileid,id_SeqIntTime,false,NaN('single'))
 end
 
 function id_range_offsets = range_offsets(fileid,did_no_seq)
     id_range_offsets = netcdf.defVar(fileid,'chirpseq_startix','nc_int',did_no_seq); % used to be range_offsets
     netcdf.putAtt(fileid,id_range_offsets,'long_name','chirp sequence start index');
-    netcdf.putAtt(fileid,id_range_offsets,'_FillValue',int32(-999));
+    netcdf.defVarFill(fileid,id_range_offsets,false,int32(-999))
     netcdf.putAtt(fileid,id_range_offsets,'comment','index for the height layer where each chirp sequence starts; zero-based indexing');
 end
 
@@ -124,14 +132,39 @@ end
 function id_SLv = SLv(fileid, did_height, did_time)
     id_SLv = netcdf.defVar(fileid,'sensitivity','nc_float',[did_height,did_time]);
     netcdf.putAtt(fileid,id_SLv,'long_name','linear sensitivity limit');
-    netcdf.putAtt(fileid,id_SLv,'units','dBz');
-    netcdf.putAtt(fileid,id_SLv,'_FillValue',NaN('single'));
+    netcdf.putAtt(fileid,id_SLv,'units','dB');
+    netcdf.defVarFill(fileid,id_SLv,false,NaN('single'))
     netcdf.putAtt(fileid,id_SLv,'comment','provided by radar software, data only logged for bins where signal exceeds this threshold');
 end
 
 function id_NStd = noisestd(fileid, did_no_seq, did_time)
     id_NStd = netcdf.defVar(fileid,'noise_std','nc_float',[did_no_seq,did_time]);
     netcdf.putAtt(fileid,id_NStd,'long_name','standard deviation of noise power level');
-    netcdf.putAtt(fileid,id_NStd,'_FillValue',NaN('single'));
+    netcdf.defVarFill(fileid,id_NStd,false,NaN('single'))
     netcdf.putAtt(fileid,id_NStd,'comment','provided by radar software, data only logged for bins where signal exceeds this threshold');
+end
+
+function id_ZeCalib = zecalib(fileid)
+    id_ZeCalib = netcdf.defVar(fileid,'ze_calibration','nc_float',[]);
+    netcdf.putAtt(fileid,id_ZeCalib,'long_name','Ze absolute calibration correction');
+    netcdf.putAtt(fileid,id_ZeCalib,'units','dB');
+    netcdf.defVarFill(fileid,id_ZeCalib,false,NaN('single'))
+    netcdf.putAtt(fileid,id_ZeCalib,'comment','Absolute calibration correction added to radar reflectivity. To get uncorrected reflectivity: ze_unccorected = ze - ze_calibration. Missing value indicates no correction applied. For methodology see documentation.');
+end
+
+function id_QF = aggregFlag(fileid, did_time)
+
+    id_QF = netcdf.defVar(fileid,'quality_flag','nc_byte',did_time);
+    netcdf.putAtt(fileid,id_QF,'long_name','quality flag');
+    netcdf.putAtt(fileid,id_QF,'standard_name','aggregate_quality_flag');
+    netcdf.putAtt(fileid,id_QF,'flag_masks',[0b0001, 0b0010, 0b0100, 0b1000]);
+    netcdf.putAtt(fileid,id_QF,'flag_meanings','timestamp_flag dealiasing_flag dealias_problem_flag radar_operation_flag');
+    netcdf.putAtt(fileid,id_QF,'comment',['Aggregate flag to collect the most important information on data quality. ' ...
+                                        'Bit0 (2^0): timestamp has been edited in data processing. '...
+                                        'Bit1 (2^1): column has been dealiased (see documentation for details). '...
+                                        'Bit2 (2^2): issues in dealiasing, larger uncertainty in vm. '...
+                                        'Bit3 (2^3): any of the flags related to radar operation set in radar software (ADC saturation, spectral width too high, no transmitter power leveling), measurement quality possibly impacted.'...
+                                        ]);
+
+
 end

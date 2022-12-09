@@ -28,7 +28,7 @@ if ~any(strcmp(data_fieldnames,'Aliasmask'))
     data.Aliasmask = NaN(specsize(1),specsize(2)); %indicating if dealiasing was applied
 end
 
-% NoisePow not provided?
+% NoisePow not provided? given if CompEna > 0
 if ~any(strcmp(data_fieldnames,'VNoisePow_mean')) % then NoisePow is not provided by RPG
     data.VNoisePow_mean = NaN(specsize(1),specsize(2)); % preallocate mean noise floor
 else
