@@ -21,6 +21,8 @@ if n_file~=1 % omitting the history attribute from the moments file
     netcdf.putAtt(ncid,glob,'history'           ,config.history    );
 end
 netcdf.putAtt(ncid,glob,'processing_script' ,config.processing_script);
+netcdf.putAtt(ncid,glob,'processing_date'   ,datestr(now));
+
 netcdf.putAtt(ncid,glob,'featureType'       ,config.featureType );
 netcdf.putAtt(ncid,glob,'references'        ,config.references );
 netcdf.putAtt(ncid,glob,'license'           ,config.license );

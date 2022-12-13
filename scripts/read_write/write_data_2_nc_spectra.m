@@ -110,12 +110,7 @@ for ch = 1:data.no_chirp_seq
     netcdf.putAtt(ncid,id_spec(ch),'units','dB');  
     netcdf.putAtt(ncid,id_spec(ch),'ancillary_variables','quality_flag, ze_calibration');
     netcdf.defVarFill(ncid,id_spec(ch),false,NaN('single'))
-    if isfield(data, 'Ze_label') % Ze corrected, adding note
-        netcdf.putAtt(ncid,id_spec(ch),'comment', [data.Ze_label ' For absolute calibration correction, see variable ze_calibration.']);
-        netcdf.putAtt(ncid,id_spec(ch),'corretion_dB',data.Ze_corr);
-    else
-        netcdf.putAtt(ncid,id_spec(ch),'comment', 'For absolute calibration correction, see variable ze_calibration.');
-    end       
+    defh.ze_comment(data, ncid, id_spec(ch)) % add comment about ze corrections
 end
 
 

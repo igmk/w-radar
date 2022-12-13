@@ -861,7 +861,7 @@ if isfield(data, 'PNv')
     netcdf.putVar(ncid,id_PNv,[0,0],[data.n_levels,data.totsamp],data.PNv');
 end
 if isfield(data, 'lineart_flag')
-    netcdf.putVar(ncid,id_lineartf,[0,0],[data.n_levels],data.lineart_flag);
+    netcdf.putVar(ncid,id_lineartf,0,data.n_levels, double(data.lineart_flag) );
 end
 if Temp_ret_flag
     netcdf.putVar(ncid,id_tprof,[0,0],[data.T_altcount, data.totsamp],data.Tprof');

@@ -19,6 +19,7 @@ function fh = outvarmeta
     fh.noisestd = @noisestd; 
     fh.zecalib = @zecalib; 
     fh.aggregFlag = @aggregFlag; 
+    fh.ze_comment = @ze_comment;
     
 end % fh
 
@@ -59,7 +60,7 @@ function id_time = time(ncid, did_time, timetype, totsamp_flag)
     if totsamp_flag
         netcdf.putAtt(ncid,id_time, 'note', ['Issues with timestamps occurred (value outside the expected range, '...
                                              'time moving backwards, and/or dublicate timestamps found in the lv0-file). ' ...
-                                             'Depending on issue, profiles removed or timestamp edited.'])
+                                             'Depending on the issue, profiles removed or timestamp edited.'])
     end
     
 end
@@ -111,7 +112,7 @@ function id_DoppMax = DoppMax(fileid, did_no_seq)
     netcdf.putAtt(fileid,id_DoppMax,'long_name',['Nyquist velocity']);
     netcdf.putAtt(fileid,id_DoppMax,'units','m s-1');
     netcdf.defVarFill(fileid,id_DoppMax,false,NaN('single'))
-    netcdf.putAtt(fileid,id_DoppMax,'comment','max. unambigious Doppler velocity; due to dealiasing values outside of the +-Nyquist velocity range are possible');
+    netcdf.putAtt(fileid,id_DoppMax,'comment','max. unambiguous Doppler velocity; due to dealiasing values outside of the +-Nyquist velocity range are possible');
 end
 
 function id_SeqIntTime = SeqIntTime(fileid, did_no_seq)
@@ -149,7 +150,7 @@ function id_ZeCalib = zecalib(fileid)
     netcdf.putAtt(fileid,id_ZeCalib,'long_name','Ze absolute calibration correction');
     netcdf.putAtt(fileid,id_ZeCalib,'units','dB');
     netcdf.defVarFill(fileid,id_ZeCalib,false,NaN('single'))
-    netcdf.putAtt(fileid,id_ZeCalib,'comment','Absolute calibration correction added to radar reflectivity. To get uncorrected reflectivity: ze_unccorected = ze - ze_calibration. Missing value indicates no correction applied. For methodology see documentation.');
+    netcdf.putAtt(fileid,id_ZeCalib,'comment','Absolute calibration correction added to radar reflectivity. To get uncorrected reflectivity: ze_unccorected = ze - ze_calibration. Missing value indicates no correction applied. Absolute calibration corrected using a disdrometer calibrated reference radar, for further details see documentation.');
 end
 
 function id_QF = aggregFlag(fileid, did_time)
@@ -168,3 +169,17 @@ function id_QF = aggregFlag(fileid, did_time)
 
 
 end
+
+
+function ze_comment(data, ncid, id_Ze)
+
+    Ze_calibcorr_label = 'If an absolute calibration correction has been applied, it is already included in ze, and the value is given by variable ze_calibration.';
+
+    if isfield(data, 'Ze_label') % Ze corrected, adding note
+        netcdf.putAtt(ncid,id_Ze,'comment', [data.Ze_label ' ' Ze_calibcorr_label ]);
+        netcdf.putAtt(ncid,id_Ze,'corretion_dB',data.Ze_corr);
+    else
+        netcdf.putAtt(ncid,id_Ze,'comment', Ze_calibcorr_label);
+    end
+
+end 
