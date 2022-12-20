@@ -812,16 +812,14 @@ if data.DualPol > 0
     netcdf.putAtt(ncid,id_spec_h,'standard_name','Doppler spectrum horizontal polarization');
     netcdf.putAtt(ncid,id_spec_h,'units','mm6 mm-3');
 
-    if data.DualPol > 1
-        id_spec_covRe = netcdf.defVar(ncid,'scov_re','nc_float',[did_vel,did_range,did_time]);
-        netcdf.putAtt(ncid,id_spec_covRe,'standard_name','Real part of covariance spectrum');
-        netcdf.putAtt(ncid,id_spec_covRe,'units','mm6 mm-3');
+    id_spec_covRe = netcdf.defVar(ncid,'scov_re','nc_float',[did_vel,did_range,did_time]);
+    netcdf.putAtt(ncid,id_spec_covRe,'standard_name','Real part of covariance spectrum');
+    netcdf.putAtt(ncid,id_spec_covRe,'units','mm6 mm-3');
     
-        id_spec_covIm = netcdf.defVar(ncid,'scov_im','nc_float',[did_vel,did_range,did_time]);
-        netcdf.putAtt(ncid,id_spec_covIm,'standard_name','Imaginary part of covariance spectrum');
-        netcdf.putAtt(ncid,id_spec_covIm,'units','mm6 mm-3');
-    end
-
+    id_spec_covIm = netcdf.defVar(ncid,'scov_im','nc_float',[did_vel,did_range,did_time]);
+    netcdf.putAtt(ncid,id_spec_covIm,'standard_name','Imaginary part of covariance spectrum');
+    netcdf.putAtt(ncid,id_spec_covIm,'units','mm6 mm-3');
+    
 end % if data.DualPol > 0
 
 
@@ -936,11 +934,11 @@ if data.DualPol > 0
     netcdf.defVarDeflate(ncid,id_spec_h,true,true,9);
     netcdf.defVarDeflate(ncid,id_ldr,true,true,9); %JABA    
     netcdf.defVarDeflate(ncid,id_Ze_hv,true,true,9); %LP
+    netcdf.defVarDeflate(ncid,id_spec_covRe,true,true,9);
+    netcdf.defVarDeflate(ncid,id_spec_covIm,true,true,9);
     if data.DualPol == 2
         netcdf.defVarDeflate(ncid,id_difphase,true,true,9); %JABA    
         netcdf.defVarDeflate(ncid,id_xcorr,true,true,9); %JABA    
-        netcdf.defVarDeflate(ncid,id_spec_covRe,true,true,9);
-        netcdf.defVarDeflate(ncid,id_spec_covIm,true,true,9);
     end
 end
 
