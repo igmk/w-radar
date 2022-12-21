@@ -8,8 +8,8 @@ mask = any(~isnan( data.spec),3);
 mask1 = repmat( mask , [1 1 max(data.DoppLen)]);
 
 for tt = 1:data.totsamp
-    for rr = data.range_offsets(end):data.n_levels
-%    for rr = 1:data.n_levels
+%     for rr = data.range_offsets(end):data.n_levels
+   for rr = 1:data.n_levels
     
         if mask(tt,rr) == 0; continue; end
         
@@ -36,7 +36,7 @@ for tt = 1:data.totsamp
             re = rr+1;
         end
         
-        if sum(mask(ts:te,rs:re)) <= 2;
+        if sum(mask(ts:te,rs:re), 'all') <= 2;
             mask1(tt,rr,:) = 0;
         end
         
