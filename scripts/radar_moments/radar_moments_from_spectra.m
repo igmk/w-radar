@@ -135,7 +135,7 @@ for i = 1:ss(1)
     % determine signal above mean noise for all blocks left
     for ii = 1:numel(block_start)
         
-        % first entry aboce mean noise
+        % first entry above mean noise
         startidx = find( spec(i, 1:block_start(ii)) < output.meannoise(i), 1, 'last') + 1;
         % last entry above mean noise
         endidx = find( spec(i, block_end(ii):end) < output.meannoise(i), 1, 'first') + block_end(ii) - 2;
@@ -156,6 +156,9 @@ for i = 1:ss(1)
         spec(i,:) = NaN;
         continue
     end
+    
+    % ignore any signal that is lower than -40dB from maximum signal in bin
+    idxnew = idxnew & spec(i,:) > (max(spec(i,:)) * 10^(-40/10));
             
     % now set set all spectral entries that are not in idxnew to zero
     spec(i,~idxnew) = 0;

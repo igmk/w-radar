@@ -161,7 +161,7 @@ for i = 1:numel(range_offsets)-1
         % determine signal above mean noise for all blocks left
         for iii = 1:numel(block_start)
             
-            % first entry aboce mean noise
+            % first entry above mean noise
             startidx = find( spec(r_idx(ii), 1:block_start(iii)) < output.meannoise(r_idx(ii)), 1, 'last') + 1;
             % last entry above mean noise
             endidx = find( spec(r_idx(ii), block_end(iii):Nfft(i)) < output.meannoise(r_idx(ii)), 1, 'first') + block_end(iii) - 2;
@@ -177,11 +177,14 @@ for i = 1:numel(range_offsets)-1
             
         end % for ii
         
-        if ~any(idxnew) % now signal was detected
+        if ~any(idxnew) % no signal was detected
             spec(r_idx(ii),:) = NaN;
             continue
         end
-    
+        
+        % ignore any signal that is lower than -40dB from maximum signal in bin
+        idxnew = idxnew & spec(r_idx(ii),1:Nfft(i)) > (max(spec(r_idx(ii),1:Nfft(i))) * 10^(-40/10));
+       
         % now set set all spectral entries that are not in idxnew to zero
         spec(r_idx(ii),~idxnew) = 0;
         % substract the mean noise level
