@@ -215,9 +215,6 @@ else
         % store how moments were calculated
         data.cal_mom = applied_method;
 
-        % calculate chirp integration times
-        data.ChirpIntTime = ChirpIntegrationTimes(data.DoppMax, data.freq, data.SeqAvg);
-
         % Specific setting or postprocessing are performed in this step.
         % (corrections to Ze for older software versions etc)
         funcname = sprintf('postprocessing_%s',config.nickradar);

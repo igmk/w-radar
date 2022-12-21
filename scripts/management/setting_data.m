@@ -96,6 +96,10 @@ end
 % create variable for chirp integration times
 data.ChirpIntTime = NaN(1,data.no_chirp_seq);
 
+% calculate chirp integration times
+data.ChirpIntTime = ChirpIntegrationTimes(data.DoppMax, data.freq, data.SeqAvg);
+
+
 % set -999 values to NaN
 data = fill2nan_struct(data,-999); 
     
