@@ -30,6 +30,14 @@ if linflag == false % convert into linear regime
 end
 
 
+% ignore any signal that is lower than -40dB from maximum signal in bin
+% (note editing spectra here does not have any effect on the spectra outside
+% this function)
+for i = 1:length(spec(:,1))
+    idx = spec(i,:) < (max(spec(i,:)) * 10^(-40/10));
+    spec(i, idx ) = NaN;
+end
+
 % ########### set all NaNs in spectra to zero
 spec(isnan(spec)) = 0;
 

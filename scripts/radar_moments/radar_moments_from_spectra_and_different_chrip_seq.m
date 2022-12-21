@@ -133,6 +133,9 @@ for i = 1:numel(range_offsets)-1
             continue
         end
         
+        % ignore any signal that is lower than -40dB from maximum signal in bin
+        idx = idx & spec(r_idx(ii),1:Nfft(i)) > (max(spec(r_idx(ii),1:Nfft(i))) * 10^(-40/10));
+        
         % determine blocks of consecutive bins
         [block_start, block_end] = radar_moments_get_blocks_of_signal(idx,[1,Nfft(i)]);
         
