@@ -75,6 +75,11 @@ config.overwrite = 1;
 % fales - dealiasing not appleied
 config.dealias = true;
 
+%Speckle filter (optional):
+% 0 - no speckle filtering applied
+% 1 - simple speckle removal in time-height space
+config.speckle = 1;
+
 % moments_cal:
 % Note! at the moment (July 2019), only use 2!
 % 2 - means spectral moments will be calculated (runs momentslv0-function)

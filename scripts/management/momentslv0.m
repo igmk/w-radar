@@ -158,8 +158,14 @@ else
                 end
             end
             
-            data = remove_speckle(data);
-            
+            if isfield(config, 'speckle')
+                if config.speckle == 1
+                    disp('Speckle filter...');
+                    data = remove_speckle(data);
+                    disp('Speckle filter...done!');
+                end
+            end
+                
             if config.dealias  % If the user wants to do it
 
                 if data.AntiAlias
