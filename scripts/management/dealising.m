@@ -21,6 +21,12 @@ if data.DualPol == 2
     disp('Hey! add here initialization of additional polarimetric variables - in function dealias.m')
 end
 
+if ~data.compress_spec
+    data.VNoisePow_mean = NaN(specsize(1:2));
+    data.VNoisePow_peak = NaN(specsize(1:2));
+    data.specmask       = false(specsize);
+end
+
 % oldspec = data.spec;  
 for i = 1:numel(data.time)
     
@@ -143,6 +149,7 @@ for i = 1:numel(data.time)
     if ~data.compress_spec
         data.VNoisePow_mean(i,:) = tempmoments.meannoise';
         data.VNoisePow_peak(i,:) = tempmoments.peaknoise';
+        data.specmask(i,:,:) = tempmoments.specmask;
     end
            
     if data.DualPol > 0

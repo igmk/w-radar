@@ -1,5 +1,10 @@
 function [data] = moments_retrieval(data)
 
+% initialize
+if ~data.compress_spec
+    data.specmask = false(size(data.spec)); 
+end
+
 for i = 1:numel(data.time)    
     
     % 0 = single pol radar, 1 = dual pol radar LDR conf., 2 = dual pol radar STSR mode
@@ -39,6 +44,7 @@ for i = 1:numel(data.time)
     if ~data.compress_spec
         data.VNoisePow_mean(i,:) = tempmoments.meannoise';
         data.VNoisePow_peak(i,:) = tempmoments.peaknoise';
+        data.specmask(i,:,:)     = tempmoments.specmask;
     end
            
     if data.DualPol > 0

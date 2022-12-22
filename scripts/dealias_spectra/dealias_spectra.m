@@ -165,6 +165,10 @@ moments.kurt = NaN(ss(1),1);
 % moments.peaknoise = NaN(ss(1),1);
 % moments.meannoise = NaN(ss(1),1);
 % 
+if ~flag_compress_spec 
+   moments.specmask = false(ss);
+end
+
 if flag_DualPol > 0
     moments.Ze_hv = NaN(ss(1),1);
     moments.vm_hv = NaN(ss(1),1);

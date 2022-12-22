@@ -3,6 +3,11 @@ function write_data_2_nc_spectra(data,outfile, config)
 % RG 1.6.2022
 
 
+%% remove noise from spectra
+
+data.spec(~data.specmask) = NaN;
+
+
 %% adjust spectra variables for move convenient use of data
 
 range_offs = data.range_offsets;

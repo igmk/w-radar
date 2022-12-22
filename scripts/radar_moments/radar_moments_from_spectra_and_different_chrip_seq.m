@@ -37,6 +37,7 @@ output.kurt = NaN(ss(1),1);
 output.peaknoise = NaN(ss(1),1);
 output.meannoise = NaN(ss(1),1);
 
+output.specmask = false(ss);
 
 % ######### check if nosie is provided
 noiseflag = any(strcmp(varargin,'noise'));
@@ -214,4 +215,7 @@ for i = 1:numel(range_offsets)-1
     tempstruct = radar_moments_call_moments(velocity(i,1:Nfft(i)), spec(r_idx,1:Nfft(i)), moment_str);
     output = dealias_spectra_write_tempmoments_to_finalmoments(output, tempstruct, r_idx, moment_str);
     
+    % save information which spectral bins used for moment calculation
+    ix_incl = (spec(r_idx,1:Nfft(i)) ~= 0) & ~isnan(spec(r_idx,1:Nfft(i)));
+    output.specmask(r_idx,1:Nfft(i)) = ix_incl;
 end % i
