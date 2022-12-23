@@ -43,33 +43,28 @@ else
         fprintf('Start processing with %s\n', infile);
 
 
-        % i) check if output file already exist
-        % output file name
+        % i) create output file name(s) and check if file(s) already exist
+        
+        % construct output file name(s)
         [config] = findoutfilename(config, files.lv0(h).name);
 
-        if ~config.overwrite
-            switch config.compact_flag
-                case 0 % general file
-                    if ~isempty(dir(config.outfile))
-                        disp('Output file already exist. Continue with the next file.');
-                        continue
-                    end
-
-                case 1  % compact file
-
-                    if ~isempty(dir(config.outfile2))
-                        disp('Output file already exist. Continue with the next file.');
-                        continue
-                    end
-
-                case 2  % both
-
-                    if ~(isempty(dir(config.outfile)) || isempty(dir(config.outfile2)))
-                        disp('Output files already exist. Continue with the next file.');
-                        continue
-                    end
-
+        % check if file(s) already exist
+        if ~config.overwrite % if overwrite requested, doesn't matter if files exist or not
+            
+            fn = fieldnames(config.outfiles);
+            fileexist = false(size(fn));
+            
+            for k=1:numel(fn)
+                if ~isempty(dir(config.outfiles.(fn{k})))
+                    fileexist(k) = true;
+                end
             end
+            
+            if all(fileexist) % all outputfiles exist: continue with next file
+                disp('Output file(s) already exists. Continuing with the next file.');
+                continue
+            end
+            
         end
 
         % counter for how many files are actually processed
@@ -162,7 +157,15 @@ else
                     data.spec_covIm = compress_spectra_filtering(data.spec_covIm, Nbin);
                 end
             end
-
+            
+            if isfield(config, 'speckle')
+                if config.speckle == 1
+                    disp('Speckle filter...');
+                    data = remove_speckle(data);
+                    disp('Speckle filter...done!');
+                end
+            end
+                
             if config.dealias  % If the user wants to do it
 
                 if data.AntiAlias
@@ -208,6 +211,7 @@ else
                 %Plots of the mean Doppler velocity
                 dealias_spectra_plot_control_figures(data)
             end
+            
         else
             fprintf('%s is empty.\n', infile);
             error = 1;
@@ -216,9 +220,6 @@ else
 
         % store how moments were calculated
         data.cal_mom = applied_method;
-
-        % calculate chirp integration times
-        data.ChirpIntTime = ChirpIntegrationTimes(data.DoppMax, data.freq, data.SeqAvg);
 
         % Specific setting or postprocessing are performed in this step.
         % (corrections to Ze for older software versions etc)

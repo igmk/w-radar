@@ -14,7 +14,7 @@ if sum(ind) == 0
     return
 end
 
-iout = find(ind, 1);
+iout = find(ind);
 
 dim_t = length(data.time);
 
@@ -22,27 +22,29 @@ dim_t = length(data.time);
 fields = fieldnames(data);
 
 for ff = 1:length(fields)
-    
+
     vardim = size(data.(fields{ff}));
-    
+
     if ~any(vardim == dim_t)
         continue
     end
-    
-    
+
+
     if strcmp(fields{ff}, 'QualFlag')
-        data.(fields{ff})(iout:end,:,:) = [];
-        
+        data.(fields{ff})(iout,:,:) = [];
+
     elseif prod(vardim) == dim_t % 1 dim variables
-        data.(fields{ff})(iout:end) = [];
-        
+        data.(fields{ff})(iout) = [];
+
     elseif length(vardim) == 2 % 2 dim variables
-        data.(fields{ff})(iout:end,:) = [];
-        
+        data.(fields{ff})(iout,:) = [];
+
     elseif length(vardim) == 3 % 3 dim variables
-        data.(fields{ff})(iout:end,:,:) = [];
-        
+        data.(fields{ff})(iout,:,:) = [];
+
     end
 end
 
-data.totsamp = iout-1;
+
+data.totsamp = length(data.time); 
+data.totsampchangelabel = 1; % note for later that issues with time found

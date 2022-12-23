@@ -37,6 +37,7 @@ output.kurt = NaN(ss(1),1);
 output.peaknoise = NaN(ss(1),1);
 output.meannoise = NaN(ss(1),1);
 
+output.specmask = false(ss);
 
 % ######### check if nosie is provided
 noiseflag = any(strcmp(varargin,'noise'));
@@ -133,6 +134,9 @@ for i = 1:numel(range_offsets)-1
             continue
         end
         
+        % ignore any signal that is lower than -40dB from maximum signal in bin
+        idx = idx & spec(r_idx(ii),1:Nfft(i)) > (max(spec(r_idx(ii),1:Nfft(i))) * 10^(-40/10));
+        
         % determine blocks of consecutive bins
         [block_start, block_end] = radar_moments_get_blocks_of_signal(idx,[1,Nfft(i)]);
         
@@ -158,7 +162,7 @@ for i = 1:numel(range_offsets)-1
         % determine signal above mean noise for all blocks left
         for iii = 1:numel(block_start)
             
-            % first entry aboce mean noise
+            % first entry above mean noise
             startidx = find( spec(r_idx(ii), 1:block_start(iii)) < output.meannoise(r_idx(ii)), 1, 'last') + 1;
             % last entry above mean noise
             endidx = find( spec(r_idx(ii), block_end(iii):Nfft(i)) < output.meannoise(r_idx(ii)), 1, 'first') + block_end(iii) - 2;
@@ -174,11 +178,14 @@ for i = 1:numel(range_offsets)-1
             
         end % for ii
         
-        if ~any(idxnew) % now signal was detected
+        if ~any(idxnew) % no signal was detected
             spec(r_idx(ii),:) = NaN;
             continue
         end
-    
+        
+        % ignore any signal that is lower than -40dB from maximum signal in bin
+        idxnew = idxnew & spec(r_idx(ii),1:Nfft(i)) > (max(spec(r_idx(ii),1:Nfft(i))) * 10^(-40/10));
+       
         % now set set all spectral entries that are not in idxnew to zero
         spec(r_idx(ii),~idxnew) = 0;
         % substract the mean noise level
@@ -208,4 +215,7 @@ for i = 1:numel(range_offsets)-1
     tempstruct = radar_moments_call_moments(velocity(i,1:Nfft(i)), spec(r_idx,1:Nfft(i)), moment_str);
     output = dealias_spectra_write_tempmoments_to_finalmoments(output, tempstruct, r_idx, moment_str);
     
+    % save information which spectral bins used for moment calculation
+    ix_incl = (spec(r_idx,1:Nfft(i)) ~= 0) & ~isnan(spec(r_idx,1:Nfft(i)));
+    output.specmask(r_idx,1:Nfft(i)) = ix_incl;
 end % i

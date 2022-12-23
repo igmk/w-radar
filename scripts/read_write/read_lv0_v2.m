@@ -10,7 +10,7 @@ function data = read_lv0_v2(infile)
     data.readerror = true; % flag for error in reading file
     
     if fid == -1
-        disp(['error opening' infile])
+        disp(['>>> error opening' infile])
         return
     end
     
@@ -23,8 +23,10 @@ function data = read_lv0_v2(infile)
     data.filecode = int32(fread(fid,1,'int')); % lv1-file code
     data.headerlen = int32(fread(fid,1,'int')); % header length in bytes (not including headerlen)
     data.progno = int32(fread(fid,1,'int')); % program number, as definded in the host-pc software
-    data.modelno = int32(fread(fid,1,'int')); % =0 singel pol., = 1 dual pol
-    
+    data.modelno = int32(fread(fid,1,'int')); % =0 singel pol., = 1 dual pol, 2 = dual pol. LDR configuration
+        % modelno contains same information as DualPol, but different
+        % definition - don't use to avoid confusion. RG 19.9.2022
+        
     cc = 0;
     count = 1;
     while cc == 0
@@ -78,6 +80,30 @@ function data = read_lv0_v2(infile)
     data.dr = single(fread(fid,[1, data.no_chirp_seq],'single')); % chirp sequence range resolution [m]
     data.DoppMax = single(fread(fid,[1, data.no_chirp_seq],'single')); % maximum unambiguious Doppler vel for each chirp sequence
     data.totsamp = int32(fread(fid,1,'int'));  % total number of samples
+
+    
+    % % % % % checks for reasonable header data % % % % % 
+    
+    % check if binary file contains reasonable number of range bins :
+    if any(data.n_levels <= 0 | data.n_levels > 7500 | ~isinteger(data.n_levels)) || isempty(data.n_levels)
+        disp(['>>> error opening' infile])
+        disp(['>>> file not processed - no of range bins either below 0 or above 7500, empty or not an integer'])
+        return
+    end
+
+    % check if binary file contains reasonable number of samples :
+    if any( data.totsamp <= 0 | data.totsamp > 10000 | ~isinteger(data.totsamp) ) || isempty(data.totsamp)
+        disp(['>>> error opening' infile])
+        disp(['>>> file not processed - number of samples/profiles below 0 or above 10000, empty or not an integer'])
+        return
+    end
+    
+    
+    % for this file, the file ends before expected, stopping reading data at last full profile
+    if data.filecode == 789346 &&  strcmp(filename, 'joyrad94_20170208140002_P05_ZEN.lv0') % hopefully filemane does not chage... 
+        data.totsamp = 640;
+    end
+    
     
     % ################################# header ends
        
@@ -89,7 +115,7 @@ function data = read_lv0_v2(infile)
     data.time(1:data.totsamp) = uint32(0); % time of sample [sec] since 1.1.2001 0:0:0
     data.sampleTms(1:data.totsamp) = int32(0); % milliseconds of sample
     data.QF(1:data.totsamp) = int8(0); % quality flag: bit 4 = ADC saturation, bit 3 = spectral width too high, bit 2 = no transm. power leveling, get bits using dec2bin()
-    data.RR(1:data.totsamp) = single(-999); % rin rate [mm/h]
+    data.RR(1:data.totsamp) = single(-999); % rain rate [mm/h]
     data.rh(1:data.totsamp) = single(-999); % relative humidity [%]
     data.T_env(1:data.totsamp) = single(-999); % environmental temp [K]
     data.pres(1:data.totsamp) = single(-999); % pressure in [hPa]
@@ -106,31 +132,31 @@ function data = read_lv0_v2(infile)
     data.T_trans(1:data.totsamp) = single(-999); % transmitter temperature [K]
     data.T_rec(1:data.totsamp) = single(-999); % receiver temperature [K]
     data.T_pc(1:data.totsamp) = single(-999); % PC temperature [K]
-    % data.reserved(1:3,1:data.totsamp) = single(-999);
-    % data.Tprof(1:data.T_altcount,1:data.totsamp) = single(-999); % temperature profile
-    % data.Qprof(1:data.H_altcount,1:data.totsamp) = single(-999); % abs hum profile
-    % data.RHprof(1:data.H_altcount,1:data.totsamp) = single(-999); % rel hum profile
+    data.reserved(1:data.totsamp,1:3) = single(-999);
+    data.Tprof(1:data.totsamp,1:data.T_altcount) = single(-999); % temperature profile
+    data.Qprof(1:data.totsamp,1:data.H_altcount) = single(-999); % abs hum profile
+    data.RHprof(1:data.totsamp,1:data.H_altcount) = single(-999); % rel hum profile
     data.PNv(1:data.totsamp,1:data.n_levels) = single(-999); % total IF power in v-pol measured at the ADC input
     data.SLv(1:data.totsamp,1:data.n_levels) = single(-999); % linear sensitivity limit in Ze units for vertical polarisation
-    data.spec(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % vertical pol doppler spectrum linear units
+    data.spec(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); % vertical pol doppler spectrum linear units % filling with NaNs instead of -999 to avoid having to convert missing values to NaNs later
     if data.DualPol > 0
         data.PNh(1:data.totsamp,1:data.n_levels) = single(-999); % total IF power in h-pol measured at ADT unput
         data.SLh(1:data.totsamp,1:data.n_levels) = single(-999); % linear sensitivity limit in Ze units for horizontal polarisation
-        data.spec_h(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % hor pol doppler spectrum linear units
-        data.spec_covRe(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % real part of covariance spectrum
-        data.spec_covIm(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % imaginary part of covariance spectrum
+        data.spec_hv(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); % hor pol doppler spectrum linear units
+        data.spec_covRe(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); % real part of covariance spectrum
+        data.spec_covIm(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); % imaginary part of covariance spectrum
     end      
     data.mask(1:data.totsamp,1:data.n_levels) = int8(0); % data.mask array of occupied range cells: 0=not occupied, 1=occupied
     
     if data.CompEna == 2 && data.DualPol > 0
-        data.d_spec(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % spectral differential reflectivity [dB]
-        data.CorrCoeff(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % rho_hv, spectral corellation coefficient [0,1]
-        data.DiffPh(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % spectral differential phase [rad]
+        data.d_spec(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); % spectral differential reflectivity [dB]
+        data.CorrCoeff(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); % rho_hv, spectral corellation coefficient [0,1]
+        data.DiffPh(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); % spectral differential phase [rad]
     end
     
     if data.DualPol == 2 && data.CompEna == 2
-        data.SLDR(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % compressed spectral slanted LDR [dB]
-        data.SCorrCoeff(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % compressed spectral slanted correlation coefficient [0,1]
+        data.SLDR(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); % compressed spectral slanted LDR [dB]
+        data.SCorrCoeff(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); % compressed spectral slanted correlation coefficient [0,1]
         if data.CompEna == 2
             data.KDP(1:data.totsamp,1:data.n_levels) = single(-999); % specific differential phase shift [rad/km]
             data.DiffAtt(1:data.totsamp,1:data.n_levels) = single(-999); % differential attenuation [dB/km]             
@@ -178,11 +204,12 @@ function data = read_lv0_v2(infile)
         data.T_trans(i) = fread(fid,1,'single');
         data.T_rec(i) = fread(fid,1,'single');
         data.T_pc(i) = fread(fid,1,'single');
+        % reserved: 
         data.reserved(i,1:3) = fread(fid,3,'single'); % reserved
-        fread(fid,data.T_altcount,'single'); % temp prof
-        fread(fid,data.H_altcount,'single'); % abs hum prof
-        fread(fid,data.H_altcount,'single'); % rel hum prof
-        
+        data.Tprof(i,1:data.T_altcount) = fread(fid,data.T_altcount,'single'); % temp prof
+        data.Qprof(i,1:data.H_altcount) = fread(fid,data.H_altcount,'single'); % abs hum prof
+        data.RHprof(i,1:data.H_altcount) = fread(fid,data.H_altcount,'single'); % rel hum prof
+
         data.PNv(i,1:data.n_levels) = fread(fid,[1, data.n_levels],'single');
         if data.DualPol > 0
             data.PNh(i,1:data.n_levels) = fread(fid,[1, data.n_levels],'single');
@@ -198,34 +225,26 @@ function data = read_lv0_v2(infile)
         for j = 1:data.n_levels
                         
             if data.mask(i,j) == 1
-                
-                % find number of current chirp index
-                chirp_idx = int32(find(data.range_offsets(2:end) - j > 0,1,'first'));
-                if isempty(chirp_idx) % then j is within last chirp
-                    chirp_idx = data.no_chirp_seq;
-                end
-                
+                               
                 fread(fid,1,'int'); % number of bytes of the followng spectral block
                 
                 % spectra
                 if data.CompEna == 0 
-                    
-                    if strcmp(filename, 'joyrad94_20170208140002_P05_ZEN.lv0') && i == 641 && j == 165 % this file ends before expected
-                        disp('Note! File ends before expected, returning the data that could be read')
-                        fclose(fid);                    
-                        data.readerror = false; % succesfull in reading file!         
-                        return
-    
-                    end
 
+                    % find number of current chirp index
+                    chirp_idx = int32(find(data.range_offsets(2:end) - j > 0,1,'first'));
+                    if isempty(chirp_idx) % then j is within last chirp
+                        chirp_idx = data.no_chirp_seq;
+                    end
+                
                     data.spec(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra
                     if data.DualPol > 0
-                        data.spec_h(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra 
+                        data.spec_hv(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra 
                         data.spec_covRe(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra 
                         data.spec_covIm(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra 
                     end
                     
-                else
+                else %  data.CompEna > 0 
                     
                     Nblocks = int8(fread(fid,1,'char*1')); % number of blocks in spectra
                     MinBkIdx = fread(fid,[1, Nblocks],'int16') + 1; % minimum indexes of blocks
@@ -235,27 +254,47 @@ function data = read_lv0_v2(infile)
                         
                         data.spec(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
                         
-                        if data.DualPol > 0
-                            
-                            data.spec_h(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
-                            data.spec_covRe(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
-                            data.spec_covIm(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
-                            
-                            if data.CompEna == 2
-                                data.d_spec(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
-                                data.CorrCoeff(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
-                                data.DiffPh(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
-                                
-                                if data.DualPol == 2
-                                    data.SLDR(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
-                                    data.SCorrCoeff(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
-                                end 
-                            end
-                            
-                            
-                        end % if data.DualPol > 0                        
-                           
                     end % jj
+
+                    if data.DualPol > 0
+                        for jj = 1:Nblocks
+                            data.spec_hv(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
+                        end
+
+                        for jj = 1:Nblocks
+                            data.spec_covRe(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
+                        end
+
+                        for jj = 1:Nblocks
+                            data.spec_covIm(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
+                        end
+                        
+                    end % fi
+                        
+                    if data.CompEna == 2
+                        
+                        disp('!!WARNING!! in read_lv0_v2: the combination of DualPol > 0 and CompEna == 2 has not been tested')
+
+                        for jj = 1:Nblocks
+                            data.d_spec(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
+                        end
+                        for jj = 1:Nblocks
+                            data.CorrCoeff(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
+                        end
+                        for jj = 1:Nblocks
+                            data.DiffPh(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
+                        end
+
+                        if data.DualPol == 2
+                            for jj = 1:Nblocks
+                                data.SLDR(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
+                            end
+                            for jj = 1:Nblocks
+                                data.SCorrCoeff(i,j,MinBkIdx(jj):MaxBkIdx(jj)) = fread(fid,[1,MaxBkIdx(jj)-MinBkIdx(jj)+1],'single');
+                            end 
+                        end
+                    end
+
                     
                     if data.DualPol == 2 && data.CompEna == 2
                         data.KDP(i,j) = fread(fid,1,'single');

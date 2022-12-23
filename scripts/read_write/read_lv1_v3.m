@@ -114,10 +114,10 @@ function data = read_lv1_v3(infile)
     data.T_trans(1:data.totsamp) = single(-999); % transmitter temperature [K]
     data.T_rec(1:data.totsamp) = single(-999); % receiver temperature [K]
     data.T_pc(1:data.totsamp) = single(-999); % PC temperature [K]
-    % data.reserved(1:3,1:data.totsamp) = single(-999);
-    % data.Tprof(1:data.T_altcount,1:data.totsamp) = single(-999); % temperature profile
-    % data.Qprof(1:data.H_altcount,1:data.totsamp) = single(-999); % abs hum profile
-    % data.RHprof(1:data.H_altcount,1:data.totsamp) = single(-999); % rel hum profile
+    data.reserved(1:3,1:data.totsamp) = single(-999);
+    data.Tprof(1:data.totsamp,1:data.T_altcount) = single(-999); % temperature profile
+    data.Qprof(1:data.totsamp,1:data.H_altcount) = single(-999); % abs hum profile
+    data.RHprof(1:data.totsamp,1:data.H_altcount) = single(-999); % rel hum profile
     data.SLv(1:data.totsamp,1:data.n_levels) = single(-999); % linear sensitivity limit in Ze units for vertical polarisation
     data.mask(1:data.totsamp,1:data.n_levels) = int8(0); % data.mask array of occupied range cells: 0=not occupied, 1=occupied
     data.Ze(1:data.totsamp,1:data.n_levels) = single(-999); % linear reflectivity vert. pol.

@@ -40,6 +40,8 @@ output.kurt = NaN(ss(1),1);
 output.peaknoise = NaN(ss(1),1);
 output.meannoise = NaN(ss(1),1);
 
+output.specmask = false(ss);
+
 
 % ######### check if nosie is provided
 if any(strcmp(varargin,'noise'))
@@ -106,6 +108,10 @@ for i = 1:ss(1)
         continue
     end
     
+    % ignore any signal that is lower than -40dB from maximum signal in bin
+    idx = idx & spec(i,:) > (max(spec(i,:)) * 10^(-40/10));
+       
+        
     % determine blocks of consecutive bins
     [block_start, block_end] = radar_moments_get_blocks_of_signal(idx,sv);
     
@@ -131,7 +137,7 @@ for i = 1:ss(1)
     % determine signal above mean noise for all blocks left
     for ii = 1:numel(block_start)
         
-        % first entry aboce mean noise
+        % first entry above mean noise
         startidx = find( spec(i, 1:block_start(ii)) < output.meannoise(i), 1, 'last') + 1;
         % last entry above mean noise
         endidx = find( spec(i, block_end(ii):end) < output.meannoise(i), 1, 'first') + block_end(ii) - 2;
@@ -152,6 +158,9 @@ for i = 1:ss(1)
         spec(i,:) = NaN;
         continue
     end
+    
+    % ignore any signal that is lower than -40dB from maximum signal in bin
+    idxnew = idxnew & spec(i,:) > (max(spec(i,:)) * 10^(-40/10));
             
     % now set set all spectral entries that are not in idxnew to zero
     spec(i,~idxnew) = 0;
@@ -177,6 +186,10 @@ for i = 1:ss(1)
     
     
 end % i
+
+% save information which spectral bins used for moment calculation
+output.specmask( (spec ~= 0) & ~isnan(spec) ) = true;
+
 
 tempstruct = radar_moments_call_moments(velocity, spec, moment_str);
 output = dealias_spectra_write_tempmoments_to_finalmoments(output, tempstruct, 1:ss(1), moment_str);

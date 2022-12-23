@@ -22,7 +22,9 @@ function data = read_lv0_v3(infile)
     data.endtime = int32(fread(fid,1,'uint')); % time of last sample in file
     data.progno = int32(fread(fid,1,'int')); % program number, as definded in the host-pc software
     data.modelno = int32(fread(fid,1,'int')); % =0 singel pol., = 1 dual pol, 2 = dual pol. LDR configuration
-    
+        % modelno contains same information as DualPol, but different
+        % definition - don't use to avoid confusion. RG 19.9.2022
+        
     cc = 0;
     count = 1;
     while cc == 0
@@ -62,11 +64,6 @@ function data = read_lv0_v3(infile)
     data.Lon = single(fread(fid,1,'single')); % GPS longitude
     data.CalInt = int32(fread(fid,1,'int')); % period of automatic zero calibrations in number of samples
     data.n_levels = int32(fread(fid,1,'int')); % number of radar altitude layers
-    if any(data.n_levels <= 0 | data.n_levels > 7500 | ~isinteger(data.n_levels)) | isempty(data.n_levels)
-        disp(['>>> error opening' infile])
-        disp(['>>> file not processed - no of range bins either below 0 or above 7500, empty or not an integer'])
-        return
-    end
     data.T_altcount = int32(fread(fid,1,'int')); % number of temperature profile altitude layers
     data.H_altcount = int32(fread(fid,1,'int')); % number of humidity profile altitude layers
     data.no_chirp_seq = fread(fid,1,'int'); % number of chirp sequences
@@ -107,13 +104,30 @@ function data = read_lv0_v3(infile)
     fread(fid,10000,'uint');
     
     data.totsamp = int32(fread(fid,1,'int'));  % total number of samples
+
     
-    % check if binary file contains reasonable number of samples :
+    % % % % % checks for reasonable header data % % % % % 
     
-    if any( data.totsamp <= 0 | data.totsamp > 3600 | ~isinteger(data.totsamp) ) || isempty(data.totsamp)
+    % check if binary file contains reasonable number of range bins :
+    if any(data.n_levels <= 0 | data.n_levels > 7500 | ~isinteger(data.n_levels)) || isempty(data.n_levels)
         disp(['>>> error opening' infile])
-        disp(['>>> file not processed - no of samples/profiles below 0 or above 3600, empty or not an integer'])
+        disp(['>>> file not processed - no of range bins either below 0 or above 7500, empty or not an integer'])
         return
+    end
+
+    % check if binary file contains reasonable number of samples :
+    if any( data.totsamp <= 0 | data.totsamp > 10000 | ~isinteger(data.totsamp) ) || isempty(data.totsamp)
+        disp(['>>> error opening' infile])
+        disp(['>>> file not processed - number of samples/profiles below 0 or above 10000, empty or not an integer'])
+        return
+    end
+
+    % for this file, data transfer did not complete, stopping reading data at last full profile - RG 10.9.2021
+    if data.filecode == 889346 && data.starttime == 652622431 && data.endtime == 652625997 ...
+        && data.n_levels == 765 && all(data.range_offsets == [1 95 202 388]) ... % strcmp(data.custname, 'Univ. Cologne (Jülich) ')
+        && all(data.SeqAvg == [4096 3072 2048 1536]) && all(data.DoppLen == [512 512 512 256])
+
+        data.totsamp = 853;
     end
     
     
@@ -124,7 +138,7 @@ function data = read_lv0_v3(infile)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% allocate arrays
     
     data.samplen(1:data.totsamp) = int32(0); % sample length in bytes without samplen
-    data.time(1:data.totsamp) = double(0); % time of sample [sec] since 1.1.2001 0:0:0
+    data.time(1:data.totsamp) = uint32(0); % time of sample [sec] since 1.1.2001 0:0:0
     data.sampleTms(1:data.totsamp) = int32(0); % milliseconds of sample
     data.QF(1:data.totsamp) = int8(0); % quality flag: bit 4 = ADC saturation, bit 3 = spectral width too high, bit 2 = no transm. power leveling, get bits using dec2bin()
     data.RR(1:data.totsamp) = single(-999); % rain rate [mm/h]
@@ -145,30 +159,30 @@ function data = read_lv0_v3(infile)
     data.T_rec(1:data.totsamp) = single(-999); % receiver temperature [K]
     data.T_pc(1:data.totsamp) = single(-999); % PC temperature [K]
     data.reserved(1:data.totsamp,1:3) = single(-999);
-    % data.Tprof(1:data.T_altcount,1:data.totsamp) = single(-999); % temperature profile
-    % data.Qprof(1:data.H_altcount,1:data.totsamp) = single(-999); % abs hum profile
-    % data.RHprof(1:data.H_altcount,1:data.totsamp) = single(-999); % rel hum profile
+    data.Tprof(1:data.totsamp,1:data.T_altcount) = single(-999); % temperature profile
+    data.Qprof(1:data.totsamp,1:data.H_altcount) = single(-999); % abs hum profile
+    data.RHprof(1:data.totsamp,1:data.H_altcount) = single(-999); % rel hum profile
     data.PNv(1:data.totsamp,1:data.n_levels) = single(-999); % total IF power in v-pol measured at the ADC input
     data.SLv(1:data.totsamp,1:data.n_levels) = single(-999); % linear sensitivity limit in Ze units for vertical polarisation
-    data.spec(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % vertical pol doppler spectrum linear units
+    data.spec(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) =  NaN('single'); % vertical pol doppler spectrum linear units % filling with NaNs instead of -999 to avoid having to convert missing values to NaNs later
     if data.DualPol > 0
         data.PNh(1:data.totsamp,1:data.n_levels) = single(-999); % total IF power in h-pol measured at ADT unput
         data.SLh(1:data.totsamp,1:data.n_levels) = single(-999); % linear sensitivity limit in Ze units for horizontal polarisation
-        data.spec_hv(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % hor pol doppler spectrum linear units
-        data.spec_covRe(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % real part of covariance spectrum
-        data.spec_covIm(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % imaginary part of covariance spectrum
+        data.spec_hv(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); % hor pol doppler spectrum linear units
+        data.spec_covRe(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); % real part of covariance spectrum
+        data.spec_covIm(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); % imaginary part of covariance spectrum
     end      
     data.mask(1:data.totsamp,1:data.n_levels) = int8(0); % data.mask array of occupied range cells: 0=not occupied, 1=occupied
     
     if data.CompEna == 2 && data.DualPol > 0
-        data.d_spec(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % spectral differential reflectivity [dB]
-        data.CorrCoeff(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % rho_hv, spectral corellation coefficient [0,1]
-        data.DiffPh(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % spectral differential phase [rad]
+        data.d_spec(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); % spectral differential reflectivity [dB]
+        data.CorrCoeff(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); % rho_hv, spectral corellation coefficient [0,1]
+        data.DiffPh(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); % spectral differential phase [rad]
     end
     
     if data.DualPol == 2 && data.CompEna == 2
-        data.SLDR(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % compressed spectral slanted LDR [dB]
-        data.SCorrCoeff(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = single(-999); % compressed spectral slanted correlation coefficient [0,1]
+        data.SLDR(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); % compressed spectral slanted LDR [dB]
+        data.SCorrCoeff(1:data.totsamp,1:data.n_levels,1:max(data.DoppLen)) = NaN('single'); % compressed spectral slanted correlation coefficient [0,1]
         if data.CompEna == 2
             data.KDP(1:data.totsamp,1:data.n_levels) = single(-999); % specific differential phase shift [rad/km]
             data.DiffAtt(1:data.totsamp,1:data.n_levels) = single(-999); % differential attenuation [dB/km]             
@@ -219,19 +233,31 @@ function data = read_lv0_v3(infile)
         % reserved: 
         data.reserved(i,1:3) = fread(fid,3,'single'); % reserved
         %fread(fid,3,'single');
-        fread(fid,data.T_altcount,'single'); % temp prof
-        fread(fid,data.H_altcount,'single'); % abs hum prof
-        fread(fid,data.H_altcount,'single'); % rel hum prof
+        
+        data.Tprof(i,1:data.T_altcount) = fread(fid,data.T_altcount,'single'); % temp prof
+        data.Qprof(i,1:data.H_altcount) = fread(fid,data.H_altcount,'single'); % abs hum prof
+        data.RHprof(i,1:data.H_altcount) = fread(fid,data.H_altcount,'single'); % rel hum prof
 
         data.PNv(i,1:data.n_levels) = fread(fid,[1, data.n_levels],'single');
         if data.DualPol > 0
             data.PNh(i,1:data.n_levels) = fread(fid,[1, data.n_levels],'single');
         end
             
-        data.SLv(i,1:data.n_levels) = fread(fid,[1, data.n_levels],'single');
-        if data.DualPol > 0
-            data.SLh(i,1:data.n_levels) = fread(fid,[1, data.n_levels],'single');
+            
+        try
+            data.SLv(i,1:data.n_levels) = fread(fid,[1, data.n_levels],'single');
+            if data.DualPol > 0
+                data.SLh(i,1:data.n_levels) = fread(fid,[1, data.n_levels],'single');
+            end
+
+        catch
+             if feof(fid)
+                endoffileerrormessage
+                return
+             end
         end
+
+            
         
         data.mask(i,1:data.n_levels) = int8(fread(fid,[1, data.n_levels],'char*1'));        
         
@@ -252,11 +278,20 @@ function data = read_lv0_v3(infile)
                         chirp_idx = data.no_chirp_seq;
                     end
 
-                    data.spec(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra
-                    if data.DualPol > 0
-                        data.spec_hv(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra 
-                        data.spec_covRe(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra 
-                        data.spec_covIm(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra 
+                     try
+
+                        data.spec(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra
+                        if data.DualPol > 0
+                            data.spec_hv(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra 
+                            data.spec_covRe(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra 
+                            data.spec_covIm(i,j,1:data.DoppLen(chirp_idx)) = fread(fid,[1,data.DoppLen(chirp_idx)],'single'); % spectra 
+                        end
+
+                    catch
+                         if feof(fid)
+                            endoffileerrormessage
+                            return
+                         end
                     end
                     
                 

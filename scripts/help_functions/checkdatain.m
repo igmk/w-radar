@@ -9,10 +9,9 @@ data = checkdata1(data);
 
 
 % Sometimes issues with time stamp due to GPS failures. Checking if time
-% goes "backwards" and correcting these time stamps by linearly
-% interpolating between neighbouring times.
+% goes "backwards" or duplicate time stamps presents
 % RG & LP 16.8.2019        
-data = checkdata2(data);
+data = checkdata2_v2(data);
 
 
 % Sometimes when measurements are interrupted, the last profile of the 
@@ -20,3 +19,9 @@ data = checkdata2(data);
 % Ze > 50 dB is found
 % RG 7.9.2021        
 data = zesanitycheck(data);
+
+
+% Sometimes in the temperature variables found 0 values, replacing these
+% with NaNs since a temperature of 0 K is obviously wrong
+% RG 20.10.2022
+data = temperaturecheck(data);

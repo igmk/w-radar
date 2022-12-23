@@ -30,7 +30,7 @@ end
 glob = netcdf.getConstant('NC_GLOBAL');
 netcdf.putAtt(ncid,glob,'FillValue',str_fill_value);
 netcdf.putAtt(ncid,glob,'program_name',data.progname);
-if data.modelno == 0
+if data.DualPol == 0
     model = '94 GHz single pol.';
 else
     model = '94 GHz dual pol.';
@@ -164,8 +164,10 @@ netcdf.putAtt(ncid,id_H_levels,'standard_name','Number of range levels of hum. p
 
 id_no_chirp_seq = netcdf.defVar(ncid,'no_chirp_seq','nc_int',did_scalar);
 netcdf.putAtt(ncid,id_no_chirp_seq,'standard_name','Number of chirp sequences');
-netcdf.putAtt(ncid,id_no_chirp_seq,'comment',...
-    'The radar can be programmed to run different resolution modes for different layers spanning several range gates');
+netcdf.putAtt(ncid,id_no_chirp_seq,'comment',['The radar can be programmed '...
+                                              'to run different resolution ' ...
+                                              'modes for different layers ' ...
+                                              'spanning several range gates']);
 
 id_CalInt = netcdf.defVar(ncid,'CalInt','nc_int',did_scalar);
 netcdf.putAtt(ncid,id_CalInt,'standard_name','Sample interval for automated zero calibrations');
@@ -201,8 +203,10 @@ end
 
 id_cal_mom = netcdf.defVar(ncid,'cal_mom','nc_byte',did_scalar);
 netcdf.putAtt(ncid,id_cal_mom,'standard_name','Integer indicating how moments were calculated.');
-netcdf.putAtt(ncid,id_cal_mom,'comment',...
-    'Set in config file. 2 = moments were calculated from spectra. 3 = moments are taken from RPG processing sofware (lv1).');
+netcdf.putAtt(ncid,id_cal_mom,'comment',['Set in config file. ' ...
+                                         '2 = moments were calculated from ' ...
+                                         'spectra. 3 = moments are taken ' ...
+                                         'from RPG processing sofware (lv1).']);
 
 
 %%%%%%% range variables
@@ -572,22 +576,6 @@ netcdf.putAtt(ncid,id_az,'units','degrees');
 %%%%%%%% multi-D variables %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-id_QualFlag = netcdf.defVar(ncid,'pro_qf','nc_float',[did_range,did_time]);
-netcdf.putAtt(ncid,id_QualFlag,'GEOMS_name','FLAG.PROCESSING.QUALITY');
-netcdf.putAtt(ncid,id_QualFlag,'long_name','quality_flag_data_processing');
-netcdf.putAtt(ncid,id_QualFlag,'standard_name','Quality flag, added in the additional data processing to alert for known issues');
-netcdf.putAtt(ncid,id_QualFlag,'short_name','pro_qf');
-netcdf.putAtt(ncid,id_QualFlag,'comment', ...
-    ['This variable contains information on anything that might impact the quality ', ...
-    'of the data at each pixel. Must be converted into three bit binary string. ', ...
-	'If 0, i.e. dec2bin(QualityFlag,3) = 000, none of the included issues were ', ...
-    'found. The definitions of each bit are given in the definition attribute.']);
-netcdf.putAtt(ncid,id_QualFlag,'definition', ...
-    ['If 2^0 bit is 1: this range gate is known to have aritifical spikes occurring ', ...
-     'If 2^1 bit is 1: aircraft or other known flying non-meteorological object ', ...
-     'If 2^2 bit is 1: wet-radome (was a problem for mirac-a for a time period '...
-     'when coating missing)']);
-
 id_Aliasmask = netcdf.defVar(ncid,'alias_mask','nc_byte',[did_range,did_time]);
 netcdf.putAtt(ncid,id_Aliasmask,'GEOMS_name','MASK.PROCESSING.ALIAISING');
 netcdf.putAtt(ncid,id_Aliasmask,'long_name','alaising_mask');
@@ -824,16 +812,14 @@ if data.DualPol > 0
     netcdf.putAtt(ncid,id_spec_h,'standard_name','Doppler spectrum horizontal polarization');
     netcdf.putAtt(ncid,id_spec_h,'units','mm6 mm-3');
 
-    if data.DualPol > 1
-        id_spec_covRe = netcdf.defVar(ncid,'scov_re','nc_float',[did_vel,did_range,did_time]);
-        netcdf.putAtt(ncid,id_spec_covRe,'standard_name','Real part of covariance spectrum');
-        netcdf.putAtt(ncid,id_spec_covRe,'units','mm6 mm-3');
+    id_spec_covRe = netcdf.defVar(ncid,'scov_re','nc_float',[did_vel,did_range,did_time]);
+    netcdf.putAtt(ncid,id_spec_covRe,'standard_name','Real part of covariance spectrum');
+    netcdf.putAtt(ncid,id_spec_covRe,'units','mm6 mm-3');
     
-        id_spec_covIm = netcdf.defVar(ncid,'scov_im','nc_float',[did_vel,did_range,did_time]);
-        netcdf.putAtt(ncid,id_spec_covIm,'standard_name','Real part of covariance spectrum');
-        netcdf.putAtt(ncid,id_spec_covIm,'units','mm6 mm-3');
-    end
-
+    id_spec_covIm = netcdf.defVar(ncid,'scov_im','nc_float',[did_vel,did_range,did_time]);
+    netcdf.putAtt(ncid,id_spec_covIm,'standard_name','Imaginary part of covariance spectrum');
+    netcdf.putAtt(ncid,id_spec_covIm,'units','mm6 mm-3');
+    
 end % if data.DualPol > 0
 
 
@@ -941,7 +927,6 @@ netcdf.defVarDeflate(ncid,id_SLv,true,true,9);
 netcdf.defVarDeflate(ncid,id_spec,true,true,9);
 netcdf.defVarDeflate(ncid,id_VNoisePow_mean,true,true,9);
 netcdf.defVarDeflate(ncid,id_VNoisePow_peak,true,true,9);
-netcdf.defVarDeflate(ncid,id_QualFlag,true,true,9);
 
 if data.DualPol > 0
     netcdf.defVarDeflate(ncid,id_PNh,true,true,9);
@@ -949,11 +934,11 @@ if data.DualPol > 0
     netcdf.defVarDeflate(ncid,id_spec_h,true,true,9);
     netcdf.defVarDeflate(ncid,id_ldr,true,true,9); %JABA    
     netcdf.defVarDeflate(ncid,id_Ze_hv,true,true,9); %LP
+    netcdf.defVarDeflate(ncid,id_spec_covRe,true,true,9);
+    netcdf.defVarDeflate(ncid,id_spec_covIm,true,true,9);
     if data.DualPol == 2
         netcdf.defVarDeflate(ncid,id_difphase,true,true,9); %JABA    
         netcdf.defVarDeflate(ncid,id_xcorr,true,true,9); %JABA    
-        netcdf.defVarDeflate(ncid,id_spec_covRe,true,true,9);
-        netcdf.defVarDeflate(ncid,id_spec_covIm,true,true,9);
     end
 end
 
@@ -1011,9 +996,10 @@ end
 netcdf.putVar(ncid,id_AntiAlias,0,data.AntiAlias);
 netcdf.putVar(ncid,id_cal_mom,0,data.cal_mom);
 netcdf.putVar(ncid,id_freq,0,data.freq);
+netcdf.putVar(ncid, id_wl, 0, data.freq * 1e9);
 netcdf.putVar(ncid,id_lon,0,data.Lon);
 netcdf.putVar(ncid,id_lat,0,data.Lat);
-netcdf.putVar(ncid,id_MSL,0,data.MSL);
+netcdf.putVar(ncid,id_MSL,0,config.MSL);
 
 % variables for dimensions
 netcdf.putVar(ncid,id_scal,0,1);
@@ -1084,7 +1070,6 @@ netcdf.putVar(ncid,id_SLv,[0,0],[data.n_levels,data.totsamp],data.SLv');
 netcdf.putVar(ncid,id_spec,[0,0,0],[max(data.DoppLen),data.n_levels,data.totsamp],permute(data.spec,[3,2,1]));
 netcdf.putVar(ncid,id_VNoisePow_mean,[0,0],[data.n_levels,data.totsamp],data.VNoisePow_mean');
 netcdf.putVar(ncid,id_VNoisePow_peak,[0,0],[data.n_levels,data.totsamp],data.VNoisePow_peak');
-netcdf.putVar(ncid,id_QualFlag,[0,0],[data.n_levels,data.totsamp],data.QualFlag');
 
 
 if data.DualPol > 0

@@ -28,7 +28,7 @@ if ~any(strcmp(data_fieldnames,'Aliasmask'))
     data.Aliasmask = NaN(specsize(1),specsize(2)); %indicating if dealiasing was applied
 end
 
-% NoisePow not provided?
+% NoisePow not provided? given if CompEna > 0
 if ~any(strcmp(data_fieldnames,'VNoisePow_mean')) % then NoisePow is not provided by RPG
     data.VNoisePow_mean = NaN(specsize(1),specsize(2)); % preallocate mean noise floor
 else
@@ -85,8 +85,6 @@ end
 % will only be modified if dealiasing is performed
 data.MinVel_Correction = zeros(specsize(1),specsize(2));    
 
-% variable to collect information on quality issues in data
-data.QualFlag = false(specsize(1),specsize(2),3);
 
 % flag for compressed spectra
 if (isfield(data, 'CompEna') && ne(data.CompEna,0))
@@ -95,19 +93,27 @@ else
     data.compress_spec = false;
 end
 
-% copy from the value given in config file
-data.MSL = config.MSL;
-
 % create variable for chirp integration times
 data.ChirpIntTime = NaN(1,data.no_chirp_seq);
+
+% calculate chirp integration times
+data.ChirpIntTime = ChirpIntegrationTimes(data.DoppMax, data.freq, data.SeqAvg);
+
 
 % set -999 values to NaN
 data = fill2nan_struct(data,-999); 
     
-% linflag == false only of data has been processed with software
-% version 1 - THIS SHOULD BE DONE IN THE PREPROCESSING FUNCTION
-% if config.linflag == false % convert spectra into linear units
-%     data.spec = 10.^(data.spec/10);
-%     data.Ze = 10.^(data.Ze/10);
-% end
 
+% separate blower and heater flags 
+data.blower = NaN(size(data.status));
+data.heater = NaN(size(data.status));
+
+% 0/1 = heater on/off; 0/10 = blower on/off.
+
+% set blower status
+data.blower( data.status >= 10 ) = 1;
+data.blower( data.status < 10 ) = 0;
+
+% heater status is what is left when removing blower status
+data.heater = data.status;
+data.heater(data.status >= 10) = data.heater(data.status >= 10) - 10;

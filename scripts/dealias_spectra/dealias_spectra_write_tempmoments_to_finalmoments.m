@@ -11,12 +11,23 @@ function moments = dealias_spectra_write_tempmoments_to_finalmoments(moments, te
 %   moment: string specifying the highest moment in tempstruct
 
 
+if isempty(idx_0) % nothing to copy
+    return
+end
+
 % repleaced old code (see below) with a more flexible solution - LP & RG 31.7.2019
 fields = fieldnames(tempstruct);
 
 for ff = 1:length(fields)
-    moments.(fields{ff})(idx_0) = tempstruct.(fields{ff});
-    
+   
+   ss = size(tempstruct.(fields{ff}));
+   if ss(1) == length(idx_0)
+       nn = ss(2);
+   else
+       nn = ss(1);
+   end
+   
+   moments.(fields{ff})(idx_0,1:nn) = tempstruct.(fields{ff});
 end
 
 
