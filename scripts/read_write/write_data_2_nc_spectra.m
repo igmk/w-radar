@@ -3,12 +3,15 @@ function write_data_2_nc_spectra(data,outfile, config)
 % RG 1.6.2022
 
 
-%% remove noise from spectra
+%% adjustements to output variables
 
+% remove noise from spectra
 data.spec(~data.specmask) = NaN;
 
+% find slowest and fastest falling bin with signal in each spectra
+[vel_slow, vel_fast] = find_edge_velocities(data);
 
-%% adjust spectra variables for move convenient use of data
+% adjust spectra variables for more convenient use of data
 
 range_offs = data.range_offsets;
 range_offs = [range_offs data.n_levels];
@@ -120,6 +123,25 @@ end
 
 
 
+%%%%%%%% variables for slow and fast falling edge in the spectra
+id_slow = netcdf.defVar(ncid,'slow_edge','nc_float',[did_height,did_time]);
+netcdf.putAtt(ncid,id_slow,'long_name','Doppler velocity of the slowest falling bin with signal');
+netcdf.putAtt(ncid,id_slow,'units','m s-1');
+netcdf.putAtt(ncid,id_slow,'ancillary_variables','quality_flag');
+netcdf.defVarFill(ncid,id_slow,false,NaN('single'))
+netcdf.putAtt(ncid,id_slow,'comment',['negative velocities indicate particles moving downwards'])
+
+
+id_fast = netcdf.defVar(ncid,'fast_edge','nc_float',[did_height,did_time]);
+netcdf.putAtt(ncid,id_fast,'long_name','Doppler velocity of the fastest falling bin with signal');
+netcdf.putAtt(ncid,id_fast,'units','m s-1');
+netcdf.putAtt(ncid,id_fast,'ancillary_variables','quality_flag');
+netcdf.defVarFill(ncid,id_fast,false,NaN('single'))
+netcdf.putAtt(ncid,id_fast,'comment',['negative velocities indicate particles moving downwards'])
+    
+
+
+
 %%%%%%%% chirp_seq dependent variables
 id_range_offsets = defh.range_offsets(ncid,did_no_seq);
 
@@ -209,6 +231,9 @@ for ch = 1:data.no_chirp_seq
     netcdf.defVarDeflate(ncid,id_spec(ch),true,true,9);
 end
 
+netcdf.defVarDeflate(ncid,id_slow,true,true,9);
+netcdf.defVarDeflate(ncid,id_fast,true,true,9);
+
 if data.DualPol > 0
     disp('WARMING!!! No polarimetric variables included in the output files')
 end
@@ -262,6 +287,8 @@ for ch = 1:data.no_chirp_seq
     netcdf.putVar(ncid,id_hght(ch),0,range_offs(ch+1)-range_offs(ch),data.range(range_offs(ch):range_offs(ch+1)-1)+config.MSL);
 end
 
+netcdf.putVar(ncid,id_slow,[0,0],[data.n_levels,data.totsamp],vel_slow');
+netcdf.putVar(ncid,id_fast,[0,0],[data.n_levels,data.totsamp],vel_fast');
 
 
 for ch = data.no_chirp_seq:-1:1
@@ -329,3 +356,32 @@ function [start_ind, vel_out] = shift_spectra(this_spectra, this_vel, this_minve
     start_ind( isnan(start_ind) ) = 1; % for empty bins, but indexes need to be real numbers
     
 end % function
+
+
+function [vel_slow, vel_fast] = find_edge_velocities(data)
+
+    vel_slow = NaN(size(data.Ze));
+    vel_fast = NaN(size(data.Ze));
+
+    % find slowest and fastest falling bin with signal in each spectra
+    for rr = 1:data.n_levels
+        for tt = 1:data.totsamp
+
+            if all(isnan(data.spec(tt,rr,:)))
+                continue
+            end
+            
+            % find chirp sequence
+            r_idx = dealias_spectra_get_range_index([ data.range_offsets data.n_levels+1] , rr);
+
+            % construct velocity array for this bin
+            this_vel = data.velocity(r_idx,:) + data.MinVel(tt,rr) - data.velocity(r_idx,1);
+            
+            % find first and last bin with signal
+            vel_fast(tt,rr) = this_vel( find(~isnan(data.spec(tt,rr,:)), 1) );
+            vel_slow(tt,rr) = this_vel( find(~isnan(data.spec(tt,rr,:)), 1, 'last') );
+
+        end
+    end
+
+end
