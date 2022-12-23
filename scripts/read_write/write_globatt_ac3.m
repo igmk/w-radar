@@ -39,3 +39,7 @@ if data.AntiAlias == 0 % if moments not calculated by our script, add note
 elseif data.AntiAlias == 1 % if moments not calculated by our script, add note
     netcdf.putAtt(ncid,glob,'note_dealiasing', 'Dealising by radar software');
 end
+
+if data.CompEna > 0 % if spectra compressed in radar software, add note
+    netcdf.putAtt(ncid,glob,'note_compression', 'Spectral compression enabled in RPG software');
+end
