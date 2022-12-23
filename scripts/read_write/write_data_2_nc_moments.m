@@ -97,8 +97,11 @@ if isfield(data, 'std_noise') % from RPG software version 1
     id_NStd = defh.noisestd(ncid, did_no_seq, did_time);
 end
 
-
-id_QF = defh.aggregFlag(ncid, did_time);
+if isfield(data, 'QF')
+    id_QF = defh.aggregFlag(ncid, did_time, true);
+else
+    id_QF = defh.aggregFlag(ncid, did_time, false);
+end
 
 
 % create here as empty variable for later use

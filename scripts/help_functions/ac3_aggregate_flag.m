@@ -20,6 +20,8 @@ ind = any(data.AliasStatus,2); % problems with dealiasing occurred
 flag_aggregate(ind) = flag_aggregate(ind) + 2^2;
 
 % Bit3:  any of the RPG flags
-data.QF( isnan(data.QF) ) = 0; % treat missing flag as no flag set
-ind = data.QF ~= 0 ;
-flag_aggregate(ind) = flag_aggregate(ind) + 2^3;
+if isfield(data, 'QF')
+    data.QF( isnan(data.QF) ) = 0; % treat missing flag as no flag set
+    ind = data.QF ~= 0 ;
+    flag_aggregate(ind) = flag_aggregate(ind) + 2^3;
+end

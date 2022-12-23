@@ -167,7 +167,13 @@ end
 
 %%%%%%%%%% other variables
 
-id_QF = defh.aggregFlag(ncid, did_time); % quality flags - using same as in moment file
+% quality flags - using same as in moment file
+if isfield(data, 'QF')
+    id_QF = defh.aggregFlag(ncid, did_time, true);
+else
+    id_QF = defh.aggregFlag(ncid, did_time, false);
+end
+
 
 % create here as empty variable for later use
 id_ZeCalib = defh.zecalib(ncid);
