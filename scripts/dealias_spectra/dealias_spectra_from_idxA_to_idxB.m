@@ -75,7 +75,7 @@ for ii = idxA:inc:idxB %
     % ############## get spec and vel chains
     % make a celovity array that is 5 times wider than the original, with
     % the same doppler resolution
-    vel_chain = (vel(1,r_idx) - 3*Nfft(r_idx)*delv(r_idx)) : delv(r_idx) : (vel(Nfft(r_idx),r_idx)+3*Nfft(r_idx)*delv(r_idx) + delv(r_idx));    
+    vel_chain = (vel(1,r_idx) - 3*Nfft(r_idx)*delv(r_idx)) : delv(r_idx) : (vel(Nfft(r_idx),r_idx)+3*Nfft(r_idx)*delv(r_idx));% + delv(r_idx));    
     
     % check if chrip boundary is approached
     [~,idx] = min(abs(ii-range_offsets));

@@ -8,6 +8,7 @@ function [status, vm, correction] = dealias_spectra_vm_column_qualitiy_check(vm,
 %   ze: reflectivity (time x height) [dB] 
 %   range: range [m]
 %   status: dealias status
+%   aliasmask: mask for bins where aliasing detected
 %   vn: nyquist velocity of each chrip sequence
 %   varargin: range_offsets when several chrip sequnces are provided
 %
