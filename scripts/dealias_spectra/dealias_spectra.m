@@ -254,7 +254,7 @@ for i = 1:numel(cbh_fin)
     
     
     % write to output struct
-    if no_clean_signal == false || ~noalias_flag
+    if no_clean_signal == false && ~noalias_flag
         
         moments = dealias_spectra_write_tempmoments_to_finalmoments(moments, tempstruct, idx_0, moment_string);
 
