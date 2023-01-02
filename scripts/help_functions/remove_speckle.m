@@ -25,6 +25,8 @@ for tt = 1:data.totsamp
             te = tt+1;
         end
         
+        te = min(te, data.totsamp); % dealing with files that only have 1 column
+        
         if rr == 1
             rs = rr;
             re = rr+1;
