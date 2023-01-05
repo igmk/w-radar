@@ -5,8 +5,10 @@ function write_data_2_nc_spectra(data,outfile, config)
 
 %% adjustements to output variables
 
-% remove noise from spectra
-data.spec(~data.specmask) = NaN;
+if ~data.compress_spec
+    % remove noise from spectra
+    data.spec(~data.specmask) = NaN;
+end
 
 % find slowest and fastest falling bin with signal in each spectra
 [vel_slow, vel_fast] = find_edge_velocities(data);
