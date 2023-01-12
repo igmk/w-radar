@@ -127,7 +127,7 @@ end
 
 %%%%%%%% variables for slow and fast falling edge in the spectra
 id_slow = netcdf.defVar(ncid,'slow_edge','nc_float',[did_height,did_time]);
-netcdf.putAtt(ncid,id_slow,'long_name','Doppler velocity of the slowest falling bin with signal');
+netcdf.putAtt(ncid,id_slow,'long_name','Doppler velocity of the slowest falling Doppler bin with signal');
 netcdf.putAtt(ncid,id_slow,'units','m s-1');
 netcdf.putAtt(ncid,id_slow,'ancillary_variables','quality_flag');
 netcdf.defVarFill(ncid,id_slow,false,NaN('single'))
@@ -135,7 +135,7 @@ netcdf.putAtt(ncid,id_slow,'comment',['negative velocities indicate particles mo
 
 
 id_fast = netcdf.defVar(ncid,'fast_edge','nc_float',[did_height,did_time]);
-netcdf.putAtt(ncid,id_fast,'long_name','Doppler velocity of the fastest falling bin with signal');
+netcdf.putAtt(ncid,id_fast,'long_name','Doppler velocity of the fastest falling Doppler bin with signal');
 netcdf.putAtt(ncid,id_fast,'units','m s-1');
 netcdf.putAtt(ncid,id_fast,'ancillary_variables','quality_flag');
 netcdf.defVarFill(ncid,id_fast,false,NaN('single'))
@@ -156,7 +156,7 @@ netcdf.putAtt(ncid,id_DoppLen,'comment','same as the Doppler FFT; the dimension 
 
 
 id_nAvg = netcdf.defVar(ncid,'num_avg_spec','nc_int',did_no_seq);
-netcdf.putAtt(ncid,id_nAvg,'long_name','number of spectra averaged for each chirp');
+netcdf.putAtt(ncid,id_nAvg,'long_name','number of spectra averaged for each chirp sequence');
 netcdf.defVarFill(ncid,id_nAvg,false,int32(-999))
 netcdf.putAtt(ncid,id_nAvg,'comment','calculated as Number of averaged chirps within a chirp sequence/spec_length')
 
@@ -275,7 +275,7 @@ netcdf.putVar(ncid,id_QF,0,data.totsamp,flag_aggregate);
 netcdf.putVar(ncid,id_VNoisePow_mean,[0,0],[data.n_levels,data.totsamp],10.*log10(data.VNoisePow_mean'));
 netcdf.putVar(ncid,id_VNoisePow_peak,[0,0],[data.n_levels,data.totsamp],10.*log10(data.VNoisePow_peak'));
 if isfield(data, 'SLv')
-    netcdf.putVar(ncid,id_SLv,[0,0],[data.n_levels,data.totsamp],10.*log10(data.SLv'));
+    netcdf.putVar(ncid,id_SLv,[0,0],[data.n_levels,data.totsamp],data.SLv');
 end
 if isfield(data, 'std_noise') % from RPG software version 1
     netcdf.putVar(ncid,id_NStd,[0,0],[data.no_chirp_seq,data.totsamp],(data.std_noise'));
@@ -327,6 +327,14 @@ end % function
 
 function [start_ind, vel_out] = shift_spectra(this_spectra, this_vel, this_minvel, this_minvelcorr, this_vnyq)
 
+    % no shifting by dealiasing, nothing special needs to be done
+    if  all( (this_minvel(:) == 0) | isnan(this_minvel(:)) ) &&   all( (this_minvelcorr(:) == 0) | isnan(this_minvelcorr(:)) )
+        vel_out = this_vel;
+        start_ind = ones(size(this_minvel));
+        return
+        
+    end % fi
+    
     % Doppler resolution
     dv = this_vel(2) - this_vel(1);
 
