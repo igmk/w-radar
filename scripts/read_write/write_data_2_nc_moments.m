@@ -240,7 +240,7 @@ netcdf.putVar(ncid,id_skew,[0,0],[data.n_levels,data.totsamp],data.skew');
 netcdf.putVar(ncid,id_kurt,[0,0],[data.n_levels,data.totsamp],data.kurt');
 
 if isfield(data, 'SLv')
-    netcdf.putVar(ncid,id_SLv,[0,0],[data.n_levels,data.totsamp],10.*log10(data.SLv'));
+    netcdf.putVar(ncid,id_SLv,[0,0],[data.n_levels,data.totsamp],data.SLv');
 end
 
 if isfield(data, 'std_noise') % from RPG software version 1
