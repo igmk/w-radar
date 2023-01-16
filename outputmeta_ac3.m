@@ -31,7 +31,7 @@ config.source = '';%'RPG-FMCW-94-SP';
 % "Miscellaneous information about the data or methods used to produce it."
 % separate comments for each of the three files, 
 config.comment = {'This file contains radar moments and the most important parameters needed to analyze the data. Doppler spectra and full housekeeping data are stored in separate files.', ... % moments file
-                  'The Doppler spectra has gone through a dealisaing algorithm, for details see references. This file only contains the radar Doppler spectra and associated parameters. Further radar variables and full housekeeping data are stored in separate files.', ... % spectra file
+                  'The Doppler spectra has gone through a dealiasing algorithm, for details see references. This file only contains the radar Doppler spectra and associated parameters. Further radar variables and full housekeeping data are stored in separate files.', ... % spectra file
                   'This file only contains housekeeping data, 89 GHz brightness temperature and derived products, and weather station measurements. Main radar variables are stored in separate files.'};    % housekeeping file
 
 % "Published or web-based references that describe the data or methods used to produce it."
