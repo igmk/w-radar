@@ -144,7 +144,9 @@ function id_SLv = SLv(fileid, did_height, did_time)
                                            'gives the threshold calibrated in mm6/m3 as '...
                                            'provided by the radar software, and it '...
                                            'determines the sensitivity limit of the '...
-                                           'measurement.']);
+                                           'measurement. The calibration correction, '...
+                                           'given by variable ze_calibration, has not '...
+                                           'been added to noise_threshold.']);
 end
 
 function id_NStd = noisestd(fileid, did_no_seq, did_time)
@@ -159,7 +161,7 @@ function id_ZeCalib = zecalib(fileid)
     netcdf.putAtt(fileid,id_ZeCalib,'long_name','Ze absolute calibration correction');
     netcdf.putAtt(fileid,id_ZeCalib,'units','dB');
     netcdf.defVarFill(fileid,id_ZeCalib,false,NaN('single'))
-    netcdf.putAtt(fileid,id_ZeCalib,'comment','Absolute calibration correction added to radar reflectivity. To get uncorrected reflectivity: ze_unccorected = ze - ze_calibration. Missing value indicates no correction applied. Absolute calibration corrected using a disdrometer calibrated reference radar, for further details see documentation.');
+    netcdf.putAtt(fileid,id_ZeCalib,'comment','Calibration correction added to radar reflectivity. To get uncorrected reflectivity: ze_unccorected = ze - ze_calibration. Missing value indicates no correction applied. Radar calibration corrected using a disdrometer calibrated reference radar, for further details see documentation.');
 end
 
 function id_QF = aggregFlag(fileid, did_time, RPGflag)
@@ -193,7 +195,7 @@ end
 
 function ze_comment(data, ncid, id_Ze)
 
-    Ze_calibcorr_label = 'If an absolute calibration correction has been applied, it is already included in ze, and the value is given by variable ze_calibration.';
+    Ze_calibcorr_label = 'If a calibration correction has been applied, it is already included in ze, and the value is given by variable ze_calibration.';
 
     if isfield(data, 'Ze_label') % Ze corrected, adding note
         netcdf.putAtt(ncid,id_Ze,'comment', [data.Ze_label ' ' Ze_calibcorr_label ]);
