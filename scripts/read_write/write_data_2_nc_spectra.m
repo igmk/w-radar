@@ -93,6 +93,7 @@ for ch = 1:data.no_chirp_seq
     netcdf.putAtt(ncid,id_vel(ch),'comment',...
         ['The velocity array is asymmetric, i.e. the absolute values of maximum and minumum velocities are not equal. ',...
         'Since the spectrum at -v_nyquist and +v_nyquist is the same, the entry at +v_nyquist was cut. '...
+        'Negative velocities indicate particles moving downwards. '...
         'If data has been dealiased, it is possible that velocity arrays in different files differ.']);
 end
 
@@ -174,13 +175,13 @@ id_VNoisePow_mean = netcdf.defVar(ncid,'mean_noise','nc_float',[did_height,did_t
 netcdf.putAtt(ncid,id_VNoisePow_mean,'long_name','Doppler spectrum mean noise');
 netcdf.putAtt(ncid,id_VNoisePow_mean,'units','dB');
 netcdf.defVarFill(ncid,id_VNoisePow_mean,false,NaN('single'))
-netcdf.putAtt(ncid,id_VNoisePow_mean,'comment','calculated from the Doppler spectra following Hildebrand and Sekhon, 1974');
+netcdf.putAtt(ncid,id_VNoisePow_mean,'comment','Calculated from the Doppler spectra following Hildebrand and Sekhon, 1974. If a calibration correction has been applied, it is included in mean_noise, and the value is given by variable ze_calibration.');
 
-id_VNoisePow_peak = netcdf.defVar(ncid,'peak_noise_pow','nc_float',[did_height,did_time]);
+id_VNoisePow_peak = netcdf.defVar(ncid,'peak_noise','nc_float',[did_height,did_time]);
 netcdf.putAtt(ncid,id_VNoisePow_peak,'long_name','Doppler spectrum peak noise');
 netcdf.putAtt(ncid,id_VNoisePow_peak,'units','dB');
 netcdf.defVarFill(ncid,id_VNoisePow_peak,false,NaN('single'))
-netcdf.putAtt(ncid,id_VNoisePow_peak,'comment','calculated from the Doppler spectra following Hildebrand and Sekhon, 1974');
+netcdf.putAtt(ncid,id_VNoisePow_peak,'comment','Calculated from the Doppler spectra following Hildebrand and Sekhon, 1974. If a calibration correction has been applied, it is included in peak_noise, and the value is given by variable ze_calibration.');
 
 if isfield(data, 'SLv')
     id_SLv = defh.SLv(ncid, did_height, did_time);
