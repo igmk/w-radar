@@ -5,6 +5,7 @@
 function fh = outvarmeta
 
     fh.height = @height;
+    fh.msl = @msl;
     fh.range = @range;
     fh.time = @time;
     fh.lat = @lat;
@@ -35,6 +36,17 @@ function id_height = height(ncid, did_height)
     netcdf.putAtt(ncid,id_height,'comment','calculated as range + instrument_altitude');
     
 end
+
+
+function id_MSL = msl(ncid)
+
+    id_MSL = netcdf.defVar(ncid,'instrument_altitude','nc_float',[]);
+    netcdf.putAtt(ncid,id_MSL,'long_name','instrument altitude above mean sea level');
+    netcdf.putAtt(ncid,id_MSL,'units','m');
+    netcdf.defVarFill(ncid,id_MSL,false,NaN('single'))
+    
+end
+
 
 
 function id_range = range(ncid, did_range)

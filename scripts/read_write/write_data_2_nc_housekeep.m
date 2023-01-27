@@ -610,99 +610,99 @@ end
 %% ###################### compression
 
 % range dependent variables
-netcdf.defVarDeflate(ncid,id_height,true,true,9);
+netcdf.defVarDeflate(ncid,id_height,true,true,5);
 
 if isfield(data, 'Fr')
-    netcdf.defVarDeflate(ncid,id_Fr,true,true,9);
+    netcdf.defVarDeflate(ncid,id_Fr,true,true,5);
 end
 
 % chirp_seq dependent variables
-netcdf.defVarDeflate(ncid,id_range_offsets,true,true,9);
-netcdf.defVarDeflate(ncid,id_SeqAvg,true,true,9);
+netcdf.defVarDeflate(ncid,id_range_offsets,true,true,5);
+netcdf.defVarDeflate(ncid,id_SeqAvg,true,true,5);
 if isfield(data, 'ChanBW')
-    netcdf.defVarDeflate(ncid,id_bw,true,true,9);
+    netcdf.defVarDeflate(ncid,id_bw,true,true,5);
 end
 if isfield(data, 'ChirpLowIF')
-    netcdf.defVarDeflate(ncid,id_lowIF,true,true,9);
+    netcdf.defVarDeflate(ncid,id_lowIF,true,true,5);
 end
 if isfield(data, 'ChirpHighIF')
-    netcdf.defVarDeflate(ncid,id_highIF,true,true,9);
+    netcdf.defVarDeflate(ncid,id_highIF,true,true,5);
 end
 if isfield(data, 'RangeMin')
-    netcdf.defVarDeflate(ncid,id_crmin,true,true,9);
+    netcdf.defVarDeflate(ncid,id_crmin,true,true,5);
 end
 if isfield(data, 'RangeMax')
-    netcdf.defVarDeflate(ncid,id_crmax,true,true,9);
+    netcdf.defVarDeflate(ncid,id_crmax,true,true,5);
 end
 if isfield(data, 'ChirpFFTSize')
-    netcdf.defVarDeflate(ncid,id_rfft,true,true,9);
+    netcdf.defVarDeflate(ncid,id_rfft,true,true,5);
 end
 if isfield(data, 'ChirpInvSamples')
-    netcdf.defVarDeflate(ncid,id_invsmp,true,true,9);
+    netcdf.defVarDeflate(ncid,id_invsmp,true,true,5);
 end
 if isfield(data, 'ChirpCenterFr')
-    netcdf.defVarDeflate(ncid,id_ccf,true,true,9);
+    netcdf.defVarDeflate(ncid,id_ccf,true,true,5);
 end
 if isfield(data, 'ChirpBWFr')
-    netcdf.defVarDeflate(ncid,id_cbw,true,true,9);
+    netcdf.defVarDeflate(ncid,id_cbw,true,true,5);
 end
 if isfield(data, 'FFTStartInd')
-    netcdf.defVarDeflate(ncid,id_ffts,true,true,9);
+    netcdf.defVarDeflate(ncid,id_ffts,true,true,5);
 end
 if isfield(data, 'FFTStopInd')
-    netcdf.defVarDeflate(ncid,id_ffte,true,true,9);
+    netcdf.defVarDeflate(ncid,id_ffte,true,true,5);
 end
 if isfield(data, 'ChirpFFTNo')
-    netcdf.defVarDeflate(ncid,id_fftno,true,true,9);
+    netcdf.defVarDeflate(ncid,id_fftno,true,true,5);
 end
-netcdf.defVarDeflate(ncid,id_ChrpIntTime,true,true,9);
-netcdf.defVarDeflate(ncid,id_dr,true,true,9);
+netcdf.defVarDeflate(ncid,id_ChrpIntTime,true,true,5);
+netcdf.defVarDeflate(ncid,id_dr,true,true,5);
 
 % time dependend variables
-netcdf.defVarDeflate(ncid,id_sampleTms,true,true,9);
-netcdf.defVarDeflate(ncid,id_RR,true,true,9);
-netcdf.defVarDeflate(ncid,id_rh,true,true,9);
-netcdf.defVarDeflate(ncid,id_T_env,true,true,9);
-netcdf.defVarDeflate(ncid,id_pres,true,true,9);
-netcdf.defVarDeflate(ncid,id_ff,true,true,9);
-netcdf.defVarDeflate(ncid,id_fff,true,true,9);
-netcdf.defVarDeflate(ncid,id_vol,true,true,9);
-netcdf.defVarDeflate(ncid,id_Tb,true,true,9);
-netcdf.defVarDeflate(ncid,id_lwp,true,true,9);
-netcdf.defVarDeflate(ncid,id_powIF,true,true,9);
-netcdf.defVarDeflate(ncid,id_ele,true,true,9);
-netcdf.defVarDeflate(ncid,id_az,true,true,9);
-netcdf.defVarDeflate(ncid,id_T_trans,true,true,9);
-netcdf.defVarDeflate(ncid,id_T_rec,true,true,9);
-netcdf.defVarDeflate(ncid,id_T_pc,true,true,9);
+netcdf.defVarDeflate(ncid,id_sampleTms,true,true,5);
+netcdf.defVarDeflate(ncid,id_RR,true,true,5);
+netcdf.defVarDeflate(ncid,id_rh,true,true,5);
+netcdf.defVarDeflate(ncid,id_T_env,true,true,5);
+netcdf.defVarDeflate(ncid,id_pres,true,true,5);
+netcdf.defVarDeflate(ncid,id_ff,true,true,5);
+netcdf.defVarDeflate(ncid,id_fff,true,true,5);
+netcdf.defVarDeflate(ncid,id_vol,true,true,5);
+netcdf.defVarDeflate(ncid,id_Tb,true,true,5);
+netcdf.defVarDeflate(ncid,id_lwp,true,true,5);
+netcdf.defVarDeflate(ncid,id_powIF,true,true,5);
+netcdf.defVarDeflate(ncid,id_ele,true,true,5);
+netcdf.defVarDeflate(ncid,id_az,true,true,5);
+netcdf.defVarDeflate(ncid,id_T_trans,true,true,5);
+netcdf.defVarDeflate(ncid,id_T_rec,true,true,5);
+netcdf.defVarDeflate(ncid,id_T_pc,true,true,5);
 if isfield(data, 'reserved')
-    netcdf.defVarDeflate(ncid,id_incel,true,true,9);
-    netcdf.defVarDeflate(ncid,id_incea,true,true,9);
+    netcdf.defVarDeflate(ncid,id_incel,true,true,5);
+    netcdf.defVarDeflate(ncid,id_incea,true,true,5);
 end
 if isfield(data, 'QF')
-    netcdf.defVarDeflate(ncid,id_QF,true,true,9);
+    netcdf.defVarDeflate(ncid,id_QF,true,true,5);
 end
 
-netcdf.defVarDeflate(ncid,id_timeshift,true,true,9);
+netcdf.defVarDeflate(ncid,id_timeshift,true,true,5);
 
 
 % multidimensional variables
-netcdf.defVarDeflate(ncid,id_Aliasmask,true,true,9);
-netcdf.defVarDeflate(ncid,id_AliasStatus,true,true,9);
-netcdf.defVarDeflate(ncid,id_MinVel_Correction,true,true,9);
+netcdf.defVarDeflate(ncid,id_Aliasmask,true,true,5);
+netcdf.defVarDeflate(ncid,id_AliasStatus,true,true,5);
+netcdf.defVarDeflate(ncid,id_MinVel_Correction,true,true,5);
 if isfield(data, 'PNv')
-    netcdf.defVarDeflate(ncid,id_PNv,true,true,9);
+    netcdf.defVarDeflate(ncid,id_PNv,true,true,5);
 end
 if isfield(data, 'lineart_flag')
-    netcdf.defVarDeflate(ncid,id_lineartf,true,true,9);
+    netcdf.defVarDeflate(ncid,id_lineartf,true,true,5);
 end
 
 if Temp_ret_flag
-    netcdf.defVarDeflate(ncid,id_tprof,true,true,9);
+    netcdf.defVarDeflate(ncid,id_tprof,true,true,5);
 end
 if Hum_ret_flag
-    netcdf.defVarDeflate(ncid,id_hprof,true,true,9);
-    netcdf.defVarDeflate(ncid,id_rhprof,true,true,9);
+    netcdf.defVarDeflate(ncid,id_hprof,true,true,5);
+    netcdf.defVarDeflate(ncid,id_rhprof,true,true,5);
 end
 
 netcdf.endDef(ncid);

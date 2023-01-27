@@ -81,6 +81,8 @@ id_height = defh.height(ncid, did_height);
 id_lat = defh.lat(ncid);
 id_lon = defh.lon(ncid);
 
+id_MSL = defh.msl(ncid);
+
 % % % 
 
 id_no_seq = defh.chirp_sequence(ncid, did_no_seq);
@@ -209,33 +211,33 @@ id_swv = defh.radar_software(ncid);
 %% ###################### compression
 
 % % chirp_seq dependent variables
-netcdf.defVarDeflate(ncid,id_DoppMax,true,true,9);
-netcdf.defVarDeflate(ncid,id_DoppLen,true,true,9);
-netcdf.defVarDeflate(ncid,id_nAvg,true,true,9);
-netcdf.defVarDeflate(ncid,id_SeqIntTime,true,true,9);
-netcdf.defVarDeflate(ncid,id_range_offsets,true,true,9);
+netcdf.defVarDeflate(ncid,id_DoppMax,true,true,5);
+netcdf.defVarDeflate(ncid,id_DoppLen,true,true,5);
+netcdf.defVarDeflate(ncid,id_nAvg,true,true,5);
+netcdf.defVarDeflate(ncid,id_SeqIntTime,true,true,5);
+netcdf.defVarDeflate(ncid,id_range_offsets,true,true,5);
 
 % time dependend variables
-netcdf.defVarDeflate(ncid,id_QF,true,true,9);
+netcdf.defVarDeflate(ncid,id_QF,true,true,5);
 
 % multi-D variables
-netcdf.defVarDeflate(ncid,id_VNoisePow_mean,true,true,9);
-netcdf.defVarDeflate(ncid,id_VNoisePow_peak,true,true,9);
+netcdf.defVarDeflate(ncid,id_VNoisePow_mean,true,true,5);
+netcdf.defVarDeflate(ncid,id_VNoisePow_peak,true,true,5);
 
 if isfield(data, 'SLv')
-    netcdf.defVarDeflate(ncid,id_SLv,true,true,9);
+    netcdf.defVarDeflate(ncid,id_SLv,true,true,5);
 end
 if isfield(data, 'std_noise') % from RPG software version 1
-    netcdf.defVarDeflate(ncid,id_NStd,true,true,9);
+    netcdf.defVarDeflate(ncid,id_NStd,true,true,5);
 end 
 
 % variables for spectra
 for ch = 1:data.no_chirp_seq
-    netcdf.defVarDeflate(ncid,id_spec(ch),true,true,9);
+    netcdf.defVarDeflate(ncid,id_spec(ch),true,true,5);
 end
 
-netcdf.defVarDeflate(ncid,id_slow,true,true,9);
-netcdf.defVarDeflate(ncid,id_fast,true,true,9);
+netcdf.defVarDeflate(ncid,id_slow,true,true,5);
+netcdf.defVarDeflate(ncid,id_fast,true,true,5);
 
 if data.DualPol > 0
     disp('WARMING!!! No polarimetric variables included in the output files')
@@ -252,6 +254,7 @@ netcdf.putVar(ncid,id_no_seq,0,data.no_chirp_seq,1:data.no_chirp_seq);
 % scalar variables
 netcdf.putVar(ncid,id_lat,data.Lat);
 netcdf.putVar(ncid,id_lon,data.Lon);
+netcdf.putVar(ncid,id_MSL,config.MSL);
 netcdf.putVar(ncid,id_swv,str2double(data.radarsw));
 
 % range dependet
