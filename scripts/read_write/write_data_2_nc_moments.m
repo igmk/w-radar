@@ -43,10 +43,7 @@ id_no_seq = defh.chirp_sequence(ncid, did_no_seq);
 id_lat = defh.lat(ncid);
 id_lon = defh.lon(ncid);
 
-id_MSL = netcdf.defVar(ncid,'instrument_altitude','nc_float',[]);
-netcdf.putAtt(ncid,id_MSL,'long_name','instrument altitude above mean sea level');
-netcdf.putAtt(ncid,id_MSL,'units','m');
-netcdf.defVarFill(ncid,id_MSL,false,NaN('single'))
+id_MSL = defh.msl(ncid);
 
 %%%%%%%%%% other variables in a convenient order for reading file headers
 
@@ -123,6 +120,7 @@ id_CalInt = netcdf.defVar(ncid,'zerocal_interval','nc_int',[]);
 netcdf.putAtt(ncid,id_CalInt,'long_name','sample interval (number of samples) between automated zero calibrations');
 netcdf.putAtt(ncid,id_CalInt,'units','count');
 netcdf.defVarFill(ncid,id_CalInt,false,int32(-999))
+netcdf.putAtt(ncid,id_CalInt,'comment','During radar operation a so-called zero calibration is performed regularly to main the accuracy of the receiver. Depending on the delay in the zero-calibration cycle, a gap in the time series might be apparent. This variable gives the number of profiles between zero calibration cycles.');
 
 id_AntG = netcdf.defVar(ncid,'antenna_gain','nc_float',[]);
 netcdf.putAtt(ncid,id_AntG,'long_name','linear antenna gain');
@@ -166,28 +164,28 @@ netcdf.defVarFill(ncid,id_TransPow,false,NaN('single'))
 %% ###################### compression
 
 % chirp_seq dependent variables
-netcdf.defVarDeflate(ncid,id_DoppMax,true,true,9);
-netcdf.defVarDeflate(ncid,id_range_offsets,true,true,9);
-netcdf.defVarDeflate(ncid,id_SeqIntTime,true,true,9);
+netcdf.defVarDeflate(ncid,id_DoppMax,true,true,5);
+netcdf.defVarDeflate(ncid,id_range_offsets,true,true,5);
+netcdf.defVarDeflate(ncid,id_SeqIntTime,true,true,5);
 
 % time dependent variables
-netcdf.defVarDeflate(ncid,id_blowstatus,true,true,9);
-netcdf.defVarDeflate(ncid,id_heatstatus,true,true,9);
-netcdf.defVarDeflate(ncid,id_TransPow,true,true,9);
-netcdf.defVarDeflate(ncid,id_QF,true,true,9);
+netcdf.defVarDeflate(ncid,id_blowstatus,true,true,5);
+netcdf.defVarDeflate(ncid,id_heatstatus,true,true,5);
+netcdf.defVarDeflate(ncid,id_TransPow,true,true,5);
+netcdf.defVarDeflate(ncid,id_QF,true,true,5);
 
 % multi-D variables
-netcdf.defVarDeflate(ncid,id_Ze,true,true,9);
-netcdf.defVarDeflate(ncid,id_vm,true,true,9);
-netcdf.defVarDeflate(ncid,id_sigma,true,true,9);
-netcdf.defVarDeflate(ncid,id_skew,true,true,9);
-netcdf.defVarDeflate(ncid,id_kurt,true,true,9);
+netcdf.defVarDeflate(ncid,id_Ze,true,true,5);
+netcdf.defVarDeflate(ncid,id_vm,true,true,5);
+netcdf.defVarDeflate(ncid,id_sigma,true,true,5);
+netcdf.defVarDeflate(ncid,id_skew,true,true,5);
+netcdf.defVarDeflate(ncid,id_kurt,true,true,5);
 
 if isfield(data, 'SLv')
-    netcdf.defVarDeflate(ncid,id_SLv,true,true,9);
+    netcdf.defVarDeflate(ncid,id_SLv,true,true,5);
 end
 if isfield(data, 'std_noise') % from RPG software version 1
-    netcdf.defVarDeflate(ncid,id_NStd,true,true,9);
+    netcdf.defVarDeflate(ncid,id_NStd,true,true,5);
 end 
 
 netcdf.endDef(ncid);
