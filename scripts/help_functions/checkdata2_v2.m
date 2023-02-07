@@ -38,6 +38,17 @@ elseif data.time(1) == 517611600 && data.n_levels == 1021 && all(data.range_offs
 
 else 
 
+    % also special treatment needed in joyrad94_20170623180001_P05_ZEN.lv0    
+	if data.time(1) == 519933601 && data.n_levels == 1021 && all(data.range_offsets == [1 76 226 494])    
+        data = special_case(data, timestamp, 1224:1234);
+        timestamp = double(data.time) + double(data.sampleTms).*1e-3;
+        
+    elseif data.time(1) == 519901200 && data.n_levels == 1021 && all(data.range_offsets == [1 76 226 494])    
+        data = special_case(data, timestamp, 19:23);
+        timestamp = double(data.time) + double(data.sampleTms).*1e-3;
+        
+    end
+    
     % within the function correct_backward_jump, if there are jumps very close
     % to each other only one of them is evaluated, since experience showed that
     % they are often connected and it is enough to correct the last one. 
