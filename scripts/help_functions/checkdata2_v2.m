@@ -47,6 +47,11 @@ else
         data = special_case(data, timestamp, 19:23);
         timestamp = double(data.time) + double(data.sampleTms).*1e-3;
         
+    % same issue for joyrad94_20170719130002_P05_ZEN.lv0
+    elseif data.time(1) == 522162002 && data.n_levels == 1021 && all(data.range_offsets == [1 76 226 494])
+        data = special_case(data, timestamp, 354:414);
+        timestamp = double(data.time) + double(data.sampleTms).*1e-3;
+        
     end
     
     % within the function correct_backward_jump, if there are jumps very close

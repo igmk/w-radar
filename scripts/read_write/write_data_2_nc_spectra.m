@@ -33,6 +33,21 @@ for ch = data.no_chirp_seq:-1:1
 
 end
 
+
+% special treatment for a file, to make easier later to concatenate with other
+% spectra file from the same hour
+
+outfil_split = strsplit(outfile,'/');
+if strcmp(outfil_split{end}, 'joyrad94_nya_spectra_lv1a_20190729080227_P01.nc')
+    
+    % modify for ch1: add 26 empty bins to the falling side
+    dv = 2.*data.DoppMax(1)./double(data.DoppLen(1));
+    velocity.chirp_1 = [ (velocity.chirp_1(1)-dv*26):dv:(velocity.chirp_1(1)-dv) velocity.chirp_1];
+
+    start_ind.chirp_1 = start_ind.chirp_1 + 26;
+    
+end
+
 %% ################## Create a netCDF file.
 
 ncid = netcdf.create(outfile,'NETCDF4'); 
