@@ -50,6 +50,7 @@ else
     % same issue for joyrad94_20170719130002_P05_ZEN.lv0
     elseif data.time(1) == 522162002 && data.n_levels == 1021 && all(data.range_offsets == [1 76 226 494])
         data = special_case(data, timestamp, 354:414);
+        data = special_case(data, timestamp, 119:143);
         timestamp = double(data.time) + double(data.sampleTms).*1e-3;
         
     end
@@ -292,7 +293,7 @@ function data = special_case(data, timestamp, ind_out)
     this_date = datestr(double(data.time(1))/3600/24 + datenum([2001,1,1,0,0,0]), 'yyyymmddHH');
 
     title(this_date)
-    savefig(['timetstamp_shiftcheck_' this_date '_specialcase'])
+    savefig(['timetstamp_shiftcheck_' this_date '_specialcase_' num2str(ind_out(1))])
     close
 
 end
