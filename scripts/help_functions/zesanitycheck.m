@@ -23,6 +23,18 @@ else
         if any(size(data.(fn{k})) == data.totsamp) % check if time dimenstion
 
             timdim = find(size(data.(fn{k})) == data.totsamp);
+            
+            % in this file, at this point range and time dimensions have same length!
+            if data.starttime(1) == 593434800 
+                if length(timdim) > 1
+                    timdim = timdim(1); 
+                end
+                
+                if strcmp(fn{k}, 'range') || strcmp(fn{k}, 'Fr')
+                    continue
+                end
+            end
+            
 
             switch length(size(data.(fn{k}))) % remove bad entry on time dimensions
 
