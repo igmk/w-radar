@@ -4,6 +4,13 @@ error = 0;
 
 [~, ~, filetype] = fileparts(infile);
 
+% check that file not 0 size, no reader needed for that
+s = dir(infile);         
+if s.bytes == 0
+    error = 1;
+    fprintf('%s is 0 bytes, nothing to read.', infile);
+end
+    
 switch filetype
     case {'nc', 'NC', '.nc', '.NC'}
         isnetcdf = 1;
@@ -52,7 +59,7 @@ if error
     lv0filetype = [];    
 end
 
-if config.debuging
+if config.debuging && ~error
     disp(['RPG file type found: ' num2str(lv0filetype)])
     disp(['Reading function for lv0: '  func2str(reader.lv0)])
 end
