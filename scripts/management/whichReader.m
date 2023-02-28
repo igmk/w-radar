@@ -7,8 +7,8 @@ error = 0;
 % check that file not 0 size, no reader needed for that
 s = dir(infile);         
 if s.bytes == 0
-    error = 1;
     fprintf('%s is 0 bytes, nothing to read.', infile);
+    lv0filetype = 0;
 end
     
 switch filetype
