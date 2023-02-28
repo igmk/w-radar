@@ -78,11 +78,13 @@ else
 
         %Determine the program to read the radar file
         [reader, filetype] = whichReader(infile, config);
+        if filetype == 0; continue; end % file size 0, nothing to read
         if isempty(reader)
             disp('No way to read this type of file. Please, define a reader in ''whichReader'' function.\n');
             error = 1;
             return
         end
+
 
         %Reading the data
         disp('Loading data...');
