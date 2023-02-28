@@ -134,6 +134,12 @@ function data = read_lv0_v3(infile)
         && all(data.SeqAvg == [4096 3072 2048 1536]) && all(data.DoppLen == [512 512 512 256])
 
         data.totsamp = 86;
+
+    elseif data.filecode == 889346 && data.starttime == 669790822 && data.endtime == 669794389 ...
+        && data.n_levels == 765 && all(data.range_offsets == [1 95 202 388])  ...
+        && all(data.SeqAvg == [4096 3072 2048 1536]) && all(data.DoppLen == [512 512 512 256])
+
+        data.totsamp = 297;
        
     end
     
