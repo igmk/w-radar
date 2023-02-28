@@ -7,7 +7,7 @@ error = 0;
 % check that file not 0 size, no reader needed for that
 s = dir(infile);         
 if s.bytes == 0
-    fprintf('%s is 0 bytes, nothing to read.', infile);
+    fprintf('%s is 0 bytes, nothing to read.\n', infile);
     lv0filetype = 0;
     reader = [];
     return
