@@ -9,6 +9,8 @@ s = dir(infile);
 if s.bytes == 0
     fprintf('%s is 0 bytes, nothing to read.', infile);
     lv0filetype = 0;
+    reader = [];
+    return
 end
     
 switch filetype
