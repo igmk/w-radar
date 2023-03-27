@@ -128,10 +128,12 @@ function id_DoppMax = DoppMax(fileid, did_no_seq)
 end
 
 function id_SeqIntTime = SeqIntTime(fileid, did_no_seq)
-    id_SeqIntTime = netcdf.defVar(fileid,'chirpseq_int_time','nc_float',did_no_seq);
-    netcdf.putAtt(fileid,id_SeqIntTime,'long_name','integration time of each chirp sequence');
+    id_SeqIntTime = netcdf.defVar(fileid,'chirpseq_effinttime','nc_float',did_no_seq);
+    netcdf.putAtt(fileid,id_SeqIntTime,'long_name','Effective integration time of each chirp sequence');
     netcdf.putAtt(fileid,id_SeqIntTime,'units','sec');
     netcdf.defVarFill(fileid,id_SeqIntTime,false,NaN('single'))
+    netcdf.putAtt(fileid,id_SeqIntTime,'comment','Provided by radar software.');
+    
 end
 
 function id_range_offsets = range_offsets(fileid,did_no_seq)
@@ -162,18 +164,19 @@ function id_SLv = SLv(fileid, did_height, did_time)
 end
 
 function id_NStd = noisestd(fileid, did_no_seq, did_time)
-    id_NStd = netcdf.defVar(fileid,'noise_std','nc_float',[did_no_seq,did_time]);
-    netcdf.putAtt(fileid,id_NStd,'long_name','standard deviation of noise power level');
+    id_NStd = netcdf.defVar(fileid,'noise_threshold','nc_float',[did_no_seq,did_time]);
+    netcdf.putAtt(fileid,id_NStd,'long_name','signal strength threshold used for data logging');
+    netcdf.putAtt(fileid,id_NStd,'units','mm6/m3');
     netcdf.defVarFill(fileid,id_NStd,false,NaN('single'))
-    netcdf.putAtt(fileid,id_NStd,'comment','provided by radar software, data only logged for bins where signal exceeds this threshold');
+    netcdf.putAtt(fileid,id_NStd,'comment','In the radar software data is only logged for a range bin where signal exceeds a threshold in at least one Doppler bin at the given range. The threshold is defined as the standard deviation of noise power in each chirp sequence. Note, that noise_threshold is calculated differently in later radar software versions. noise_threshold gives the threshold as provided by the radar software, and it determines the sensitivity limit of the measurement. The calibration correction, given by variable ze_calibration, has not been added to noise_threshold.');
 end
 
 function id_ZeCalib = zecalib(fileid)
     id_ZeCalib = netcdf.defVar(fileid,'ze_calibration','nc_float',[]);
-    netcdf.putAtt(fileid,id_ZeCalib,'long_name','Ze absolute calibration correction');
+    netcdf.putAtt(fileid,id_ZeCalib,'long_name','Reflectivity calibration correction');
     netcdf.putAtt(fileid,id_ZeCalib,'units','dB');
     netcdf.defVarFill(fileid,id_ZeCalib,false,NaN('single'))
-    netcdf.putAtt(fileid,id_ZeCalib,'comment','Calibration correction added to radar reflectivity. To get uncorrected reflectivity: ze_unccorected = ze - ze_calibration. Missing value indicates no correction applied. Radar calibration corrected using a disdrometer calibrated reference radar, for further details see documentation.');
+    netcdf.putAtt(fileid,id_ZeCalib,'comment','Calibration correction added to radar reflectivity. To get uncorrected reflectivity: ze_unccorected = ze - ze_calibration. Missing value indicates no correction applied. Radar calibration is corrected using a reference radar, for further details see documentation.');
 end
 
 function id_QF = aggregFlag(fileid, did_time, RPGflag)
@@ -207,7 +210,7 @@ end
 
 function ze_comment(data, ncid, id_Ze)
 
-    Ze_calibcorr_label = 'If a calibration correction has been applied, it is already included in ze, and the value is given by variable ze_calibration.';
+    Ze_calibcorr_label = 'If a calibration correction has been applied, it is already included in this variable, and the value is given by variable ze_calibration.';
 
     if isfield(data, 'Ze_label') % Ze corrected, adding note
         netcdf.putAtt(ncid,id_Ze,'comment', [data.Ze_label ' ' Ze_calibcorr_label ]);
