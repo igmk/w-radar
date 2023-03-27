@@ -376,8 +376,8 @@ if isfield(data, 'ChirpFFTNo')
     netcdf.putAtt(ncid,id_fftno,'comment','usually 1, according to the manual');
 end
 
-id_ChrpIntTime = netcdf.defVar(ncid,'chirp_seq_int_time','nc_float',did_no_seq); % added by RG 4.12.2020
-netcdf.putAtt(ncid,id_ChrpIntTime,'long_name','Integration time of each chirp sequence');
+id_ChrpIntTime = netcdf.defVar(ncid,'chirpseq_duration','nc_float',did_no_seq); % added by RG 4.12.2020
+netcdf.putAtt(ncid,id_ChrpIntTime,'long_name','Duration of each chirp sequence');
 netcdf.putAtt(ncid,id_ChrpIntTime,'units','sec');
 netcdf.defVarFill(ncid,id_ChrpIntTime,false,NaN('single'))
 netcdf.putAtt(ncid,id_ChrpIntTime,'comment',['Calculated from chirp repetition frequency ' ...
