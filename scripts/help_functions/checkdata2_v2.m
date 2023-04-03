@@ -131,7 +131,7 @@ end
 
 %% still a problem with time? 
     
-disp('WARNING ! This not programmed yet')
+error('WARNING ! This not programmed yet')
 
 end % function
 

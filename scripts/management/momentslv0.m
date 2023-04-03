@@ -108,7 +108,7 @@ else
                 disp('Completing data structure...done!');
             else
                 try
-                    [data] = setting_data(data, config);
+                    [data] = setting_data(data, config, path);
                     disp('Completing data structure...done!');
                 catch
                     disp('Completing data structure...Error!!');
