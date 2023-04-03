@@ -39,8 +39,8 @@ else
      for h = stf:df:endf
 %    for h = 1
         % start with level 0 (lv0) files
-        infile = fullfile(path.lv0, files.lv0(h).name);
-        fprintf('Start processing with %s\n', infile);
+        config.infile = fullfile(path.lv0, files.lv0(h).name);
+        fprintf('Start processing with %s\n', config.infile);
 
 
         % i) create output file name(s) and check if file(s) already exist
@@ -77,7 +77,7 @@ else
         % ii) Reading input data
 
         %Determine the program to read the radar file
-        [reader, filetype] = whichReader(infile, config);
+        [reader, filetype] = whichReader(config.infile, config);
         if filetype == 0; continue; end % file size 0, nothing to read
         if isempty(reader)
             disp('No way to read this type of file. Please, define a reader in ''whichReader'' function.\n');
@@ -88,7 +88,7 @@ else
 
         %Reading the data
         disp('Loading data...');
-        data = reader.lv0(infile);
+        data = reader.lv0(config.infile);
         if data.readerror % problem in reading file encountered, continuing with next file
             continue
         end
@@ -97,14 +97,14 @@ else
         %If there are samples, the process starts, otherwise it follows
         %with another file
         if data.totsamp ~= 0
-            fprintf('%d samples found in %s\n', data.totsamp, infile);
+            fprintf('%d samples found in %s\n', data.totsamp, config.infile);
 
 
             % iii) Additional variables added into "data" and missing values set to NaN.
             disp('Completing data structure...');
 
             if config.debuging % for debugging, want to have the code crash
-                [data] = setting_data(data, config);
+                [data] = setting_data(data, config, path);
                 disp('Completing data structure...done!');
             else
                 try
@@ -124,7 +124,7 @@ else
 
             % check data - some times there are data logging issues
             % - RG 14.8.2019
-            data = checkdatain(data);
+            data = checkdatain(data, config, reader);
 
             if exist(funcpath, 'file')
                 fprintf('Preprocessing %s data...\n', config.nickradar);
@@ -215,7 +215,7 @@ else
             end
             
         else
-            fprintf('%s is empty.\n', infile);
+            fprintf('%s is empty.\n', config.infile);
             error = 1;
             return
         end
