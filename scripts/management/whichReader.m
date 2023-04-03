@@ -39,15 +39,11 @@ if isnetcdf
         error = 1; 
     end
 else
-    if code == 789346 % then it is a binary file that contains variable created with radar software version 2       
-    reader.lv0 = str2func('read_lv0_v2');    % copied from joyrad processing script RG 19.3.2018   
-    reader.lv1 = str2func('read_lv1_v2'); 
-    lv0filetype = 2;
-    elseif code == 889346 % then it is a binary file that contains variable created with radar software version 3.5 or later      
-        reader.lv0 = str2func('read_lv0_v3');
-        reader.lv1 = str2func('read_lv1_v3');     
-        lv0filetype = 3;
-    elseif code == 889347 % then it is a binary file that contains variable created with radar software version 3.5 or later      
+    if code == 789346 || code == 789347 % then it is a binary file that contains variable created with radar software version 2
+        reader.lv0 = str2func('read_lv0_v2');    % copied from joyrad processing script RG 19.3.2018
+        reader.lv1 = str2func('read_lv1_v2');
+        lv0filetype = 2;
+    elseif code == 889346  || code == 889347 % then it is a binary file that contains variable created with radar software version 3.5 or later
         reader.lv0 = str2func('read_lv0_v3');
         reader.lv1 = str2func('read_lv1_v3');     
         lv0filetype = 3;

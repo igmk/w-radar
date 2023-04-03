@@ -243,7 +243,7 @@ id_SampDur = netcdf.defVar(ncid,'sample_duration','nc_float',[]);
 netcdf.putAtt(ncid,id_SampDur,'long_name','full sample duration');
 netcdf.putAtt(ncid,id_SampDur,'units','sec');
 netcdf.defVarFill(ncid,id_SampDur,false,NaN('single'))
-netcdf.putAtt(ncid,id_SampDur,'comment','This is the sum of the chirp sequences integration times, and not the integration time (see chirp_seq_int_time)')
+netcdf.putAtt(ncid,id_SampDur,'comment','This is the sum of the chirp sequences integration times, and not the integration time (see chirpseq_duration)')
 
 
 %%%% for polarimetric radar
@@ -273,7 +273,6 @@ if isfield(data, 'Fr')
 end
 
 %%%%%%%% chirp_seq_dependent variables
-
 
 id_range_offsets = defh.range_offsets(ncid,did_no_seq);
 netcdf.putAtt(ncid,id_range_offsets,'rpg_name','RngOffs');

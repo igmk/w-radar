@@ -67,8 +67,8 @@ for tmpdate = dateini:dateend
     fprintf('Launching raw2l1_radar for %s...\n', datestr(tmpdate, 'yyyymmdd'));
     if config.moments2calculate == 2        
         disp('Retrieving radar moments from level-0 files.');
-        error = momentslv0(config, tmpdate, opF);                    
-        if ~error
+        err = momentslv0(config, tmpdate, opF);
+        if ~err
             disp('Retrieving radar moments from level-0 files... done!');
             
         end           
@@ -83,7 +83,7 @@ for tmpdate = dateini:dateend
 %         end
     end  
     
-    if ~error
+    if ~err
         fprintf('Launching raw2l1_radar for %s...done!\n', datestr(tmpdate, 'yyyymmdd'));
     end
 end 
