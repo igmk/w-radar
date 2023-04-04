@@ -6,11 +6,11 @@ function data = checktime(data, config, reader)
 [yy, mm, dd, hh, ~, ~] = datevec(double(data.time(1))/3600/24 + datenum([2001,1,1,0,0,0])); % assuming that first time is correct
 ind = data.time < datetimeconv(yy, mm, dd, hh, 0, 0) | data.time > datetimeconv(yy, mm, dd, hh+1, 0, 0);
 
-test1 = sum(ind) == 0;
+test1 = sum(ind) ~= 0;
 
 
-% 2. check if any dubplciate timestamps  
-test2 = ~any(diff(double(data.time) + double(data.sampleTms).*1e-3) <= 0 );
+% 2. check if any dubplicate timestamps  
+test2 = any(diff(double(data.time) + double(data.sampleTms).*1e-3) <= 0 );
 
 
 % 3. if either test is true, continue checking time from lv1 file
