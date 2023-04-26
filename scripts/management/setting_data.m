@@ -1,4 +1,4 @@
-function [data] = setting_data(data, config)
+function [data] = setting_data(data, config, path)
 
 specsize = size(data.spec);
 
@@ -117,3 +117,8 @@ data.blower( data.status < 10 ) = 0;
 % heater status is what is left when removing blower status
 data.heater = data.status;
 data.heater(data.status >= 10) = data.heater(data.status >= 10) - 10;
+
+% store for later
+data.infullpath = path.lv0; 
+
+

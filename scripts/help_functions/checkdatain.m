@@ -1,5 +1,8 @@
-function data = checkdatain(data)
+function data = checkdatain(data, config, reader)
 
+
+% testing if lv1 file can help with the time stamp issue
+data = checktime(data, config, reader);
 
 % sometimes data logging problems - remove these from the data
 % using time stamp for check, if time is outside the hour for hour of the
