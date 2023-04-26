@@ -9,14 +9,9 @@ ind = data.time < datetimeconv(yy, mm, dd, hh, 0, 0) | data.time > datetimeconv(
 test1 = sum(ind) ~= 0;
 
 
-<<<<<<< HEAD
-% 2. check if any dubplicate timestamps  
-test2 = any(diff(double(data.time) + double(data.sampleTms).*1e-3) <= 0 );
-=======
 % 2. check if any dubplicate timestamps 
 ind2 = diff(double(data.time) + double(data.sampleTms).*1e-3) <= 0 ;
 test2 = any(ind2);
->>>>>>> master
 
 
 % 3. if either test is true, continue checking time from lv1 file
@@ -35,8 +30,6 @@ lv1_file = [lv1_file config.filetype_lv1];
 % read lv1 file
 data_lv1 = reader.lv1(lv1_file);  
 
-<<<<<<< HEAD
-=======
 if isempty(data_lv1)
     return
 end
@@ -46,14 +39,10 @@ if length(data_lv1.time) ~= length(data.time)
     return
 end
 
->>>>>>> master
 if all(data_lv1.time == data.time) % time stamps are identical
     return
 end
 
-<<<<<<< HEAD
-error('lv1 file timestamps differ from lv0 timestamps.')
-=======
 % checked, lv1 file stamps does not look better than lv0
 %if strcmp( lv1_file, '/data/obs/site/nya/joyrad94/l0/2022/04/26/joyrad94_20220426040003_P01_ZEN.lv1')
 %    return
@@ -80,4 +69,3 @@ else
     
 end
 
->>>>>>> master
