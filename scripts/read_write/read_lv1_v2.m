@@ -208,7 +208,7 @@ function data = read_lv1_v2(infile)
     
     fclose(fid);                 
              
-                  
-    
+    % to be consistent with data structure from later software versions              
+    data.starttime = data.time(1);
 
 end %function

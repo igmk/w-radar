@@ -24,6 +24,11 @@ data = checkdata2_v2(data);
 data = zesanitycheck(data);
 
 
+% found some cases where status got unreasonable values, these happened in 
+% files where started to use lv1 file timestamp, so problaly bad data
+% logged and not cathed before
+data = statuscheck(data);
+
 % Sometimes in the temperature variables found 0 values, replacing these
 % with NaNs since a temperature of 0 K is obviously wrong
 % RG 20.10.2022

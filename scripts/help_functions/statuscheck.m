@@ -1,19 +1,22 @@
-function data = zesanitycheck(data)
-% Sometimes Ze gets unphysical values, this seems to happen sometimes 
-% when the measurement is interrupted in the last logged profile
-% This function checks for profiles where spectral reflectivity > 50 dB,
-% and removes entire profile from the dataset
-% RG 7.9.2021
+function data = statuscheck(data)
+% found some cases where status got unreasonable values, these happened in 
+% files where overwrote time with lv1 file timestamp, so problaly bad data
+% logged and not cathed by time check as before.
+% This function checks for timestamps where status gets any value that is
+% not 0, 1, 10 or 11, and removes all data related to that time stamp from 
+% the dataset
+% RG 11.4.2023
+
 
 
 % check if in any profile reflectivity > 50 dB 
-if ~any(data.spec(:) > 10^(50/10))
+if all(data.status == 0 | data.status == 1 | data.status == 10 | data.status == 11)
     return
     
 else
 
     % find profile with bad data
-    indout = any(any(data.spec > 10^(50/10), 3)');
+    indout = ~(data.status == 0 | data.status == 1 | data.status == 10 | data.status == 11);
 
 
     % loop over fieldnames of data
@@ -23,18 +26,7 @@ else
         if any(size(data.(fn{k})) == data.totsamp) % check if time dimenstion
 
             timdim = find(size(data.(fn{k})) == data.totsamp);
-            
-            % in this file, at this point range and time dimensions have same length!
-            if data.starttime(1) == 593434800 
-                if length(timdim) > 1
-                    timdim = timdim(1); 
-                end
-                
-                if strcmp(fn{k}, 'range') || strcmp(fn{k}, 'Fr')
-                    continue
-                end
-            end
-            
+
 
             switch length(size(data.(fn{k}))) % remove bad entry on time dimensions
 

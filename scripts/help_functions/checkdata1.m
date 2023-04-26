@@ -9,12 +9,12 @@ function data = checkdata1(data)
 
 ind = data.time < datetimeconv(yy, mm, dd, hh, 0, 0) | data.time > datetimeconv(yy, mm, dd, hh+1, 0, 0);
 
+iout = find(ind);
 
-if sum(ind) == 0
+if isempty(iout)
     return
 end
 
-iout = find(ind);
 
 dim_t = length(data.time);
 
