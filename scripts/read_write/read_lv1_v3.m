@@ -4,6 +4,7 @@ function data = read_lv1_v3(infile)
 % Author: Nils Küchler
 % created: 4 May 2018
 
+data = [];
 %%%%%%%%%%%%%%%% open file
     fid = fopen(infile, 'r', 'l');
     
@@ -89,6 +90,21 @@ function data = read_lv1_v3(infile)
     
     % ################################# header ends
     
+   
+    % for this file, file ends before expected, stopping reading data at last full profile - RG 06.04.2023
+    if data.filecode == 889347 && data.starttime == 669798003 && data.endtime == 669801596 ...
+        && data.n_levels == 765 && all(data.range_offsets == [1 95 202 388]) ... % strcmp(data.custname, 'Univ. Cologne (Jülich) ')
+        && all(data.SeqAvg == [4096 3072 2048 1536]) && all(data.DoppLen == [512 512 512 256])
+
+        data.totsamp = 254;
+     
+    elseif data.filecode == 889347 && data.starttime == 672620407 && data.endtime == 672623998 ...
+        && data.n_levels == 765 && all(data.range_offsets == [1 95 202 388]) ... % strcmp(data.custname, 'Univ. Cologne (Jülich) ')
+        && all(data.SeqAvg == [4096 3072 2048 1536]) && all(data.DoppLen == [512 512 512 256])
+
+        data.totsamp = 268;
+        
+    end
     data.nAvg = data.SeqAvg./data.DoppLen; % number of spectral averages
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% allocate arrays

@@ -9,8 +9,14 @@ ind = data.time < datetimeconv(yy, mm, dd, hh, 0, 0) | data.time > datetimeconv(
 test1 = sum(ind) ~= 0;
 
 
+<<<<<<< HEAD
 % 2. check if any dubplicate timestamps  
 test2 = any(diff(double(data.time) + double(data.sampleTms).*1e-3) <= 0 );
+=======
+% 2. check if any dubplicate timestamps 
+ind2 = diff(double(data.time) + double(data.sampleTms).*1e-3) <= 0 ;
+test2 = any(ind2);
+>>>>>>> master
 
 
 % 3. if either test is true, continue checking time from lv1 file
@@ -29,8 +35,49 @@ lv1_file = [lv1_file config.filetype_lv1];
 % read lv1 file
 data_lv1 = reader.lv1(lv1_file);  
 
+<<<<<<< HEAD
+=======
+if isempty(data_lv1)
+    return
+end
+
+% check if time arrays the same size, if not, nothing to be done
+if length(data_lv1.time) ~= length(data.time)
+    return
+end
+
+>>>>>>> master
 if all(data_lv1.time == data.time) % time stamps are identical
     return
 end
 
+<<<<<<< HEAD
 error('lv1 file timestamps differ from lv0 timestamps.')
+=======
+% checked, lv1 file stamps does not look better than lv0
+%if strcmp( lv1_file, '/data/obs/site/nya/joyrad94/l0/2022/04/26/joyrad94_20220426040003_P01_ZEN.lv1')
+%    return
+%end
+
+% check if time in lv1 file has problems
+ind_test1 = data_lv1.time < datetimeconv(yy, mm, dd, hh, 0, 0) | data_lv1.time > datetimeconv(yy, mm, dd, hh+1, 0, 0);
+ind_test2 = diff(double(data_lv1.time) + double(data_lv1.sampleTms).*1e-3) <= 0 ;
+
+% if no problems in lv 1 file, then it is definitely better
+if sum(ind_test1) == 0 && sum(ind_test2) == 0
+    data.time = data_lv1.time;
+    data.sampleTms = data_lv1.sampleTms;
+    return
+
+% check if less problematic time stamps in lv1 file than lv0 file
+elseif ( sum(ind_test1) + sum(ind_test2) ) < ( sum(ind) + sum(ind2) )
+    data.time = data_lv1.time;
+    data.sampleTms = data_lv1.sampleTms;
+    return
+    
+else 
+    disp('checked time stamp from l1 file, not better than in the lv0 file -> not considering them further.')
+    
+end
+
+>>>>>>> master

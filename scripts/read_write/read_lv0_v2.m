@@ -321,6 +321,9 @@ function data = read_lv0_v2(infile)
     
     fclose(fid);                    
        
-    data.readerror = false; % succesfull in reading file!                   
+    data.readerror = false; % succesfull in reading file! 
+    
+    % to be consistent with data structure from later software versions              
+    data.starttime = data.time(1);
     
 end %function

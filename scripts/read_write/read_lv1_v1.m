@@ -179,5 +179,7 @@ fid = fopen(infile, 'r', 'l');
     data.PNv = NaN; % total IF power in v-pol measured at the ADC input
     data.SLv = NaN; % linear sensitivity limit in Ze units for vertical polarisation
     
+    % to be consistent with data structure from later software versions              
+    data.starttime = data.time(1);
     
 end % function
