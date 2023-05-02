@@ -26,7 +26,17 @@ end
 % find lv1 corresponding to lv0 file
 lv1_file = config.infile( 1 : strfind(config.infile,config.filetype(2:end))-1); % strip file name (incl. path) without file ending
 lv1_file = [lv1_file config.filetype_lv1];
- 
+
+% check if lv1 file reader available
+if ~isfield(reader, 'lv1')
+    return
+end
+
+% check if lv1 file exists
+if ~exist(lv1_file, 'file')
+    return
+end
+
 % read lv1 file
 data_lv1 = reader.lv1(lv1_file);  
 
