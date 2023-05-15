@@ -1,12 +1,14 @@
-function [status, vm, correction] = dealias_spectra_vm_column_qualitiy_check(vm, range, status, vn, correction, varargin)
+function [status, vm, correction] = dealias_spectra_vm_column_qualitiy_check(vm, ze, range, status, aliasmask, vn, correction, varargin)
 
 % this function corrects mean Doppler velocity columnwise by comparing
 % several columns
 
 % input
 %   vm: mean Doppler velocity (time x height)
+%   ze: reflectivity (time x height) [dB] 
 %   range: range [m]
 %   status: dealias status
+%   aliasmask: mask for bins where aliasing detected
 %   vn: nyquist velocity of each chrip sequence
 %   varargin: range_offsets when several chrip sequnces are provided
 %
@@ -45,7 +47,7 @@ idx = length(range);
 [vm, correction] = dealias_spectra_vm_cloumn_quality_check_double_columns(vm , vn, idx, noise_fac, correction, varargin{:});
 
 % ########## correct rest of columns
-[vm, correction] = dealias_spectra_vm_cloumn_quality_check_all_columns(vm , vn, idx, noise_fac, correction, varargin{:});
+[vm, correction] = dealias_spectra_vm_cloumn_quality_check_all_columns(vm , ze, vn, idx, noise_fac, correction, aliasmask, varargin{:});
 
 
 

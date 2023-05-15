@@ -195,7 +195,7 @@ if sv(2) > 1
     for ii = 1:ss(1)
         % get chirp indexes for each range gate
          r_idx = dealias_spectra_get_range_index(range_offsets, ii);
-         vel_out(ii,:) = vel(:,r_idx)';
+         vel_out(ii,:) = vel(:,r_idx)'; % Doppler velocity array for each spectra
     end
 end
 
@@ -234,20 +234,32 @@ end
 
 % #################### start dealiasing every layer
 for i = 1:numel(cbh_fin)
+    
+    % check if aliasing detected in this cloud layer 
+    % - added by RG 22.12.2022
+    noalias_flag = false;
+    if ~any( ( cbh_fin(i) <= find(alias_flag) ) & ( find(alias_flag) <= cth_fin(i)) )
+        noalias_flag = true;
+        no_clean_signal = true;
+        
+    else
 
-    % Looks for a range bin where no aliasing occurs starting from cloud
-    % top down. This bin is used as reference in the next step (line 250->)!
-    % if a non-dealiased bin is found, the function will calculate the 
-    % higher moments in this bin
-   
-    [tempstruct, no_clean_signal, idx_0] = dealias_spectra_find_nonaliased_bin(cth_fin(i), cbh_fin(i), spec, range_offsets, vel, nAvg, moment_string, nf_string, nf, nbins, alias_flag, noise, Nfft(r_idx), flag_compress_spec, flag_DualPol, spec_hv, spec_re, spec_im);
+        % Looks for a range bin where no aliasing occurs starting from cloud
+        % top down. This bin is used as reference in the next step (line 250->)!
+        % if a non-dealiased bin is found, the function will calculate the 
+        % higher moments in this bin
+
+        [tempstruct, no_clean_signal, idx_0] = dealias_spectra_find_nonaliased_bin(cth_fin(i), cbh_fin(i), spec, range_offsets, vel, nAvg, moment_string, nf_string, nf, nbins, alias_flag, noise, Nfft(r_idx), flag_compress_spec, flag_DualPol, spec_hv, spec_re, spec_im);
+        
+    end
+    
     
     % write to output struct
-    if no_clean_signal == false
+    if no_clean_signal == false && ~noalias_flag
         
         moments = dealias_spectra_write_tempmoments_to_finalmoments(moments, tempstruct, idx_0, moment_string);
 
-    else % no non-dealiased singal was found; calculate moments for all bins
+    else % no non-dealiased singal was found, or no aliasing in this layer; calculate moments for all bins
         
         for ii = cbh_fin(i):cth_fin(i)
                         
@@ -262,16 +274,19 @@ for i = 1:numel(cbh_fin)
             tempnoise.peaknoise = noise.peaknoise(ii);
             
             tempstruct = radar_moments(spec(ii,1:Nfft(r_idx)),vel(1:Nfft(r_idx),r_idx),nAvg(r_idx),'noise',tempnoise,'moment_str',moment_string,'linear',nf_string,nf,'nbins',nbins, 'compressed', flag_compress_spec, 'DualPol', flag_DualPol, spec_hv(ii,1:Nfft(r_idx)), spec_re(ii,1:Nfft(r_idx)), spec_im(ii,1:Nfft(r_idx)));
-            moments = dealias_spectra_write_tempmoments_to_finalmoments(moments, tempstruct, idx_0, moment_string);
+            moments = dealias_spectra_write_tempmoments_to_finalmoments(moments, tempstruct, ii, moment_string);
 
         end
         
     end
     
-    if all( isnan( moments.vm(cbh_fin(i):cth_fin(i),1) ) ) || cbh_fin(i) == cth_fin(i) % then no entry of this layer contains signal or it is only one bin
+    if noalias_flag || all( isnan( moments.vm(cbh_fin(i):cth_fin(i),1) ) ) || cbh_fin(i) == cth_fin(i) % no aliasing in this layer, or no entry of this layer contains signal, or it is only one bin
         continue
     end % if cc == nbins-1, then the lowest bin of this layer contains signal
     
+    if isempty(idx_0) % no reference bin found, i.e. all bins in the cloud layer are aliased
+        continue
+    end
     
     % ################ dealiase
     % start dealiasing topdown

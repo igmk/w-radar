@@ -1,15 +1,17 @@
-function [vm, correction] = dealias_spectra_vm_cloumn_quality_check_all_columns(vm, vn, idx, noise_fac, correction, varargin)
+function [vm, correction] = dealias_spectra_vm_cloumn_quality_check_all_columns(vm, ze, vn, idx, noise_fac, correction, aliasmask, varargin)
 
 % this function corrects mean doppler velocities considering neighbouring
 % columns
 
 % input:
 %   vm: mean Doppler velocity (time x height)
+%   ze: reflectivity (time x height) [dB] 
 %   idx_columns: (time) index arrays indicating wrogly dealiased colmuns
 %   vn: Nyquist velocities
 %   idx: last bin to include
 %   noise_fac: factor of peaknoise level that must be exceeded
 %   correction: value that must be added to the velocity offset
+%   aliasmask: mask for bins where aliasing detected
 %   varargin:
 %      range_offsets: start of chirp sequences
 %
@@ -77,6 +79,12 @@ while  any(abs(dv) > noise_fac*noise.peaknoise) && noise.peaknoise > 1 && max(ab
         break
     end
     
+    % check that aliasing detected in the column 
+    if ~any(find(any(aliasmask,2)) == idx_flag)
+        continue
+    end
+           
+    
     % ######### if column is again identified as peak set vm_temp to NaN
     % and skip this peak
     idx_flag_compare(cc) = idx_flag;
@@ -97,7 +105,21 @@ while  any(abs(dv) > noise_fac*noise.peaknoise) && noise.peaknoise > 1 && max(ab
     end
     
     % ########## get mean profile of the last 60 seconds
-    vm_prof = nanmean(vm(a:b,:));
+    
+    % only include values with similar reflectivity, to address genuine
+    % discontinuities (usually fall streaks)
+        
+    for yy = 1:svm(2)
+        
+        ind_incl = zeros(svm(1),1);
+        ind_incl(a:b) = 1; % include profiles a to b
+        ind_incl = ind_incl & abs(ze(idx_flag,yy) - ze(:,yy)) < 5;
+        
+        vm_prof(yy) = nanmean(vm(ind_incl,yy));
+        
+    end
+    
+%     vm_prof = nanmean(vm(a:b,:));
         
     % correct for all chirp sequences
     for ii = 1:numel(range_offsets)-1
@@ -107,13 +129,15 @@ while  any(abs(dv) > noise_fac*noise.peaknoise) && noise.peaknoise > 1 && max(ab
         
         
         % check if vm_prof contains signal
-        idx_value = ~isnan(vm_prof(r_idx));
+%         idx_value = ~isnan(vm_prof(r_idx));
+        temp_neigh = vm_prof(r_idx);
+        idx_value = ~isnan(temp_neigh);
         if sum(idx_value) < 2
             continue
         end
         
         % interpolate nighbouring velocities
-        vm_neighbour = interp1( r_idx(idx_value), vm_prof(idx_value), r_idx, 'linear','extrap');
+        vm_neighbour = interp1( r_idx(idx_value), temp_neigh(idx_value), r_idx, 'linear','extrap');
         
         % subtract/add vn, to correct for dealiasing into wrong
         % direction, i.e. causing an offset of +-k*2*v_n, k = 1,2,...,N
