@@ -309,14 +309,14 @@ below and above.
 
 ### vi) Find maximum 
 
-The maximum in the concatenated spectra within +-Vnyq/2 from guess 
+The maximum in the concatenated spectra within +-Vnyq/4 from guess 
 velocity is identified. The corresponding Doppler velocity bin is V_max.
 
 ### vii) Shift spectra
 
 The spectrum is centered so that the contributions of the neighboring 
 range gates are minimized. The center of the spectrum is shifted 
-within  +-Vnyq/2 from V_max to the minimum of the first and last data
+within  +-Vnyq/4 from V_max to the minimum of the first and last data
 point. See figure 10 in Küchler et al, 2017. In addition, for compressed 
 spectra if new mean Doppler velocity is close to the guess velocity,
 and first and last 10% of the spectrum is empty, no shift is done.
