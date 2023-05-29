@@ -13,6 +13,7 @@ function fh = outvarmeta
     fh.sampleTms = @sampleTms;
     fh.chirp_sequence = @chirp_sequence;
     fh.radar_software = @radar_software;
+    fh.radar_software_as_str = @radar_software_as_str;
     fh.DoppMax = @DoppMax;
     fh.SeqIntTime = @SeqIntTime;
     fh.range_offsets = @range_offsets;
@@ -118,6 +119,13 @@ function id_swv = radar_software(fileid)
     netcdf.putAtt(fileid,id_swv,'long_name','radar software version');
     netcdf.defVarFill(fileid,id_swv,false,NaN('single'))
 end
+
+
+function id_swv = radar_software_as_str(fileid, did_str)
+    id_swv = netcdf.defVar(fileid,'radar_software','nc_char', did_str);
+    netcdf.putAtt(fileid,id_swv,'long_name','radar software version');
+end
+
 
 function id_DoppMax = DoppMax(fileid, did_no_seq)
     id_DoppMax = netcdf.defVar(fileid,'nyquist_velocity','nc_float',did_no_seq);

@@ -7,7 +7,7 @@
 
 % height above mean sea level [m] of the instrument platform
 %   stored in the metadata 
-config.MSL = 0;
+%config.MSL = 0;
 
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % 

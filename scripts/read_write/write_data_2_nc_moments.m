@@ -8,8 +8,19 @@ ncid = netcdf.create(outfile,'NETCDF4');
 
 %% ################# Define dimensions
 did_time   = netcdf.defDim(ncid,'time',netcdf.getConstant('NC_UNLIMITED'));
-did_height  = netcdf.defDim(ncid,'height',data.n_levels);
+did_height = netcdf.defDim(ncid,'height',data.n_levels);
 did_no_seq = netcdf.defDim(ncid,'chirp_sequence',data.no_chirp_seq);
+
+% usually radar software version is given by a number, so that the string
+% can be converted to a single float that can be stored in the file as
+% scalar float, but this not always the case
+sw_as_string = 0;
+if length(str2num(data.radarsw)) > 1
+    sw_as_string = 1;
+    % need to define string dimension to write data.radarsw as string
+    did_str    = netcdf.defDim(ncid,'string_len',length(data.radarsw)); 
+end
+    
 
 %% ######################## add global attributes
 
@@ -127,7 +138,11 @@ netcdf.putAtt(ncid,id_AntG,'long_name','linear antenna gain');
 netcdf.putAtt(ncid,id_AntG,'units','unitless');
 netcdf.defVarFill(ncid,id_AntG,false,NaN('single'))
 
-id_swv = defh.radar_software(ncid);
+if sw_as_string
+    id_swv = defh.radar_software_as_str(ncid, did_str);
+else
+    id_swv = defh.radar_software(ncid);
+end
 
 id_DoppMax = defh.DoppMax(ncid, did_no_seq);
 
@@ -203,7 +218,12 @@ netcdf.putVar(ncid,id_freq,data.freq);
 netcdf.putVar(ncid,id_HPBW,data.HPBW);
 netcdf.putVar(ncid,id_CalInt,data.CalInt);
 netcdf.putVar(ncid,id_AntG,data.AntG);
-netcdf.putVar(ncid,id_swv,str2num(data.radarsw));
+if sw_as_string
+    netcdf.putVar(ncid,id_swv,data.radarsw);
+else
+    netcdf.putVar(ncid,id_swv,str2num(data.radarsw));
+end
+
 
 
 % range dependent
