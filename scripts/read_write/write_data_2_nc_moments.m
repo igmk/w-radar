@@ -221,7 +221,7 @@ netcdf.putVar(ncid,id_AntG,data.AntG);
 if sw_as_string
     netcdf.putVar(ncid,id_swv,data.radarsw);
 else
-    netcdf.putVar(ncid,id_swv,str2num(data.radarsw));
+    netcdf.putVar(ncid,id_swv,str2double(data.radarsw));
 end
 
 
